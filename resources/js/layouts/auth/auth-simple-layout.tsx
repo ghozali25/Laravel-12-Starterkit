@@ -1,4 +1,3 @@
-import AppLogoIcon from '@/components/app-logo-icon';
 import { Link, usePage } from '@inertiajs/react';
 import { useEffect } from 'react';
 
@@ -23,7 +22,7 @@ export default function AuthSimpleLayout({ children, title, description }: AuthL
         };
     };
 
-    const primaryColor = setting?.warna || '#0ea5e9';
+    const primaryColor = setting?.warna || '#1ccd5aff';
     const primaryForeground = '#ffffff';
 
     useEffect(() => {
@@ -42,11 +41,7 @@ export default function AuthSimpleLayout({ children, title, description }: AuthL
                         <div className="flex flex-col items-center gap-6">
                             <Link 
                                 href={route('home')} 
-                                className="flex flex-col items-center gap-3 font-medium transition-opacity hover:opacity-90"
-                            >
-                                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-[var(--primary)] p-2 shadow-sm">
-                                    <AppLogoIcon className="size-8 fill-current text-[var(--primary-foreground)]" />
-                                </div>
+                                className="flex flex-col items-center gap-3 font-medium transition-opacity hover:opacity-90">
                                 <span className="text-lg font-semibold text-gray-900 dark:text-white">
                                     {setting?.nama_app}
                                 </span>
