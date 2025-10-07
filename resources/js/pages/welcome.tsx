@@ -5,7 +5,7 @@ import { useEffect } from 'react';
 export default function Welcome() {
   const { auth, setting } = usePage<SharedData>().props;
 
-  const primaryColor = setting?.warna || '#0ea5e9';
+  const primaryColor = setting?.warna || '#1ccd5aff';
   const primaryForeground = '#ffffff';
 
   useEffect(() => {
@@ -29,10 +29,9 @@ export default function Welcome() {
           {/* Header section */}
           <div className="space-y-6">
             <h1 className="text-5xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-[var(--primary)] to-[var(--primary)]/80">
-              Laravel 12 + React Starter Kit
+              Welcome
             </h1>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Accelerate your development with a production-ready foundation featuring authentication, role management, customizable settings, and a modern UI.
             </p>
           </div>
 
@@ -61,7 +60,7 @@ export default function Welcome() {
                 href="/register"
                 className="px-8 py-3 rounded-lg bg-[var(--primary)] text-white font-medium hover:bg-[var(--primary)]/90 transition-all transform hover:-translate-y-0.5 shadow-md hover:shadow-lg"
               >
-                Get Started
+                Register
               </Link>
             </div>
           )}
@@ -101,10 +100,7 @@ export default function Welcome() {
           {/* Footer links */}
           <div className="pt-8 space-y-2 text-sm text-muted-foreground">
             <p>
-              Read the <a href="https://laravel.com/docs" target="_blank" rel="noopener noreferrer" className="text-[var(--primary)] hover:underline font-medium">Laravel documentation</a> or explore <a href="https://laracasts.com" target="_blank" rel="noopener noreferrer" className="text-[var(--primary)] hover:underline font-medium">Laracasts tutorials</a>.
-            </p>
-            <p>
-              Need quick deployment? Try <a href="https://cloud.laravel.com" target="_blank" rel="noopener noreferrer" className="text-[var(--primary)] hover:underline font-medium">Laravel Cloud</a>.
+              Creator By Ahmad Ghozali
             </p>
           </div>
         </div>

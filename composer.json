@@ -1,6 +1,6 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "yogijowo/laravel12-react-starterkit",
+    "name": "ghozali25/laravel-12-starterkit",
     "type": "project",
     "description": "Starter Kit Laravel 12 + React + Inertia + Tailwind + ShadCN UI + Spatie Permission",
     "keywords": [
