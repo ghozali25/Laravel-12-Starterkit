@@ -7,7 +7,6 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from '@/components/ui/sidebar';
-
 import { usePage, Link } from '@inertiajs/react';
 import AppLogo from './app-logo';
 import { NavFooter } from '@/components/nav-footer';
@@ -15,7 +14,7 @@ import { NavUser } from '@/components/nav-user';
 import { iconMapper } from '@/lib/iconMapper';
 import type { LucideIcon } from 'lucide-react';
 import { ChevronDown, ChevronRight } from 'lucide-react';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
 
 interface MenuItem {
@@ -28,8 +27,13 @@ interface MenuItem {
 
 function RenderMenu({ items, level = 0 }: { items: MenuItem[]; level?: number }) {
   const { url: currentUrl } = usePage();
+  const [openMenus, setOpenMenus] = useState<Record<number, boolean>>({});
 
   if (!Array.isArray(items)) return null;
+
+  const toggleMenu = (id: number) => {
+    setOpenMenus((prev) => ({ ...prev, [id]: !prev[id] }));
+  };
 
   return (
     <>
@@ -40,7 +44,7 @@ function RenderMenu({ items, level = 0 }: { items: MenuItem[]; level?: number })
         const hasChildren = children.length > 0;
         const isActive = menu.route && currentUrl.startsWith(menu.route);
         const indentClass = level > 0 ? `pl-${4 + level * 3}` : '';
-        
+
         const activeClass = isActive
           ? 'bg-primary/10 text-primary font-medium'
           : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground';
@@ -51,9 +55,10 @@ function RenderMenu({ items, level = 0 }: { items: MenuItem[]; level?: number })
           <SidebarMenuItem key={menu.id}>
             {hasChildren ? (
               <>
-                <SidebarMenuButton 
+                <SidebarMenuButton
+                  onClick={() => toggleMenu(menu.id)}
                   className={cn(
-                    `group flex items-center justify-between rounded-md transition-colors ${indentClass}`,
+                    `group flex items-center justify-between rounded-md cursor-pointer transition-colors ${indentClass}`,
                     activeClass,
                     level === 0 ? 'py-3 px-4 my-1' : 'py-2 px-3'
                   )}
@@ -62,15 +67,29 @@ function RenderMenu({ items, level = 0 }: { items: MenuItem[]; level?: number })
                     <Icon className="size-4 mr-3 opacity-80 group-hover:opacity-100" />
                     <span>{menu.title}</span>
                   </div>
-                  <ChevronDown className="size-4 opacity-50 group-hover:opacity-70 transition-transform group-data-[state=open]:rotate-180" />
+                  <ChevronDown
+                    className={cn(
+                      'size-4 opacity-50 transition-transform duration-200',
+                      openMenus[menu.id] ? 'rotate-180' : 'rotate-0'
+                    )}
+                  />
                 </SidebarMenuButton>
-                <SidebarMenu className="ml-2 border-l border-muted pl-2">
-                  <RenderMenu items={children} level={level + 1} />
-                </SidebarMenu>
+
+                {/* submenu collapsible */}
+                <div
+                  className={cn(
+                    'overflow-hidden transition-all duration-300 ease-in-out',
+                    openMenus[menu.id] ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+                  )}
+                >
+                  <SidebarMenu className="ml-2 border-l border-muted pl-2">
+                    <RenderMenu items={children} level={level + 1} />
+                  </SidebarMenu>
+                </div>
               </>
             ) : (
-              <SidebarMenuButton 
-                asChild 
+              <SidebarMenuButton
+                asChild
                 className={cn(
                   `group flex items-center rounded-md transition-colors ${indentClass}`,
                   activeClass,
@@ -98,24 +117,18 @@ export function AppSidebar() {
 
   const footerNavItems = [
     {
-      title: 'Star this Repo',
-      url: 'https://github.com/yogijowo/laravel12-react-starterkit',
+      title: 'Ahmad Ghozali',
+      url: 'https://github.com/ghozali25/Laravel-12-Starterkit',
       icon: iconMapper('Star') as LucideIcon,
-    },
-    {
-      title: 'Donate via Saweria',
-      url: 'https://saweria.co/yogijowo',
-      icon: iconMapper('Heart') as LucideIcon,
-    },
-    {
-      title: 'Donate via Ko-fi',
-      url: 'https://ko-fi.com/yogijowo',
-      icon: iconMapper('Heart') as LucideIcon,
     },
   ];
 
   return (
-    <Sidebar collapsible="icon" variant="inset" className="border-r bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <Sidebar
+      collapsible="icon"
+      variant="inset"
+      className="border-r bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60"
+    >
       <SidebarHeader className="px-4 py-3 border-b">
         <SidebarMenu>
           <SidebarMenuItem>
@@ -133,8 +146,9 @@ export function AppSidebar() {
           <RenderMenu items={menus} />
         </SidebarMenu>
       </SidebarContent>
+
       <SidebarFooter className="px-4 py-3 border-t">
-        <NavUser  />
+        <NavUser />
         <NavFooter items={footerNavItems} className="justify-center gap-4" />
       </SidebarFooter>
     </Sidebar>

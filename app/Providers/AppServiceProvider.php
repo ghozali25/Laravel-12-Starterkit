@@ -9,6 +9,7 @@ use Spatie\Permission\Models\Role;
 use App\Observers\GlobalActivityLogger;
 use Illuminate\Support\ServiceProvider;
 use Spatie\Permission\Models\Permission;
+use Illuminate\Support\Facades\Schema;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -25,6 +26,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // ✅ Tambahkan ini untuk mengatasi "Specified key was too long"
+        Schema::defaultStringLength(191);
         User::observe(GlobalActivityLogger::class);
         Role::observe(GlobalActivityLogger::class);
         Permission::observe(GlobalActivityLogger::class);
