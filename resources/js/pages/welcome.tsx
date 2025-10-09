@@ -1,6 +1,7 @@
+import React, { useEffect } from 'react';
 import { Head, Link, usePage } from '@inertiajs/react';
+import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import { type SharedData } from '@/types';
-import { useEffect } from 'react';
 
 export default function Welcome() {
   const { auth, setting } = usePage<SharedData>().props;
@@ -18,90 +19,82 @@ export default function Welcome() {
   return (
     <>
       <Head title="Welcome" />
-      <div className="relative min-h-screen flex flex-col items-center justify-center px-4 bg-gradient-to-br from-background to-gray-50 dark:to-gray-900">
-        {/* Decorative elements */}
+      <div className="relative min-h-screen flex flex-col justify-center px-6 bg-gradient-to-br from-background to-gray-50 dark:to-gray-900 overflow-hidden">
+        {/* Decorative blur elements */}
         <div className="absolute inset-0 overflow-hidden">
           <div className="absolute top-0 left-1/4 w-32 h-32 rounded-full bg-[var(--primary)]/10 blur-3xl" />
           <div className="absolute bottom-0 right-1/4 w-40 h-40 rounded-full bg-secondary/10 blur-3xl" />
         </div>
 
-        <div className="relative w-full max-w-4xl text-center space-y-8 z-10">
-          {/* Header section */}
-          <div className="space-y-6">
-            <h1 className="text-5xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-[var(--primary)] to-[var(--primary)]/80">
-              Welcome
-            </h1>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            </p>
-          </div>
+        {/* MAIN LAYOUT */}
+        <div className="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-8 items-center max-w-7xl mx-auto w-full">
+          {/* LEFT SIDE - TEXT */}
+          <div className="text-center lg:text-left space-y-8 px-4 md:px-8">
+            <div className="flex justify-center lg:justify-start items-center">
+              <h1 className="text-5xl sm:text-6xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-[var(--primary)] to-[var(--primary)]/80 flex items-center">
+                Welcome
+              </h1>
 
-          {/* CTA section */}
-          {auth.user ? (
-            <div className="space-y-4">
+              {/* 🔹 Lottie animation super close & aligned */}
+              <div className="ml-[-8px] translate-y-[4px] w-[80px] sm:w-[100px] md:w-[140px]">
+                <DotLottieReact
+                  src="https://lottie.host/90eca65f-57a9-4a19-9bd3-1b1961209fed/5wI2rfFT6b.lottie"
+                  loop
+                  autoplay
+                />
+              </div>
+            </div>
+
+            <p className="text-lg text-muted-foreground max-w-md mx-auto lg:mx-0">
+              Selamat datang di aplikasi kami. Nikmati pengalaman modern dan mudah digunakan.
+            </p>
+
+            {/* CTA */}
+            {auth.user ? (
               <Link
                 href="/dashboard"
                 className="inline-flex items-center justify-center px-8 py-3 rounded-lg bg-[var(--primary)] text-white font-medium hover:bg-[var(--primary)]/90 transition-all transform hover:-translate-y-0.5 shadow-md hover:shadow-lg"
               >
                 Go to Dashboard
                 <svg xmlns="http://www.w3.org/2000/svg" className="ml-2 h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
+                  <path
+                    fillRule="evenodd"
+                    d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z"
+                    clipRule="evenodd"
+                  />
                 </svg>
               </Link>
-            </div>
-          ) : (
-            <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
-              <Link
-                href="/login"
-                className="px-8 py-3 rounded-lg border border-border bg-white dark:bg-gray-800 font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-all transform hover:-translate-y-0.5 shadow-sm hover:shadow-md"
-              >
-                Sign In
-              </Link>
-              <Link
-                href="/register"
-                className="px-8 py-3 rounded-lg bg-[var(--primary)] text-white font-medium hover:bg-[var(--primary)]/90 transition-all transform hover:-translate-y-0.5 shadow-md hover:shadow-lg"
-              >
-                Register
-              </Link>
-            </div>
-          )}
+            ) : (
+              <div className="flex flex-col sm:flex-row justify-center lg:justify-start items-center gap-4">
+                <Link
+                  href="/login"
+                  className="px-8 py-3 rounded-lg border border-border bg-white dark:bg-gray-800 font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-all transform hover:-translate-y-0.5 shadow-sm hover:shadow-md"
+                >
+                  Sign In
+                </Link>
+                <Link
+                  href="/register"
+                  className="px-8 py-3 rounded-lg bg-[var(--primary)] text-white font-medium hover:bg-[var(--primary)]/90 transition-all transform hover:-translate-y-0.5 shadow-md hover:shadow-lg"
+                >
+                  Register
+                </Link>
+              </div>
+            )}
 
-          {/* Features grid */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-8">
-            <div className="bg-white dark:bg-gray-800/50 p-6 rounded-xl border border-border shadow-sm hover:shadow-md transition-shadow">
-              <div className="text-[var(--primary)] mb-3">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                </svg>
-              </div>
-              <h3 className="font-semibold text-lg mb-2">Secure Authentication</h3>
-              <p className="text-muted-foreground text-sm">Built-in user authentication with email verification and password reset.</p>
-            </div>
-            <div className="bg-white dark:bg-gray-800/50 p-6 rounded-xl border border-border shadow-sm hover:shadow-md transition-shadow">
-              <div className="text-[var(--primary)] mb-3">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-              </div>
-              <h3 className="font-semibold text-lg mb-2">Role Management</h3>
-              <p className="text-muted-foreground text-sm">Flexible role-based permissions system for controlling access.</p>
-            </div>
-            <div className="bg-white dark:bg-gray-800/50 p-6 rounded-xl border border-border shadow-sm hover:shadow-md transition-shadow">
-              <div className="text-[var(--primary)] mb-3">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" />
-                </svg>
-              </div>
-              <h3 className="font-semibold text-lg mb-2">Modern Dashboard</h3>
-              <p className="text-muted-foreground text-sm">Clean, responsive interface with dark mode support.</p>
+            <div className="pt-6 text-sm text-muted-foreground">
+              Creator By Ahmad Ghozali
             </div>
           </div>
 
-          {/* Footer links */}
-          <div className="pt-8 space-y-2 text-sm text-muted-foreground">
-            <p>
-              Creator By Ahmad Ghozali
-            </p>
+          {/* RIGHT SIDE - BIG LOTTIE */}
+          <div className="flex justify-center lg:justify-end">
+            <div className="w-[90%] sm:w-[500px] md:w-[600px] lg:w-[650px]">
+              <DotLottieReact
+                src="https://lottie.host/3fbc8b21-aa97-408a-ae6b-ce4964fba1c8/jDX4a2Fp4D.lottie"
+                loop
+                autoplay
+              />
+            </div>
           </div>
         </div>
       </div>
