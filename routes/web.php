@@ -11,7 +11,8 @@ use App\Http\Controllers\UserFileController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\SettingAppController;
 use App\Http\Controllers\MediaFolderController;
-use App\Http\Controllers\LanguageController; // Import the new controller
+use App\Http\Controllers\LanguageController;
+use App\Http\Controllers\DashboardController; // Import the new DashboardController
 
 Route::get('/', function () {
     return Inertia::render('welcome');
@@ -21,9 +22,11 @@ Route::get('/', function () {
 Route::get('/lang/{locale}', [LanguageController::class, 'setLocale'])->name('language.set');
 
 Route::middleware(['auth', 'menu.permission'])->group(function () {
-    Route::get('dashboard', function () {
-        return Inertia::render('dashboard');
-    })->name('dashboard');
+    // Route::get('dashboard', function () { // Old dashboard route
+    //     return Inertia::render('dashboard');
+    // })->name('dashboard');
+    Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard'); // New dashboard route
+    Route::post('dashboard/save-widgets', [DashboardController::class, 'saveWidgets'])->name('dashboard.save-widgets'); // New route to save widgets
 
     Route::resource('roles', RoleController::class);
     Route::resource('menus', MenuController::class);
