@@ -56,6 +56,16 @@ class MenuSeeder extends Seeder
             'parent_id' => $access->id,
         ]);
 
+        // New: Employee Menu
+        Menu::create([
+            'title' => 'Employees',
+            'icon' => 'Briefcase', // Menggunakan ikon Briefcase
+            'route' => '/employees',
+            'order' => 5, // Urutan setelah Roles
+            'permission_name' => 'employee-view',
+            'parent_id' => $access->id,
+        ]);
+
         // GROUP: Settings
         $settings = Menu::create([
             'title' => 'Settings',

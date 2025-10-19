@@ -24,6 +24,10 @@ class User extends Authenticatable implements HasMedia
         'name',
         'email',
         'password',
+        'nik', // Tambahkan ini
+        'personal_email', // Tambahkan ini
+        'phone_number', // Tambahkan ini
+        'address', // Tambahkan ini
     ];
 
     /**

@@ -6,6 +6,8 @@ module.exports = {
     './storage/framework/views/*.php',
     './resources/views/**/*.blade.php',
     './resources/js/**/*.{ts,tsx}',
+    './app/Exports/**/*.php', // Tambahkan ini
+    './app/Imports/**/*.php', // Tambahkan ini
   ],
   theme: {
     container: {

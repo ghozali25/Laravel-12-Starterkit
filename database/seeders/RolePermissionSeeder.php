@@ -25,6 +25,14 @@ class RolePermissionSeeder extends Seeder
                 'users-view',
                 'roles-view',
             ],
+            'Employees' => [ // Grup baru untuk karyawan
+                'employee-view',
+                'employee-create',
+                'employee-edit',
+                'employee-delete',
+                'employee-export',
+                'employee-import',
+            ],
             'Settings' => [
                 'settings-view',
                 'menu-view',

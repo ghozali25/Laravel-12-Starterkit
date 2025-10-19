@@ -12,7 +12,8 @@ use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\SettingAppController;
 use App\Http\Controllers\MediaFolderController;
 use App\Http\Controllers\LanguageController;
-use App\Http\Controllers\DashboardController; // Import the new DashboardController
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\EmployeeController; // Import the new EmployeeController
 
 Route::get('/', function () {
     return Inertia::render('welcome');
@@ -22,11 +23,8 @@ Route::get('/', function () {
 Route::get('/lang/{locale}', [LanguageController::class, 'setLocale'])->name('language.set');
 
 Route::middleware(['auth', 'menu.permission'])->group(function () {
-    // Route::get('dashboard', function () { // Old dashboard route
-    //     return Inertia::render('dashboard');
-    // })->name('dashboard');
-    Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard'); // New dashboard route
-    Route::post('dashboard/save-widgets', [DashboardController::class, 'saveWidgets'])->name('dashboard.save-widgets'); // New route to save widgets
+    Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::post('dashboard/save-widgets', [DashboardController::class, 'saveWidgets'])->name('dashboard.save-widgets');
 
     Route::resource('roles', RoleController::class);
     Route::resource('menus', MenuController::class);
@@ -45,6 +43,11 @@ Route::middleware(['auth', 'menu.permission'])->group(function () {
     Route::post('/files', [UserFileController::class, 'store'])->name('files.store');
     Route::delete('/files/{id}', [UserFileController::class, 'destroy'])->name('files.destroy');
     Route::resource('media', MediaFolderController::class);
+
+    // Employee Management Routes
+    Route::resource('employees', EmployeeController::class);
+    Route::get('employees/export/{format}', [EmployeeController::class, 'export'])->name('employees.export');
+    Route::post('employees/import', [EmployeeController::class, 'import'])->name('employees.import');
 });
 
 require __DIR__ . '/settings.php';
