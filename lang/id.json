@@ -181,5 +181,14 @@
     "Users": "Pengguna",
     "Backups": "Cadangan",
     "Activity Logs": "Log Aktivitas",
-    "Settings": "Pengaturan"
+    "Settings": "Pengaturan",
+    "Add Widget": "Tambah Widget",
+    "Select Widget to Add": "Pilih Widget untuk Ditambahkan",
+    "Add": "Tambah",
+    "Widget removed successfully!": "Widget berhasil dihapus!",
+    "Widget added successfully!": "Widget berhasil ditambahkan!",
+    "Widget size updated!": "Ukuran widget berhasil diperbarui!",
+    "1 Column": "1 Kolom",
+    "2 Columns": "2 Kolom",
+    "3 Columns": "3 Kolom"
 }

@@ -181,5 +181,14 @@
     "Users": "Users",
     "Backups": "Backups",
     "Activity Logs": "Activity Logs",
-    "Settings": "Settings"
+    "Settings": "Settings",
+    "Add Widget": "Add Widget",
+    "Select Widget to Add": "Select Widget to Add",
+    "Add": "Add",
+    "Widget removed successfully!": "Widget removed successfully!",
+    "Widget added successfully!": "Widget added successfully!",
+    "Widget size updated!": "Widget size updated!",
+    "1 Column": "1 Column",
+    "2 Columns": "2 Columns",
+    "3 Columns": "3 Columns"
 }

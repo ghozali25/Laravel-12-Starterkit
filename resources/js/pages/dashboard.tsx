@@ -62,6 +62,7 @@ type DashboardWidget = {
     id: string;
     type: K;
     props: WidgetComponentsMap[K]['defaultProps'];
+    colSpan: number; // Add colSpan property
   };
 }[keyof WidgetComponentsMap];
 
@@ -75,14 +76,14 @@ export default function Dashboard() {
   useEffect(() => {
     if (widgets.length === 0) {
       setWidgets([
-        { id: 'summary-users', type: 'SummaryCardUsers', props: { label: t('Users'), value: 420, icon: <Users className="h-4 w-4 text-muted-foreground" /> } },
-        { id: 'summary-backups', type: 'SummaryCardBackups', props: { label: t('Backups'), value: 80, icon: <HardDrive className="h-4 w-4 text-muted-foreground" /> } },
-        { id: 'summary-activity', type: 'SummaryCardActivityLogs', props: { label: t('Activity Logs'), value: 1570, icon: <Activity className="h-4 w-4 text-muted-foreground" /> } } ,
-        { id: 'monthly-activity', type: 'MonthlyActivityChart', props: widgetComponents.MonthlyActivityChart.defaultProps },
-        { id: 'user-roles', type: 'UserRolesPieChart', props: widgetComponents.UserRolesPieChart.defaultProps },
-        { id: 'monthly-trends', type: 'MonthlyTrendsChart', props: widgetComponents.MonthlyTrendsChart.defaultProps },
-        { id: 'resource-usage', type: 'ResourceUsageAreaChart', props: widgetComponents.ResourceUsageAreaChart.defaultProps },
-        { id: 'performance-metrics', type: 'PerformanceMetricsRadialChart', props: widgetComponents.PerformanceMetricsRadialChart.defaultProps },
+        { id: 'summary-users', type: 'SummaryCardUsers', props: { label: t('Users'), value: 420, icon: <Users className="h-4 w-4 text-muted-foreground" /> }, colSpan: 1 },
+        { id: 'summary-backups', type: 'SummaryCardBackups', props: { label: t('Backups'), value: 80, icon: <HardDrive className="h-4 w-4 text-muted-foreground" /> }, colSpan: 1 },
+        { id: 'summary-activity', type: 'SummaryCardActivityLogs', props: { label: t('Activity Logs'), value: 1570, icon: <Activity className="h-4 w-4 text-muted-foreground" /> }, colSpan: 1 } ,
+        { id: 'monthly-activity', type: 'MonthlyActivityChart', props: widgetComponents.MonthlyActivityChart.defaultProps, colSpan: 2 },
+        { id: 'user-roles', type: 'UserRolesPieChart', props: widgetComponents.UserRolesPieChart.defaultProps, colSpan: 1 },
+        { id: 'monthly-trends', type: 'MonthlyTrendsChart', props: widgetComponents.MonthlyTrendsChart.defaultProps, colSpan: 2 },
+        { id: 'resource-usage', type: 'ResourceUsageAreaChart', props: widgetComponents.ResourceUsageAreaChart.defaultProps, colSpan: 2 },
+        { id: 'performance-metrics', type: 'PerformanceMetricsRadialChart', props: widgetComponents.PerformanceMetricsRadialChart.defaultProps, colSpan: 1 },
       ]);
     }
   }, [t]);
@@ -108,13 +109,24 @@ export default function Dashboard() {
     toast.success(t('Widget removed successfully!'));
   };
 
+  const handleColSpanChange = (id: string, newColSpan: number) => {
+    setWidgets((prevWidgets) =>
+      prevWidgets.map((widget) =>
+        widget.id === id ? { ...widget, colSpan: newColSpan } : widget
+      )
+    );
+    toast.success(t('Widget size updated!'));
+  };
+
   // Make handleAddWidget generic to correctly infer the type
   const handleAddWidget = <T extends keyof WidgetComponentsMap>(widgetType: T) => {
     const newId = `${widgetType}-${Date.now()}`; // Unique ID for the new widget instance
-    const newWidget: { id: string; type: T; props: WidgetComponentsMap[T]['defaultProps'] } = {
+    const defaultColSpan = (widgetType.includes('SummaryCard') || widgetType.includes('PieChart') || widgetType.includes('RadialChart')) ? 1 : 2; // Default colSpan based on widget type
+    const newWidget: { id: string; type: T; props: WidgetComponentsMap[T]['defaultProps']; colSpan: number } = {
       id: newId,
       type: widgetType,
       props: widgetComponents[widgetType].defaultProps,
+      colSpan: defaultColSpan,
     };
     setWidgets((prevWidgets) => [...prevWidgets, newWidget as DashboardWidget]); // Cast to DashboardWidget
     setIsAddWidgetDialogOpen(false);
@@ -140,7 +152,7 @@ export default function Dashboard() {
       default:
         // This case should ideally not be reached with a discriminated union
         // but is good for robustness.
-        console.warn('Unknown widget type:', widget);
+        console.warn(`Unknown widget type: ${widget.type}`);
         return null;
     }
   };
@@ -190,7 +202,13 @@ export default function Dashboard() {
           <SortableContext items={widgets.map((w) => w.id)} strategy={rectSortingStrategy}>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {widgets.map((widget) => (
-                <DashboardWidgetWrapper key={widget.id} id={widget.id} onRemove={handleRemoveWidget}>
+                <DashboardWidgetWrapper
+                  key={widget.id}
+                  id={widget.id}
+                  colSpan={widget.colSpan}
+                  onRemove={handleRemoveWidget}
+                  onColSpanChange={handleColSpanChange}
+                >
                   {renderWidgetComponent(widget)}
                 </DashboardWidgetWrapper>
               ))}
