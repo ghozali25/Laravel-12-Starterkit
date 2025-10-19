@@ -16,6 +16,7 @@ import type { LucideIcon } from 'lucide-react';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
+import { useTranslation } from '@/lib/i18n'; // Import useTranslation
 
 interface MenuItem {
   id: number;
@@ -28,6 +29,7 @@ interface MenuItem {
 function RenderMenu({ items, level = 0 }: { items: MenuItem[]; level?: number }) {
   const { url: currentUrl } = usePage();
   const [openMenus, setOpenMenus] = useState<Record<number, boolean>>({});
+  const { t } = useTranslation(); // Use the translation hook
 
   if (!Array.isArray(items)) return null;
 
@@ -65,7 +67,7 @@ function RenderMenu({ items, level = 0 }: { items: MenuItem[]; level?: number })
                 >
                   <div className="flex items-center">
                     <Icon className="size-4 mr-3 opacity-80 group-hover:opacity-100" />
-                    <span>{menu.title}</span>
+                    <span>{t(menu.title)}</span> {/* Translate menu title */}
                   </div>
                   <ChevronDown
                     className={cn(
@@ -98,7 +100,7 @@ function RenderMenu({ items, level = 0 }: { items: MenuItem[]; level?: number })
               >
                 <Link href={menu.route || '#'}>
                   <Icon className="size-4 mr-3 opacity-80 group-hover:opacity-100" />
-                  <span>{menu.title}</span>
+                  <span>{t(menu.title)}</span> {/* Translate menu title */}
                   {level > 0 && (
                     <ChevronRight className="ml-auto size-4 opacity-0 group-hover:opacity-50" />
                   )}
@@ -114,10 +116,11 @@ function RenderMenu({ items, level = 0 }: { items: MenuItem[]; level?: number })
 
 export function AppSidebar() {
   const { menus = [] } = usePage().props as { menus?: MenuItem[] };
+  const { t } = useTranslation(); // Use the translation hook
 
   const footerNavItems = [
     {
-      title: 'Ahmad Ghozali',
+      title: t('Ahmad Ghozali'), // Translate footer item title
       url: 'https://github.com/ghozali25/Laravel-12-Starterkit',
       icon: iconMapper('Star') as LucideIcon,
     },
