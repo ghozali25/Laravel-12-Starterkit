@@ -11,6 +11,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useTranslation } from '@/lib/i18n';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'; // Import Tooltip components
 
 interface DashboardWidgetWrapperProps {
   id: string;
@@ -51,28 +52,39 @@ export default function DashboardWidgetWrapper({ id, children, onRemove, colSpan
       )}
     >
       <div className="absolute top-2 right-2 flex gap-1 z-10">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-7 w-7 text-muted-foreground hover:text-primary"
-            >
-              <Maximize2 className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => onColSpanChange(id, 1)}>
-              {t('1 Column')}
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => onColSpanChange(id, 2)}>
-              {t('2 Columns')}
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => onColSpanChange(id, 3)}>
-              {t('3 Columns')}
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7 text-muted-foreground hover:text-primary relative" // Added relative for positioning the span
+                >
+                  <Maximize2 className="h-4 w-4" />
+                  {/* Current colSpan indicator */}
+                  <span className="absolute -bottom-1 -right-1 text-[0.6rem] font-bold bg-primary text-primary-foreground rounded-full h-3.5 w-3.5 flex items-center justify-center">
+                    {colSpan}
+                  </span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => onColSpanChange(id, 1)}>
+                  {t('1 Column')}
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => onColSpanChange(id, 2)}>
+                  {t('2 Columns')}
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => onColSpanChange(id, 3)}>
+                  {t('3 Columns')}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </TooltipTrigger>
+          <TooltipContent>
+            {t('Change widget size')}
+          </TooltipContent>
+        </Tooltip>
 
         <Button
           variant="ghost"
@@ -82,15 +94,22 @@ export default function DashboardWidgetWrapper({ id, children, onRemove, colSpan
         >
           <X className="h-4 w-4" />
         </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-7 w-7 text-muted-foreground hover:text-primary cursor-grab"
-          {...listeners}
-          {...attributes}
-        >
-          <GripVertical className="h-4 w-4" />
-        </Button>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7 text-muted-foreground hover:text-primary cursor-grab"
+              {...listeners}
+              {...attributes}
+            >
+              <GripVertical className="h-4 w-4" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            {t('Drag to reorder')}
+          </TooltipContent>
+        </Tooltip>
       </div>
       <div className="group">
         {children}

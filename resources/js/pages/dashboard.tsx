@@ -68,25 +68,24 @@ type DashboardWidget = {
 
 
 export default function Dashboard() {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const [widgets, setWidgets] = useState<DashboardWidget[]>([]);
   const [isAddWidgetDialogOpen, setIsAddWidgetDialogOpen] = useState(false);
 
   // Initialize with default widgets if none are saved (or for demonstration)
   useEffect(() => {
-    if (widgets.length === 0) {
-      setWidgets([
-        { id: 'summary-users', type: 'SummaryCardUsers', props: { label: t('Users'), value: 420, icon: <Users className="h-4 w-4 text-muted-foreground" /> }, colSpan: 1 },
-        { id: 'summary-backups', type: 'SummaryCardBackups', props: { label: t('Backups'), value: 80, icon: <HardDrive className="h-4 w-4 text-muted-foreground" /> }, colSpan: 1 },
-        { id: 'summary-activity', type: 'SummaryCardActivityLogs', props: { label: t('Activity Logs'), value: 1570, icon: <Activity className="h-4 w-4 text-muted-foreground" /> }, colSpan: 1 } ,
-        { id: 'monthly-activity', type: 'MonthlyActivityChart', props: widgetComponents.MonthlyActivityChart.defaultProps, colSpan: 2 },
-        { id: 'user-roles', type: 'UserRolesPieChart', props: widgetComponents.UserRolesPieChart.defaultProps, colSpan: 1 },
-        { id: 'monthly-trends', type: 'MonthlyTrendsChart', props: widgetComponents.MonthlyTrendsChart.defaultProps, colSpan: 2 },
-        { id: 'resource-usage', type: 'ResourceUsageAreaChart', props: widgetComponents.ResourceUsageAreaChart.defaultProps, colSpan: 2 },
-        { id: 'performance-metrics', type: 'PerformanceMetricsRadialChart', props: widgetComponents.PerformanceMetricsRadialChart.defaultProps, colSpan: 1 },
-      ]);
-    }
-  }, [t]);
+    // Re-initialize widgets whenever locale changes
+    setWidgets([
+      { id: 'summary-users', type: 'SummaryCardUsers', props: { label: t('Users'), value: 420, icon: <Users className="h-4 w-4 text-muted-foreground" /> }, colSpan: 1 },
+      { id: 'summary-backups', type: 'SummaryCardBackups', props: { label: t('Backups'), value: 80, icon: <HardDrive className="h-4 w-4 text-muted-foreground" /> }, colSpan: 1 },
+      { id: 'summary-activity', type: 'SummaryCardActivityLogs', props: { label: t('Activity Logs'), value: 1570, icon: <Activity className="h-4 w-4 text-muted-foreground" /> }, colSpan: 1 } ,
+      { id: 'monthly-activity', type: 'MonthlyActivityChart', props: widgetComponents.MonthlyActivityChart.defaultProps, colSpan: 2 },
+      { id: 'user-roles', type: 'UserRolesPieChart', props: widgetComponents.UserRolesPieChart.defaultProps, colSpan: 1 },
+      { id: 'monthly-trends', type: 'MonthlyTrendsChart', props: widgetComponents.MonthlyTrendsChart.defaultProps, colSpan: 2 },
+      { id: 'resource-usage', type: 'ResourceUsageAreaChart', props: widgetComponents.ResourceUsageAreaChart.defaultProps, colSpan: 2 },
+      { id: 'performance-metrics', type: 'PerformanceMetricsRadialChart', props: widgetComponents.PerformanceMetricsRadialChart.defaultProps, colSpan: 1 },
+    ]);
+  }, [t, locale]); // Add 'locale' to the dependency array
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -110,6 +109,7 @@ export default function Dashboard() {
   };
 
   const handleColSpanChange = (id: string, newColSpan: number) => {
+    console.log(`Changing colSpan for widget ${id} to ${newColSpan}`); // Added console.log
     setWidgets((prevWidgets) =>
       prevWidgets.map((widget) =>
         widget.id === id ? { ...widget, colSpan: newColSpan } : widget
@@ -153,7 +153,7 @@ export default function Dashboard() {
       default:
         // This case should ideally not be reached with a discriminated union
         // but is good for robustness.
-        console.warn('Unknown widget type', widget);
+        console.warn('Unknown widget type:', widget);
         return null;
     }
   };
