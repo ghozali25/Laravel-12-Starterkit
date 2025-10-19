@@ -13,12 +13,12 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogDescription,
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { DialogDescription } from '@/components/ui/dialog'; // Import DialogDescription
 
 // Widget Components and their Props interfaces
 import MonthlyActivityChart, { MonthlyActivityChartProps } from '@/components/dashboard-widgets/MonthlyActivityChart';
@@ -42,7 +42,7 @@ interface ConfigurableProp {
 interface WidgetDefinition<P> {
   component: React.ComponentType<P>;
   label: string;
-  getInitialProps: (t: (key: string) => string) => P;
+  getInitialProps: (t: (key: string) => string, data: DashboardData) => P; // Updated to pass full DashboardData
   configurableProps?: ConfigurableProp[];
   defaultColSpan: number;
   icon: React.ReactNode; // Icon for the add widget dialog
@@ -53,21 +53,16 @@ type WidgetComponentsMap = {
   [key: string]: WidgetDefinition<any>;
 };
 
-// Dummy data for charts (in a real app, this would come from an API)
-const dummyChartData = [
-  { name: 'Jan', Users: 50, Backups: 10, Files: 100, CPU: 60, Memory: 70 },
-  { name: 'Feb', Users: 120, Backups: 25, Files: 150, CPU: 65, Memory: 75 },
-  { name: 'Mar', Users: 80, Backups: 15, Files: 120, CPU: 70, Memory: 80 },
-  { name: 'Apr', Users: 150, Backups: 30, Files: 200, CPU: 75, Memory: 85 },
-  { name: 'May', Users: 90, Backups: 20, Files: 130, CPU: 80, Memory: 90 },
-  { name: 'Jun', Users: 170, Backups: 35, Files: 220, CPU: 85, Memory: 95 },
-];
+// --- New: DashboardData interface to hold all fetched data ---
+interface DashboardData {
+  totalUsers: number;
+  totalBackups: number;
+  totalActivityLogs: number;
+  monthlyData: { name: string; Users: number; Backups: number }[];
+  userRoleDistribution: { name: string; value: number; color: string }[];
+}
 
-const dummyPieData = [
-  { name: 'Admin', value: 20, color: '#fbbf24' },
-  { name: 'User', value: 80, color: '#a78bfa' },
-];
-
+// Dummy data for PerformanceMetricsRadialChart (as it's harder to get real-time system metrics)
 const dummyRadialData = [
   { name: 'CPU Usage', value: 85, fill: '#8884d8' },
   { name: 'Memory Usage', value: 70, fill: '#83a6ed' },
@@ -78,37 +73,37 @@ const widgetComponents: WidgetComponentsMap = {
   SummaryCardUsers: {
     component: SummaryCard,
     label: 'Summary Card (Users)',
-    getInitialProps: (t) => ({ label: t('Users'), value: 420, iconName: 'Users' }), // Changed to iconName
+    getInitialProps: (t, data) => ({ label: t('Users'), value: data?.totalUsers ?? 0, iconName: 'Users' }),
     defaultColSpan: 1,
-    icon: <Users className="h-5 w-5" />, // This icon is for the dialog
+    icon: <Users className="h-5 w-5" />,
   },
   SummaryCardBackups: {
     component: SummaryCard,
     label: 'Summary Card (Backups)',
-    getInitialProps: (t) => ({ label: t('Backups'), value: 80, iconName: 'HardDrive' }), // Changed to iconName
+    getInitialProps: (t, data) => ({ label: t('Backups'), value: data?.totalBackups ?? 0, iconName: 'HardDrive' }),
     defaultColSpan: 1,
-    icon: <HardDrive className="h-5 w-5" />, // This icon is for the dialog
+    icon: <HardDrive className="h-5 w-5" />,
   },
   SummaryCardActivityLogs: {
     component: SummaryCard,
     label: 'Summary Card (Activity Logs)',
-    getInitialProps: (t) => ({ label: t('Activity Logs'), value: 1570, iconName: 'Activity' }), // Changed to iconName
+    getInitialProps: (t, data) => ({ label: t('Activity Logs'), value: data?.totalActivityLogs ?? 0, iconName: 'Activity' }),
     defaultColSpan: 1,
-    icon: <Activity className="h-5 w-5" />, // This icon is for the dialog
+    icon: <Activity className="h-5 w-5" />,
   },
   MonthlyActivityChart: {
     component: MonthlyActivityChart,
     label: 'Monthly Activity Chart',
-    getInitialProps: (t) => ({
-      data: dummyChartData,
+    getInitialProps: (t, data) => ({
+      data: data?.monthlyData ?? [],
       xAxisDataKey: 'name',
       yAxisDataKey1: 'Users',
       yAxisDataKey2: 'Backups',
     }),
     configurableProps: [
-      { key: 'xAxisDataKey', label: 'X-Axis Data Key', type: 'select', dataOptions: Object.keys(dummyChartData[0] || {}) },
-      { key: 'yAxisDataKey1', label: 'Y-Axis Data Key 1', type: 'select', dataOptions: Object.keys(dummyChartData[0] || {}) },
-      { key: 'yAxisDataKey2', label: 'Y-Axis Data Key 2', type: 'select', dataOptions: Object.keys(dummyChartData[0] || {}) },
+      { key: 'xAxisDataKey', label: 'X-Axis Data Key', type: 'select', dataOptions: ['name'] }, // 'name' is the month
+      { key: 'yAxisDataKey1', label: 'Y-Axis Data Key 1', type: 'select', dataOptions: ['Users', 'Backups'] },
+      { key: 'yAxisDataKey2', label: 'Y-Axis Data Key 2', type: 'select', dataOptions: ['Users', 'Backups'] },
     ],
     defaultColSpan: 2,
     icon: <BarChart className="h-5 w-5" />,
@@ -116,16 +111,16 @@ const widgetComponents: WidgetComponentsMap = {
   MonthlyTrendsChart: {
     component: MonthlyTrendsChart,
     label: 'Monthly Trends Chart',
-    getInitialProps: (t) => ({
-      data: dummyChartData,
+    getInitialProps: (t, data) => ({
+      data: data?.monthlyData ?? [],
       xAxisDataKey: 'name',
       yAxisDataKey1: 'Users',
       yAxisDataKey2: 'Backups',
     }),
     configurableProps: [
-      { key: 'xAxisDataKey', label: 'X-Axis Data Key', type: 'select', dataOptions: Object.keys(dummyChartData[0] || {}) },
-      { key: 'yAxisDataKey1', label: 'Y-Axis Data Key 1', type: 'select', dataOptions: Object.keys(dummyChartData[0] || {}) },
-      { key: 'yAxisDataKey2', label: 'Y-Axis Data Key 2', type: 'select', dataOptions: Object.keys(dummyChartData[0] || {}) },
+      { key: 'xAxisDataKey', label: 'X-Axis Data Key', type: 'select', dataOptions: ['name'] },
+      { key: 'yAxisDataKey1', label: 'Y-Axis Data Key 1', type: 'select', dataOptions: ['Users', 'Backups'] },
+      { key: 'yAxisDataKey2', label: 'Y-Axis Data Key 2', type: 'select', dataOptions: ['Users', 'Backups'] },
     ],
     defaultColSpan: 2,
     icon: <LineChart className="h-5 w-5" />,
@@ -133,23 +128,23 @@ const widgetComponents: WidgetComponentsMap = {
   UserRolesPieChart: {
     component: UserRolesPieChart,
     label: 'User Roles Pie Chart',
-    getInitialProps: (t) => ({ data: dummyPieData }),
+    getInitialProps: (t, data) => ({ data: data?.userRoleDistribution ?? [] }),
     defaultColSpan: 1,
     icon: <PieChart className="h-5 w-5" />,
   },
   ResourceUsageAreaChart: {
     component: ResourceUsageAreaChart,
     label: 'Resource Usage Area Chart',
-    getInitialProps: (t) => ({
-      data: dummyChartData.map(d => ({ month: d.name, users: d.Users, backups: d.Backups })),
+    getInitialProps: (t, data) => ({
+      data: data?.monthlyData?.map(d => ({ month: d.name, users: d.Users, backups: d.Backups })) ?? [],
       xAxisDataKey: 'month',
       yAxisDataKey1: 'users',
       yAxisDataKey2: 'backups',
     }),
     configurableProps: [
-      { key: 'xAxisDataKey', label: 'X-Axis Data Key', type: 'select', dataOptions: ['month', 'name'] },
-      { key: 'yAxisDataKey1', label: 'Y-Axis Data Key 1', type: 'select', dataOptions: ['users', 'backups', 'Files', 'CPU', 'Memory'] },
-      { key: 'yAxisDataKey2', label: 'Y-Axis Data Key 2', type: 'select', dataOptions: ['users', 'backups', 'Files', 'CPU', 'Memory'] },
+      { key: 'xAxisDataKey', label: 'X-Axis Data Key', type: 'select', dataOptions: ['month'] },
+      { key: 'yAxisDataKey1', label: 'Y-Axis Data Key 1', type: 'select', dataOptions: ['users', 'backups'] },
+      { key: 'yAxisDataKey2', label: 'Y-Axis Data Key 2', type: 'select', dataOptions: ['users', 'backups'] },
     ],
     defaultColSpan: 2,
     icon: <Radar className="h-5 w-5" />,
@@ -157,7 +152,7 @@ const widgetComponents: WidgetComponentsMap = {
   PerformanceMetricsRadialChart: {
     component: PerformanceMetricsRadialChart,
     label: 'Performance Metrics Radial Chart',
-    getInitialProps: (t) => ({ data: dummyRadialData }),
+    getInitialProps: (t, data) => ({ data: dummyRadialData }), // Still dummy as real-time system metrics are complex
     defaultColSpan: 1,
     icon: <Radar className="h-5 w-5" />,
   },
@@ -171,16 +166,32 @@ type DashboardWidget = {
   colSpan: number;
 };
 
-interface DashboardProps {
+interface DashboardProps extends DashboardData { // Extend with DashboardData
   initialWidgets: DashboardWidget[];
 }
 
-export default function Dashboard({ initialWidgets }: DashboardProps) {
+export default function Dashboard(props: DashboardProps) { // Receive props directly
+  const { initialWidgets, totalUsers, totalBackups, totalActivityLogs, monthlyData, userRoleDistribution } = props;
   const { t, locale } = useTranslation();
   const [widgets, setWidgets] = useState<DashboardWidget[]>([]);
   const [isAddWidgetDialogOpen, setIsAddWidgetDialogOpen] = useState(false);
   const [selectedWidgetTypeToAdd, setSelectedWidgetTypeToAdd] = useState<keyof WidgetComponentsMap | null>(null);
   const [newWidgetProps, setNewWidgetProps] = useState<Record<string, any>>({});
+
+  // Log all incoming props for debugging
+  console.log('Dashboard Props:', props);
+
+  // Combine all dashboard data into a single object for easier passing to getInitialProps
+  const dashboardData: DashboardData = {
+    totalUsers: totalUsers ?? 0,
+    totalBackups: totalBackups ?? 0,
+    totalActivityLogs: totalActivityLogs ?? 0,
+    monthlyData: monthlyData ?? [],
+    userRoleDistribution: userRoleDistribution ?? [],
+  };
+
+  // Log the constructed dashboardData
+  console.log('Constructed Dashboard Data:', dashboardData);
 
   // Initialize widgets from backend or default if empty
   useEffect(() => {
@@ -190,17 +201,16 @@ export default function Dashboard({ initialWidgets }: DashboardProps) {
     } else {
       // Default widgets if none are saved
       setWidgets([
-        { id: 'summary-users', type: 'SummaryCardUsers', props: { label: t('Users'), value: 420, iconName: 'Users' }, colSpan: 1 },
-        { id: 'summary-backups', type: 'SummaryCardBackups', props: { label: t('Backups'), value: 80, iconName: 'HardDrive' }, colSpan: 1 },
-        { id: 'summary-activity', type: 'SummaryCardActivityLogs', props: { label: t('Activity Logs'), value: 1570, iconName: 'Activity' }, colSpan: 1 },
-        { id: 'monthly-activity', type: 'MonthlyActivityChart', props: widgetComponents.MonthlyActivityChart.getInitialProps(t), colSpan: 2 },
-        { id: 'user-roles', type: 'UserRolesPieChart', props: widgetComponents.UserRolesPieChart.getInitialProps(t), colSpan: 1 },
+        { id: 'summary-users', type: 'SummaryCardUsers', props: widgetComponents.SummaryCardUsers.getInitialProps(t, dashboardData), colSpan: 1 },
+        { id: 'summary-backups', type: 'SummaryCardBackups', props: widgetComponents.SummaryCardBackups.getInitialProps(t, dashboardData), colSpan: 1 },
+        { id: 'summary-activity', type: 'SummaryCardActivityLogs', props: widgetComponents.SummaryCardActivityLogs.getInitialProps(t, dashboardData), colSpan: 1 },
+        { id: 'monthly-activity', type: 'MonthlyActivityChart', props: widgetComponents.MonthlyActivityChart.getInitialProps(t, dashboardData), colSpan: 2 },
+        { id: 'user-roles', type: 'UserRolesPieChart', props: widgetComponents.UserRolesPieChart.getInitialProps(t, dashboardData), colSpan: 1 },
       ]);
     }
-  }, [initialWidgets, t]);
+  }, [initialWidgets, t]); // Removed dashboardData from dependencies
 
   // Save layout to backend
-  // Now accepts currentWidgets as an argument to ensure it uses the latest state
   const saveLayout = useCallback((currentWidgets: DashboardWidget[]) => {
     console.log('saveLayout called with widgets:', currentWidgets);
     const widgetsToSave = currentWidgets.map(widget => ({
@@ -208,11 +218,10 @@ export default function Dashboard({ initialWidgets }: DashboardProps) {
       id: String(widget.id), // Ensure ID is string for backend
     }));
     router.post(route('dashboard.save-widgets'), { widgets_data: widgetsToSave }, {
-      // Removed onSuccess/onError toasts here, relying on backend flash messages
       preserveScroll: true,
-      preserveState: true, // Crucial for maintaining DndContext state
+      preserveState: true,
     });
-  }, [t]); // `t` is a dependency if used inside, otherwise empty array
+  }, []); // No dependencies needed if `t` and `dashboardData` are not used directly here
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -225,7 +234,7 @@ export default function Dashboard({ initialWidgets }: DashboardProps) {
 
     setWidgets((items) => {
       const newItems = arrayMove(items, items.findIndex((item) => item.id === active.id), items.findIndex((item) => item.id === over.id));
-      saveLayout(newItems); // Pass the new state to saveLayout
+      saveLayout(newItems);
       return newItems;
     });
   };
@@ -233,7 +242,7 @@ export default function Dashboard({ initialWidgets }: DashboardProps) {
   const handleRemoveWidget = (id: UniqueIdentifier) => {
     setWidgets((prevWidgets) => {
       const newWidgets = prevWidgets.filter((widget) => widget.id !== id);
-      saveLayout(newWidgets); // Pass the new state to saveLayout
+      saveLayout(newWidgets);
       return newWidgets;
     });
     toast.success(t('Widget removed successfully!'));
@@ -244,7 +253,7 @@ export default function Dashboard({ initialWidgets }: DashboardProps) {
       const newWidgets = prevWidgets.map((widget) =>
         widget.id === id ? { ...widget, colSpan: newColSpan } : widget
       );
-      saveLayout(newWidgets); // Pass the new state to saveLayout
+      saveLayout(newWidgets);
       return newWidgets;
     });
     toast.success(t('Widget size updated!'));
@@ -256,7 +265,7 @@ export default function Dashboard({ initialWidgets }: DashboardProps) {
     const widgetDef = widgetComponents[selectedWidgetTypeToAdd];
     const newId = `${selectedWidgetTypeToAdd}-${Date.now()}`;
     
-    const initialProps = widgetDef.getInitialProps(t);
+    const initialProps = widgetDef.getInitialProps(t, dashboardData); // Pass dashboardData here
 
     const finalProps = { ...initialProps, ...newWidgetProps };
 
@@ -269,7 +278,7 @@ export default function Dashboard({ initialWidgets }: DashboardProps) {
 
     setWidgets((prevWidgets) => {
       const newWidgets = [...prevWidgets, newWidget];
-      saveLayout(newWidgets); // Pass the new state to saveLayout
+      saveLayout(newWidgets);
       return newWidgets;
     });
 
@@ -317,7 +326,6 @@ export default function Dashboard({ initialWidgets }: DashboardProps) {
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>{t('Select Widget to Add')}</DialogTitle>
-                {/* Added DialogDescription to fix accessibility warning */}
                 <DialogDescription>{t('Choose a widget type and configure its properties.')}</DialogDescription>
               </DialogHeader>
               <div className="grid grid-cols-1 gap-3 max-h-[60vh] overflow-y-auto">

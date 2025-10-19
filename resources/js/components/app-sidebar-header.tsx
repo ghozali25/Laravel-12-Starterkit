@@ -12,11 +12,17 @@ export function AppSidebarHeader({ breadcrumbs = [] }: { breadcrumbs?: Breadcrum
   const page = usePage<SharedData>();
   const { auth } = page.props;
 
+  // Log untuk memeriksa locale dan user auth
+  console.log('AppSidebarHeader locale:', locale, 'auth user:', auth.user);
+
   const handleLanguageChange = (value: string) => {
-    router.get(route('language.set', value), {}, {
-      preserveScroll: true,
-      preserveState: true,
-    });
+    // Hanya panggil router.get jika locale berubah
+    if (value !== locale) {
+      router.get(route('language.set', value), {}, {
+        preserveScroll: true,
+        preserveState: true,
+      });
+    }
   };
 
   return (
