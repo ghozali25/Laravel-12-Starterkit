@@ -26,10 +26,21 @@ export default function AuthSimpleLayout({ children, title, description }: AuthL
     const primaryForeground = '#ffffff';
 
     useEffect(() => {
+        // Set warna tema
         document.documentElement.style.setProperty('--primary', primaryColor);
         document.documentElement.style.setProperty('--color-primary', primaryColor);
         document.documentElement.style.setProperty('--primary-foreground', primaryForeground);
         document.documentElement.style.setProperty('--color-primary-foreground', primaryForeground);
+
+        // Tambahkan script Lottie WC hanya sekali
+        const script = document.createElement('script');
+        script.src = 'https://unpkg.com/@lottiefiles/dotlottie-wc@0.8.1/dist/dotlottie-wc.js';
+        script.type = 'module';
+        document.body.appendChild(script);
+
+        return () => {
+            document.body.removeChild(script);
+        };
     }, [primaryColor, primaryForeground]);
 
     return (
@@ -39,14 +50,15 @@ export default function AuthSimpleLayout({ children, title, description }: AuthL
                     <div className="flex flex-col gap-8">
                         {/* Logo and Header Section */}
                         <div className="flex flex-col items-center gap-6">
-                            <Link 
-                                href={route('home')} 
+                            <Link
+                                href={route('home')}
                                 className="flex flex-col items-center gap-3 font-medium transition-opacity hover:opacity-90">
                                 <span className="text-lg font-semibold text-gray-900 dark:text-white">
                                     {setting?.nama_app}
                                 </span>
                             </Link>
 
+                            {/* Judul dan Deskripsi */}
                             <div className="space-y-1.5 text-center">
                                 <h1 className="text-2xl font-semibold tracking-tight text-gray-900 dark:text-white">
                                     {title}
@@ -60,9 +72,7 @@ export default function AuthSimpleLayout({ children, title, description }: AuthL
                         </div>
 
                         {/* Form Content */}
-                        <div className="space-y-6">
-                            {children}
-                        </div>
+                        <div className="space-y-6">{children}</div>
                     </div>
                 </div>
 
