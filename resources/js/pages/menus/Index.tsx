@@ -33,6 +33,7 @@ import {
 import { toast } from 'sonner';
 import { Edit, Trash2, Plus, Save, ChevronDown, ChevronRight } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
+import { useTranslation } from '@/lib/i18n'; // Import useTranslation
 
 interface MenuItem {
   id: number;
@@ -46,17 +47,18 @@ interface Props {
   menuItems: MenuItem[];
 }
 
-const breadcrumbs: BreadcrumbItem[] = [
-  {
-    title: 'Menu Management',
-    href: '/menus',
-  },
-];
-
 export default function MenuIndex({ menuItems }: Props) {
+  const { t } = useTranslation(); // Use the translation hook
   const [menus, setMenus] = useState<MenuItem[]>(menuItems);
   const [isSaving, setIsSaving] = useState(false);
   const [expandedIds, setExpandedIds] = useState<number[]>([]);
+
+  const breadcrumbs: BreadcrumbItem[] = [
+    {
+      title: t('Menu Management'),
+      href: '/menus',
+    },
+  ];
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -178,18 +180,18 @@ export default function MenuIndex({ menuItems }: Props) {
                 </AlertDialogTrigger>
                 <AlertDialogContent>
                   <AlertDialogHeader>
-                    <AlertDialogTitle>Delete this menu?</AlertDialogTitle>
+                    <AlertDialogTitle>{t('Delete this menu?')}</AlertDialogTitle>
                     <AlertDialogDescription>
-                      This will permanently delete the menu "{menu.title}".
+                      {t('This will permanently delete the menu')} "{menu.title}".
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogCancel>{t('Cancel')}</AlertDialogCancel>
                     <AlertDialogAction
                       onClick={() => handleDelete(menu.id)}
                       className="bg-destructive hover:bg-destructive/90"
                     >
-                      Delete
+                      {t('Delete')}
                     </AlertDialogAction>
                   </AlertDialogFooter>
                 </AlertDialogContent>
@@ -208,7 +210,9 @@ export default function MenuIndex({ menuItems }: Props) {
                   items={menu.children!.map((c) => c.id.toString())}
                   strategy={verticalListSortingStrategy}
                 >
-                  {renderMenuList(menu.children!, level + 1)}
+                  <div className="space-y-3">
+                    {renderMenuList(menu.children!, level + 1)}
+                  </div>
                 </SortableContext>
               </DndContext>
             </div>
@@ -220,7 +224,7 @@ export default function MenuIndex({ menuItems }: Props) {
 
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
-      <Head title="Menu Management" />
+      <Head title={t('Menu Management')} />
 
       <div className="flex-1 p-4 md:p-6">
         <Card className="w-full">
@@ -228,21 +232,21 @@ export default function MenuIndex({ menuItems }: Props) {
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
               <div>
                 <CardTitle className="text-2xl font-bold tracking-tight">
-                  Menu Management
+                  {t('Menu Management')}
                 </CardTitle>
                 <p className="text-sm text-muted-foreground">
-                  Drag & drop to reorder main menus and submenus
+                  {t('Drag & drop to reorder main menus and submenus')}
                 </p>
               </div>
               <div className="flex items-center gap-3">
                 <Button onClick={handleSave} disabled={isSaving}>
                   <Save className="mr-2 h-4 w-4" />
-                  {isSaving ? 'Saving...' : 'Save Order'}
+                  {isSaving ? t('Saving...') : t('Save Order')}
                 </Button>
                 <Link href="/menus/create">
                   <Button>
                     <Plus className="mr-2 h-4 w-4" />
-                    Add Menu
+                    {t('Add Menu')}
                   </Button>
                 </Link>
               </div>
@@ -255,12 +259,12 @@ export default function MenuIndex({ menuItems }: Props) {
             {menus.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-12 text-center">
                 <p className="text-muted-foreground mb-4">
-                  No menus available
+                  {t('No menus available')}
                 </p>
                 <Link href="/menus/create">
                   <Button>
                     <Plus className="mr-2 h-4 w-4" />
-                    Add First Menu
+                    {t('Add First Menu')}
                   </Button>
                 </Link>
               </div>

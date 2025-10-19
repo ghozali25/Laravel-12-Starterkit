@@ -39,6 +39,7 @@ import {
   FolderRoot,
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { useTranslation } from '@/lib/i18n'; // Import useTranslation
 
 interface FolderNode {
   id: number;
@@ -62,13 +63,6 @@ interface Props {
   currentFolder: FolderNode | null;
   files: FileNode[];
 }
-
-const breadcrumbs: BreadcrumbItem[] = [
-  {
-    title: 'File Management',
-    href: '/files',
-  },
-];
 
 function buildFolderTree(flat: FolderNode[]): (FolderNode & { children: FolderNode[] })[] {
   const map = new Map<number, FolderNode & { children: FolderNode[] }>();
@@ -119,12 +113,20 @@ function isPreviewable(mime: string) {
 }
 
 export default function FileManager({ folders, currentFolderId, currentFolder, files }: Props) {
+  const { t } = useTranslation(); // Use the translation hook
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [uploading, setUploading] = useState(false);
   const [newFolderName, setNewFolderName] = useState('');
   const [deleteFolderId, setDeleteFolderId] = useState<number | null>(null);
   const [previewFile, setPreviewFile] = useState<FileNode | null>(null);
   const [isCreatingFolder, setIsCreatingFolder] = useState(false);
+
+  const breadcrumbs: BreadcrumbItem[] = [
+    {
+      title: t('File Management'),
+      href: '/files',
+    },
+  ];
 
   const confirmDeleteFolder = () => {
     if (!deleteFolderId) return;
@@ -173,7 +175,7 @@ export default function FileManager({ folders, currentFolderId, currentFolder, f
 
   const handleCreateFolder = () => {
     if (!newFolderName.trim()) {
-      toast.error('Folder name cannot be empty');
+      toast.error(t('Folder name cannot be empty'));
       return;
     }
 
@@ -229,18 +231,18 @@ export default function FileManager({ folders, currentFolderId, currentFolder, f
             </AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
-                <AlertDialogTitle>Delete Folder?</AlertDialogTitle>
+                <AlertDialogTitle>{t('Delete Folder?')}</AlertDialogTitle>
                 <AlertDialogDescription>
-                  Folder <strong>{folder.name}</strong> and all its contents will be permanently deleted.
+                  {t('Folder')} <strong>{folder.name}</strong> {t('and all its contents will be permanently deleted.')}
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogCancel>{t('Cancel')}</AlertDialogCancel>
                 <AlertDialogAction
                   onClick={confirmDeleteFolder}
                   className="bg-red-600 hover:bg-red-700"
                 >
-                  Delete
+                  {t('Delete')}
                 </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
@@ -257,12 +259,12 @@ export default function FileManager({ folders, currentFolderId, currentFolder, f
 
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
-      <Head title="File Manager" />
+      <Head title={t('File Management')} />
       <div className="flex-1 p-4 md:p-6 grid grid-cols-1 md:grid-cols-4 gap-6">
         {/* Sidebar Folder Tree */}
         <div className="md:col-span-1 border rounded-lg p-4 bg-white">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-sm font-semibold">Folder Structure</h2>
+            <h2 className="text-sm font-semibold">{t('Folder Structure')}</h2>
             <Button 
               variant="outline" 
               size="sm" 
@@ -270,7 +272,7 @@ export default function FileManager({ folders, currentFolderId, currentFolder, f
               className="gap-1"
             >
               <FolderPlus className="w-4 h-4" />
-              <span>New Folder</span>
+              <span>{t('New Folder')}</span>
             </Button>
           </div>
           
@@ -280,7 +282,7 @@ export default function FileManager({ folders, currentFolderId, currentFolder, f
               onClick={() => router.visit('/files')}
             >
               <FolderRoot className="w-4 h-4 text-blue-500" />
-              <span className="text-sm font-medium">Root Folder</span>
+              <span className="text-sm font-medium">{t('Root Folder')}</span>
             </div>
             {renderFolderTree(buildFolderTree(folders ?? []))}
           </div>
@@ -291,11 +293,11 @@ export default function FileManager({ folders, currentFolderId, currentFolder, f
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <h2 className="text-lg font-semibold">
-                {currentFolder ? currentFolder.name : 'Root Folder'}
+                {currentFolder ? currentFolder.name : t('Root Folder')}
               </h2>
               {currentFolder && (
                 <span className="text-sm text-gray-500">
-                  ({files.length} {files.length === 1 ? 'item' : 'items'})
+                  ({files.length} {files.length === 1 ? t('item') : t('items')})
                 </span>
               )}
             </div>
@@ -314,7 +316,7 @@ export default function FileManager({ folders, currentFolderId, currentFolder, f
                 className="gap-2"
               >
                 <UploadCloud className="w-4 h-4" />
-                {uploading ? 'Uploading...' : 'Upload'}
+                {uploading ? t('Uploading...') : t('Upload')}
               </Button>
             </div>
           </div>
@@ -324,14 +326,14 @@ export default function FileManager({ folders, currentFolderId, currentFolder, f
           {files.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-64 text-gray-500">
               <Folder className="w-12 h-12 mb-2" />
-              <p>No files in this folder</p>
+              <p>{t('No files in this folder')}</p>
               <Button 
                 variant="ghost" 
                 size="sm" 
                 className="mt-2"
                 onClick={() => fileInputRef.current?.click()}
               >
-                Upload the first file
+                {t('Upload the first file')}
               </Button>
             </div>
           ) : (
@@ -371,13 +373,13 @@ export default function FileManager({ folders, currentFolderId, currentFolder, f
                         </AlertDialogTrigger>
                         <AlertDialogContent>
                           <AlertDialogHeader>
-                            <AlertDialogTitle>Delete File?</AlertDialogTitle>
+                            <AlertDialogTitle>{t('Delete File?')}</AlertDialogTitle>
                             <AlertDialogDescription>
-                              File <strong>{file.name}</strong> will be permanently deleted.
+                              {t('File')} <strong>{file.name}</strong> {t('will be permanently deleted.')}
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogCancel>{t('Cancel')}</AlertDialogCancel>
                             <AlertDialogAction
                               onClick={() => router.delete(`/files/${file.id}`, {
                                 preserveScroll: true,
@@ -388,7 +390,7 @@ export default function FileManager({ folders, currentFolderId, currentFolder, f
                               })}
                               className="bg-red-600 hover:bg-red-700"
                             >
-                              Delete
+                              {t('Delete')}
                             </AlertDialogAction>
                           </AlertDialogFooter>
                         </AlertDialogContent>
@@ -406,21 +408,21 @@ export default function FileManager({ folders, currentFolderId, currentFolder, f
       <Dialog open={isCreatingFolder} onOpenChange={setIsCreatingFolder}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Create New Folder</DialogTitle>
+            <DialogTitle>{t('Create New Folder')}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <Input
-              placeholder="Folder name"
+              placeholder={t('Folder name')}
               value={newFolderName}
               onChange={(e) => setNewFolderName(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleCreateFolder()}
             />
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setIsCreatingFolder(false)}>
-                Cancel
+                {t('Cancel')}
               </Button>
               <Button onClick={handleCreateFolder} disabled={!newFolderName.trim()}>
-                Create
+                {t('Create')}
               </Button>
             </div>
           </div>
@@ -455,13 +457,13 @@ export default function FileManager({ folders, currentFolderId, currentFolder, f
                 ) : (
                   <div className="flex flex-col items-center justify-center h-64 text-gray-500">
                     <File className="w-12 h-12 mb-2" />
-                    <p>Preview not available</p>
+                    <p>{t('Preview not available')}</p>
                     <a 
                       href={previewFile.url} 
                       download={previewFile.name}
                       className="mt-2 text-blue-500 hover:underline"
                     >
-                      Download file
+                      {t('Download file')}
                     </a>
                   </div>
                 )}

@@ -17,13 +17,7 @@ import {
   AlertDialogAction,
 } from '@/components/ui/alert-dialog';
 import { ShieldCheck } from 'lucide-react';
-
-const breadcrumbs: BreadcrumbItem[] = [
-  {
-    title: 'Role Management',
-    href: '/roles',
-  },
-];
+import { useTranslation } from '@/lib/i18n'; // Import useTranslation
 
 interface Permission {
   id: number;
@@ -43,7 +37,15 @@ interface Props {
 }
 
 export default function RoleIndex({ roles }: Props) {
+  const { t } = useTranslation(); // Use the translation hook
   const { delete: destroy, processing } = useForm();
+
+  const breadcrumbs: BreadcrumbItem[] = [
+    {
+      title: t('Role Management'),
+      href: '/roles',
+    },
+  ];
 
   const handleDelete = (id: number) => {
     destroy(`/roles/${id}`);
@@ -51,18 +53,18 @@ export default function RoleIndex({ roles }: Props) {
 
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
-      <Head title="Role Management" />
+      <Head title={t('Role Management')} />
       <div className="flex-1 space-y-6 p-4 md:p-6">
         <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">Role Management</h1>
+            <h1 className="text-2xl font-bold tracking-tight">{t('Role Management')}</h1>
             <p className="text-muted-foreground">
-              Manage roles and permissions for the system
+              {t('Manage roles and permissions for the system')}
             </p>
           </div>
           <Link href="/roles/create">
             <Button className="w-full md:w-auto" size="sm">
-              + Add Role
+              {t('+ Add Role')}
             </Button>
           </Link>
         </div>
@@ -71,7 +73,7 @@ export default function RoleIndex({ roles }: Props) {
           {roles.length === 0 && (
             <Card>
               <CardContent className="py-6 text-center text-muted-foreground">
-                No role data available.
+                {t('No role data available.')}
               </CardContent>
             </Card>
           )}
@@ -85,33 +87,33 @@ export default function RoleIndex({ roles }: Props) {
                     {role.name}
                   </CardTitle>
                   <div className="text-sm text-muted-foreground">
-                    {role.permissions.length} permission
-                    {role.permissions.length > 1 ? 's' : ''}
+                    {role.permissions.length} {t('permission')}
+                    {role.permissions.length > 1 ? t('s') : ''}
                   </div>
                 </div>
                 <div className="flex gap-2">
                   <Link href={`/roles/${role.id}/edit`}>
-                    <Button size="sm" variant="outline">Edit</Button>
+                    <Button size="sm" variant="outline">{t('Edit')}</Button>
                   </Link>
 
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
-                      <Button size="sm" variant="destructive">Delete</Button>
+                      <Button size="sm" variant="destructive">{t('Delete')}</Button>
                     </AlertDialogTrigger>
                     <AlertDialogContent>
                       <AlertDialogHeader>
-                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                        <AlertDialogTitle>{t('Are you sure?')}</AlertDialogTitle>
                         <AlertDialogDescription>
-                          Role <strong>{role.name}</strong> will be permanently deleted.
+                          {t('Role')} <strong>{role.name}</strong> {t('will be permanently deleted.')}
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogCancel>{t('Cancel')}</AlertDialogCancel>
                         <AlertDialogAction
                           onClick={() => handleDelete(role.id)}
                           disabled={processing}
                         >
-                          Yes, Delete
+                          {t('Yes, Delete')}
                         </AlertDialogAction>
                       </AlertDialogFooter>
                     </AlertDialogContent>
@@ -122,7 +124,7 @@ export default function RoleIndex({ roles }: Props) {
               {role.permissions.length > 0 && (
                 <CardContent className="pt-4">
                   <p className="mb-2 text-sm font-medium text-muted-foreground">
-                    Permissions:
+                    {t('Permissions')}:
                   </p>
                   <div className="flex flex-wrap gap-2">
                     {role.permissions.map((permission) => (

@@ -14,28 +14,7 @@ import { Link, usePage } from '@inertiajs/react';
 import { BookOpen, Folder, LayoutGrid, Menu, Search } from 'lucide-react';
 import AppLogo from './app-logo';
 import AppLogoIcon from './app-logo-icon';
-
-const mainNavItems: NavItem[] = [
-    {
-        title: 'Dashboard',
-        url: '/dashboard',
-        icon: LayoutGrid,
-    },
-    
-];
-
-const rightNavItems: NavItem[] = [
-    {
-        title: 'Repository',
-        url: 'https://github.com/laravel/react-starter-kit',
-        icon: Folder,
-    },
-    {
-        title: 'Documentation',
-        url: 'https://laravel.com/docs/starter-kits',
-        icon: BookOpen,
-    },
-];
+import { useTranslation } from '@/lib/i18n'; // Import useTranslation
 
 const activeItemStyles = 'text-neutral-900 dark:bg-neutral-800 dark:text-neutral-100';
 
@@ -44,9 +23,37 @@ interface AppHeaderProps {
 }
 
 export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
+    const { t } = useTranslation(); // Use the translation hook
     const page = usePage<SharedData>();
     const { auth } = page.props;
     const getInitials = useInitials();
+
+    const mainNavItems: NavItem[] = [
+        {
+            title: t('Dashboard'),
+            url: '/dashboard',
+            icon: LayoutGrid,
+        },
+        {
+            title: t('Settings'),
+            url: '/settings/profile',
+            icon: LayoutGrid,
+        },
+    ];
+    
+    const rightNavItems: NavItem[] = [
+        {
+            title: t('Repository'),
+            url: 'https://github.com/laravel/react-starter-kit',
+            icon: Folder,
+        },
+        {
+            title: t('Documentation'),
+            url: 'https://laravel.com/docs/starter-kits',
+            icon: BookOpen,
+        },
+    ];
+
     return (
         <>
             <div className="border-sidebar-border/80 border-b">
@@ -65,30 +72,28 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                                     <AppLogoIcon className="h-6 w-6 fill-current text-black dark:text-white" />
                                 </SheetHeader>
                                 <div className="mt-6 flex h-full flex-1 flex-col space-y-4">
-                                    <div className="flex h-full flex-col justify-between text-sm">
-                                        <div className="flex flex-col space-y-4">
-                                            {mainNavItems.map((item) => (
-                                                <Link key={item.title} href={item.url} className="flex items-center space-x-2 font-medium">
-                                                    {item.icon && <Icon iconNode={item.icon} className="h-5 w-5" />}
-                                                    <span>{item.title}</span>
-                                                </Link>
-                                            ))}
-                                        </div>
+                                    <div className="flex flex-col space-y-4">
+                                        {mainNavItems.map((item) => (
+                                            <Link key={item.title} href={item.url} className="flex items-center space-x-2 font-medium">
+                                                {item.icon && <Icon iconNode={item.icon} className="h-5 w-5" />}
+                                                <span>{item.title}</span>
+                                            </Link>
+                                        ))}
+                                    </div>
 
-                                        <div className="flex flex-col space-y-4">
-                                            {rightNavItems.map((item) => (
-                                                <a
-                                                    key={item.title}
-                                                    href={item.url}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="flex items-center space-x-2 font-medium"
-                                                >
-                                                    {item.icon && <Icon iconNode={item.icon} className="h-5 w-5" />}
-                                                    <span>{item.title}</span>
-                                                </a>
-                                            ))}
-                                        </div>
+                                    <div className="flex flex-col space-y-4">
+                                        {rightNavItems.map((item) => (
+                                            <a
+                                                key={item.title}
+                                                href={item.url}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="flex items-center space-x-2 font-medium"
+                                            >
+                                                {item.icon && <Icon iconNode={item.icon} className="h-5 w-5" />}
+                                                <span>{item.title}</span>
+                                            </a>
+                                        ))}
                                     </div>
                                 </div>
                             </SheetContent>

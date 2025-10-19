@@ -9,6 +9,7 @@ import { Separator } from '@/components/ui/separator';
 import { type BreadcrumbItem } from '@/types';
 import IconPicker from '@/components/ui/icon-picker';
 import ComboboxPermission from '@/components/ui/combobox-permission';
+import { useTranslation } from '@/lib/i18n'; // Import useTranslation
 
 interface MenuFormProps {
   menu?: {
@@ -24,6 +25,7 @@ interface MenuFormProps {
 }
 
 export default function MenuForm({ menu, parentMenus, permissions }: MenuFormProps) {
+  const { t } = useTranslation(); // Use the translation hook
   const isEdit = !!menu;
 
   const { data, setData, post, put, processing, errors, reset } = useForm({
@@ -40,21 +42,21 @@ export default function MenuForm({ menu, parentMenus, permissions }: MenuFormPro
   };
 
   const breadcrumbs: BreadcrumbItem[] = [
-    { title: 'Menu Management', href: '/menus' },
-    { title: isEdit ? 'Edit Menu' : 'Add Menu', href: '#' },
+    { title: t('Menu Management'), href: '/menus' },
+    { title: isEdit ? t('Edit Menu') : t('Add Menu'), href: '#' },
   ];
 
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
-      <Head title={isEdit ? 'Edit Menu' : 'Add Menu'} />
+      <Head title={isEdit ? t('Edit Menu') : t('Add Menu')} />
       <div className="flex-1 p-4 md:p-6">
         <Card className="max-w-2xl mx-auto">
           <CardHeader className="pb-3">
             <CardTitle className="text-2xl font-bold tracking-tight">
-              {isEdit ? 'Edit Menu' : 'Add New Menu'}
+              {isEdit ? t('Edit Menu') : t('Add New Menu')}
             </CardTitle>
             <p className="text-sm text-muted-foreground">
-              {isEdit ? 'Update menu details' : 'Create a new menu for the system'}
+              {isEdit ? t('Update menu details') : t('Create a new menu for the system')}
             </p>
           </CardHeader>
 
@@ -64,7 +66,7 @@ export default function MenuForm({ menu, parentMenus, permissions }: MenuFormPro
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                 <div className="space-y-2">
-                  <Label htmlFor="title">Menu Title *</Label>
+                  <Label htmlFor="title">{t('Menu Title')} *</Label>
                   <Input
                     id="title"
                     value={data.title}
@@ -76,7 +78,7 @@ export default function MenuForm({ menu, parentMenus, permissions }: MenuFormPro
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="route">Route</Label>
+                  <Label htmlFor="route">{t('Route')}</Label>
                   <Input
                     id="route"
                     value={data.route}
@@ -88,13 +90,13 @@ export default function MenuForm({ menu, parentMenus, permissions }: MenuFormPro
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="icon">Icon (Lucide)</Label>
+                  <Label htmlFor="icon">{t('Icon (Lucide)')}</Label>
                   <IconPicker value={data.icon} onChange={(val) => setData('icon', val)} />
                   {errors.icon && <p className="text-sm text-red-500">{errors.icon}</p>}
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="parent_id">Parent Menu</Label>
+                  <Label htmlFor="parent_id">{t('Parent Menu')}</Label>
                   <select
                     id="parent_id"
                     value={data.parent_id ?? ''}
@@ -103,7 +105,7 @@ export default function MenuForm({ menu, parentMenus, permissions }: MenuFormPro
                     }
                     className="w-full rounded border px-3 py-2"
                   >
-                    <option value="">— None —</option>
+                    <option value="">{t('— None —')}</option>
                     {parentMenus.map((m) => (
                       <option key={m.id} value={m.id}>
                         {m.title}
@@ -113,7 +115,7 @@ export default function MenuForm({ menu, parentMenus, permissions }: MenuFormPro
                 </div>
 
                 <div className="space-y-2 md:col-span-2">
-                  <Label htmlFor="permission_name">Permission</Label>
+                  <Label htmlFor="permission_name">{t('Permission')}</Label>
                   <ComboboxPermission
                     value={data.permission_name || ''}
                     onChange={(val) => setData('permission_name', val)}
@@ -130,19 +132,19 @@ export default function MenuForm({ menu, parentMenus, permissions }: MenuFormPro
               <div className="flex flex-col-reverse gap-3 pt-2 sm:flex-row sm:justify-end">
                 <Link href="/menus" className="w-full sm:w-auto">
                   <Button type="button" variant="secondary" className="w-full">
-                    Cancel
+                    {t('Cancel')}
                   </Button>
                 </Link>
                 <Button type="submit" disabled={processing} className="w-full sm:w-auto">
                   {processing ? (
                     <span className="flex items-center gap-2">
                       <span className="animate-spin">↻</span>
-                      {isEdit ? 'Saving...' : 'Creating...'}
+                      {isEdit ? t('Saving...') : t('Creating...')}
                     </span>
                   ) : isEdit ? (
-                    'Save Changes'
+                    t('Save Changes')
                   ) : (
-                    'Create Menu'
+                    t('Create Menu')
                   )}
                 </Button>
               </div>

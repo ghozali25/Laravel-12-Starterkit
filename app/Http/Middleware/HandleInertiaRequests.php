@@ -6,6 +6,7 @@ use App\Models\SettingApp;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
+use Illuminate\Support\Facades\Lang; // Import Lang facade
 
 class HandleInertiaRequests extends Middleware
 {
@@ -42,6 +43,8 @@ class HandleInertiaRequests extends Middleware
                 'error' => session('error'),
             ],
             'setting' => fn() => SettingApp::first(),
+            'locale' => app()->getLocale(), // Share current locale
+            'translations' => Lang::get('*'), // Share all translations
         ]);
     }
 }

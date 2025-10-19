@@ -22,6 +22,7 @@ import {
   AlertDialogAction,
 } from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
+import { useTranslation } from '@/lib/i18n'; // Import useTranslation
 
 interface Props {
   permissions: {
@@ -37,15 +38,16 @@ interface Props {
   };
 }
 
-const breadcrumbs: BreadcrumbItem[] = [
-  {
-    title: 'Permission Management',
-    href: '/permissions',
-  },
-];
-
 export default function PermissionIndex({ permissions, groups, filters }: Props) {
+  const { t } = useTranslation(); // Use the translation hook
   const [search, setSearch] = useState(filters.search || '');
+
+  const breadcrumbs: BreadcrumbItem[] = [
+    {
+      title: t('Permission Management'),
+      href: '/permissions',
+    },
+  ];
 
   const handleDelete = (id: number) => {
     router.delete(`/permissions/${id}`, {
@@ -67,18 +69,18 @@ export default function PermissionIndex({ permissions, groups, filters }: Props)
 
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
-      <Head title="Permission Management" />
+      <Head title={t('Permission Management')} />
       <div className="flex-1 p-4 md:p-6">
         <Card>
           <CardHeader className="pb-3 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
-              <CardTitle className="text-2xl font-bold">Permissions</CardTitle>
-              <p className="text-muted-foreground text-sm">Manage system access permissions</p>
+              <CardTitle className="text-2xl font-bold">{t('Permissions')}</CardTitle>
+              <p className="text-muted-foreground text-sm">{t('Manage system access permissions')}</p>
             </div>
             <Link href="/permissions/create">
               <Button>
                 <Plus className="h-4 w-4 mr-2" />
-                Add Permission
+                {t('Add Permission')}
               </Button>
             </Link>
           </CardHeader>
@@ -90,7 +92,7 @@ export default function PermissionIndex({ permissions, groups, filters }: Props)
             <div className="flex flex-col md:flex-row md:items-center gap-4">
               <Input
                 type="text"
-                placeholder="Search permissions... (press Enter)"
+                placeholder={t('Search permissions... (press Enter)')}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 onKeyDown={handleSearchKey}
@@ -100,10 +102,10 @@ export default function PermissionIndex({ permissions, groups, filters }: Props)
                 onValueChange={handleGroupChange}
               >
                 <SelectTrigger className="md:w-64">
-                  <SelectValue placeholder="All Groups" />
+                  <SelectValue placeholder={t('All Groups')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="__ALL__">All Groups</SelectItem>
+                  <SelectItem value="__ALL__">{t('All Groups')}</SelectItem>
                   {groups.map((group) => (
                     <SelectItem key={group} value={group}>
                       {group}
@@ -116,7 +118,7 @@ export default function PermissionIndex({ permissions, groups, filters }: Props)
             {/* List */}
             <div className="space-y-3">
               {permissions.data.length === 0 ? (
-                <p className="text-muted-foreground text-center">No data available.</p>
+                <p className="text-muted-foreground text-center">{t('No data available.')}</p>
               ) : (
                 permissions.data.map((permission) => (
                   <div
@@ -138,18 +140,18 @@ export default function PermissionIndex({ permissions, groups, filters }: Props)
                         </AlertDialogTrigger>
                         <AlertDialogContent>
                           <AlertDialogHeader>
-                            <AlertDialogTitle>Delete this permission?</AlertDialogTitle>
+                            <AlertDialogTitle>{t('Delete this permission?')}</AlertDialogTitle>
                             <AlertDialogDescription>
-                              Permission <strong>{permission.name}</strong> will be permanently deleted.
+                              {t('Permission')} <strong>{permission.name}</strong> {t('will be permanently deleted.')}
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogCancel>{t('Cancel')}</AlertDialogCancel>
                             <AlertDialogAction
                               className="bg-destructive hover:bg-destructive/90"
                               onClick={() => handleDelete(permission.id)}
                             >
-                              Delete
+                              {t('Delete')}
                             </AlertDialogAction>
                           </AlertDialogFooter>
                         </AlertDialogContent>

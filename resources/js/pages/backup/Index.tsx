@@ -16,6 +16,7 @@ import {
   AlertDialogCancel,
   AlertDialogAction,
 } from '@/components/ui/alert-dialog';
+import { useTranslation } from '@/lib/i18n'; // Import useTranslation
 
 interface Backup {
   name: string;
@@ -28,11 +29,20 @@ interface Props {
   backups: Backup[];
 }
 
-const breadcrumbs: BreadcrumbItem[] = [
-  { title: 'Backup', href: '/backup' },
-];
+function formatSize(bytes: number) {
+  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+  if (bytes === 0) return '0 Byte';
+  const i = Math.floor(Math.log(bytes) / Math.log(1024));
+  return `${(bytes / Math.pow(1024, i)).toFixed(2)} ${sizes[i]}`;
+}
 
 export default function BackupIndex({ backups }: Props) {
+  const { t } = useTranslation(); // Use the translation hook
+
+  const breadcrumbs: BreadcrumbItem[] = [
+    { title: t('Backup'), href: '/backup' },
+  ];
+
   const handleBackup = () => {
     router.post('/backup/run', {}, {
       onSuccess: () => toast.success('Backup created successfully'),
@@ -50,24 +60,24 @@ export default function BackupIndex({ backups }: Props) {
   };
 
   return (
-    <AppLayout title="Backup" breadcrumbs={breadcrumbs}>
-      <Head title="Backup" />
+    <AppLayout title={t('Backup')} breadcrumbs={breadcrumbs}>
+      <Head title={t('Backup')} />
 
       <div className="p-4 md:p-6 space-y-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
-              <CardTitle className="text-2xl font-bold">Database Backups</CardTitle>
-              <p className="text-muted-foreground text-sm">Manage system backup files</p>
+              <CardTitle className="text-2xl font-bold">{t('Database Backups')}</CardTitle>
+              <p className="text-muted-foreground text-sm">{t('Manage system backup files')}</p>
             </div>
-            <Button onClick={handleBackup}>Create Backup</Button>
+            <Button onClick={handleBackup}>{t('Create Backup')}</Button>
           </CardHeader>
 
           <Separator />
 
           <CardContent className="pt-4 space-y-4">
             {backups.length === 0 ? (
-              <p className="text-muted-foreground text-center">No backups available.</p>
+              <p className="text-muted-foreground text-center">{t('No backups available.')}</p>
             ) : (
               <ul className="space-y-2">
                 {backups.map((backup, index) => (
@@ -88,24 +98,24 @@ export default function BackupIndex({ backups }: Props) {
                         target="_blank"
                         rel="noopener noreferrer"
                       >
-                        <Button variant="outline" size="sm">Download</Button>
+                        <Button variant="outline" size="sm">{t('Download')}</Button>
                       </a>
 
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
-                          <Button variant="destructive" size="sm">Delete</Button>
+                          <Button variant="destructive" size="sm">{t('Delete')}</Button>
                         </AlertDialogTrigger>
                         <AlertDialogContent>
                           <AlertDialogHeader>
-                            <AlertDialogTitle>Delete this backup?</AlertDialogTitle>
+                            <AlertDialogTitle>{t('Delete this backup?')}</AlertDialogTitle>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogCancel>{t('Cancel')}</AlertDialogCancel>
                             <AlertDialogAction
                               className="bg-destructive hover:bg-destructive/90"
                               onClick={() => handleDelete(backup.name)}
                             >
-                              Delete
+                              {t('Yes, Delete')}
                             </AlertDialogAction>
                           </AlertDialogFooter>
                         </AlertDialogContent>
@@ -120,11 +130,4 @@ export default function BackupIndex({ backups }: Props) {
       </div>
     </AppLayout>
   );
-}
-
-function formatSize(bytes: number) {
-  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-  if (bytes === 0) return '0 Byte';
-  const i = Math.floor(Math.log(bytes) / Math.log(1024));
-  return `${(bytes / Math.pow(1024, i)).toFixed(2)} ${sizes[i]}`;
 }

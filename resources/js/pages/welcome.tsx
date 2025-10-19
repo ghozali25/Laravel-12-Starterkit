@@ -2,9 +2,11 @@ import React, { useEffect } from 'react';
 import { Head, Link, usePage } from '@inertiajs/react';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import { type SharedData } from '@/types';
+import { useTranslation } from '@/lib/i18n'; // Import useTranslation
 
 export default function Welcome() {
   const { auth, setting } = usePage<SharedData>().props;
+  const { t } = useTranslation(); // Use the translation hook
 
   const primaryColor = setting?.warna || '#1ccd5aff';
   const primaryForeground = '#ffffff';
@@ -18,7 +20,7 @@ export default function Welcome() {
 
   return (
     <>
-      <Head title="Welcome" />
+      <Head title={t('Welcome')} />
       <div className="relative min-h-screen flex flex-col justify-center px-6 bg-gradient-to-br from-background to-gray-50 dark:to-gray-900 overflow-hidden">
         {/* Decorative blur elements */}
         <div className="absolute inset-0 overflow-hidden">
@@ -32,7 +34,7 @@ export default function Welcome() {
           <div className="text-center lg:text-left space-y-8 px-4 md:px-8">
             <div className="flex justify-center lg:justify-start items-center">
               <h1 className="text-5xl sm:text-6xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-[var(--primary)] to-[var(--primary)]/80 flex items-center">
-                Welcome
+                {t('Welcome')}
               </h1>
 
               {/* 🔹 Lottie animation super close & aligned */}
@@ -46,7 +48,7 @@ export default function Welcome() {
             </div>
 
             <p className="text-lg text-muted-foreground max-w-md mx-auto lg:mx-0">
-              Selamat datang di aplikasi kami. Nikmati pengalaman modern dan mudah digunakan.
+              {t('Selamat datang di aplikasi kami. Nikmati pengalaman modern dan mudah digunakan.')}
             </p>
 
             {/* CTA */}
@@ -55,7 +57,7 @@ export default function Welcome() {
                 href="/dashboard"
                 className="inline-flex items-center justify-center px-8 py-3 rounded-lg bg-[var(--primary)] text-white font-medium hover:bg-[var(--primary)]/90 transition-all transform hover:-translate-y-0.5 shadow-md hover:shadow-lg"
               >
-                Go to Dashboard
+                {t('Go to Dashboard')}
                 <svg xmlns="http://www.w3.org/2000/svg" className="ml-2 h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                   <path
                     fillRule="evenodd"
@@ -70,19 +72,19 @@ export default function Welcome() {
                   href="/login"
                   className="px-8 py-3 rounded-lg border border-border bg-white dark:bg-gray-800 font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-all transform hover:-translate-y-0.5 shadow-sm hover:shadow-md"
                 >
-                  Sign In
+                  {t('Sign In')}
                 </Link>
                 <Link
                   href="/register"
                   className="px-8 py-3 rounded-lg bg-[var(--primary)] text-white font-medium hover:bg-[var(--primary)]/90 transition-all transform hover:-translate-y-0.5 shadow-md hover:shadow-lg"
                 >
-                  Register
+                  {t('Register')}
                 </Link>
               </div>
             )}
 
             <div className="pt-6 text-sm text-muted-foreground">
-              Creator By Ahmad Ghozali
+              {t('Creator By Ahmad Ghozali')}
             </div>
           </div>
 

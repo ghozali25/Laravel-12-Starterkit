@@ -7,6 +7,7 @@ import { AppSidebarHeader } from '@/components/app-sidebar-header';
 import { type BreadcrumbItem } from '@/types';
 import { Toaster } from '@/components/ui/sonner';
 import { toast } from 'sonner';
+import { useTranslation } from '@/lib/i18n'; // Import useTranslation
 
 interface Props {
   children: React.ReactNode;
@@ -17,9 +18,10 @@ interface Props {
 export default function AppSidebarLayout({
   children,
   breadcrumbs = [],
-  title = 'Dashboard',
+  title,
 }: Props) {
   const { props } = usePage();
+  const { t } = useTranslation(); // Use the translation hook
 
   const flash = (props?.flash as { success?: string; error?: string }) ?? {};
   const setting = props?.setting as {
@@ -43,7 +45,7 @@ export default function AppSidebarLayout({
 
   useEffect(() => {
     const unsubscribe = router.on('navigate', () => {
-      router.reload({ only: ['menus'] });
+      router.reload({ only: ['menus', 'translations'] }); // Reload translations on navigation
     });
 
     return () => unsubscribe();
@@ -52,7 +54,7 @@ export default function AppSidebarLayout({
   return (
     <>
       <Head>
-        <title>{title ?? setting?.seo?.title ?? setting?.nama_app ?? 'Dashboard'}</title>
+        <title>{title ?? setting?.seo?.title ?? setting?.nama_app ?? t('Dashboard')}</title>
         {setting?.seo?.description && (
           <meta name="description" content={setting.seo.description} />
         )}

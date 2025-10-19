@@ -1,5 +1,6 @@
 import { Link, usePage } from '@inertiajs/react';
 import { useEffect } from 'react';
+import { useTranslation } from '@/lib/i18n'; // Import useTranslation
 
 interface AuthLayoutProps {
     children: React.ReactNode;
@@ -10,6 +11,7 @@ interface AuthLayoutProps {
 
 export default function AuthSimpleLayout({ children, title, description }: AuthLayoutProps) {
     const { props } = usePage();
+    const { t } = useTranslation(); // Use the translation hook
 
     const setting = props?.setting as {
         nama_app: string;
@@ -61,11 +63,11 @@ export default function AuthSimpleLayout({ children, title, description }: AuthL
                             {/* Judul dan Deskripsi */}
                             <div className="space-y-1.5 text-center">
                                 <h1 className="text-2xl font-semibold tracking-tight text-gray-900 dark:text-white">
-                                    {title}
+                                    {t(title || '')}
                                 </h1>
                                 {description && (
                                     <p className="text-muted-foreground text-center text-sm leading-5">
-                                        {description}
+                                        {t(description)}
                                     </p>
                                 )}
                             </div>
@@ -79,7 +81,7 @@ export default function AuthSimpleLayout({ children, title, description }: AuthL
                 {/* Optional Footer */}
                 <div className="border-t border-gray-100 px-8 py-6 text-center dark:border-gray-700/50">
                     <p className="text-xs text-gray-500 dark:text-gray-400">
-                        © {new Date().getFullYear()} {setting?.nama_app}. All rights reserved.
+                        © {new Date().getFullYear()} {setting?.nama_app}. {t('All rights reserved.')}
                     </p>
                 </div>
             </div>

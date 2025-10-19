@@ -9,6 +9,7 @@ import { Head } from '@inertiajs/react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { BreadcrumbItem } from '@/types';
+import { useTranslation } from '@/lib/i18n'; // Import useTranslation
 
 
 interface Permission {
@@ -29,6 +30,7 @@ interface Props {
 }
 
 export default function RoleForm({ role, groupedPermissions }: Props) {
+  const { t } = useTranslation(); // Use the translation hook
   const isEdit = !!role;
 
   const { data, setData, post, put, processing, errors } = useForm({
@@ -42,8 +44,8 @@ export default function RoleForm({ role, groupedPermissions }: Props) {
   };
 
   const breadcrumbs: BreadcrumbItem[] = [
-    { title: 'Role Management', href: '/roles' },
-    { title: isEdit ? 'Edit Role' : 'Create Role', href: '#' },
+    { title: t('Role Management'), href: '/roles' },
+    { title: isEdit ? t('Edit Role') : t('Create Role'), href: '#' },
   ];
 
   const togglePermission = (perm: string) => {
@@ -70,15 +72,15 @@ export default function RoleForm({ role, groupedPermissions }: Props) {
 
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
-      <Head title={isEdit ? 'Edit Role' : 'Create Role'} />
+      <Head title={isEdit ? t('Edit Role') : t('Create Role')} />
       <div className="flex-1 p-4 md:p-6">
         <Card className="max-w-4xl mx-auto">
           <CardHeader className="pb-3">
             <CardTitle className="text-2xl font-bold tracking-tight">
-              {isEdit ? 'Edit Role' : 'Create New Role'}
+              {isEdit ? t('Edit Role') : t('Create New Role')}
             </CardTitle>
             <p className="text-sm text-muted-foreground">
-              {isEdit ? 'Update role details and permissions' : 'Create a new role and set permissions'}
+              {isEdit ? t('Update role details and permissions') : t('Create a new role and set permissions')}
             </p>
           </CardHeader>
           
@@ -88,10 +90,10 @@ export default function RoleForm({ role, groupedPermissions }: Props) {
             <form onSubmit={handleSubmit} className="space-y-8">
               <div className="space-y-4">
                 <div>
-                  <Label htmlFor="name" className="mb-2 block">Role Name</Label>
+                  <Label htmlFor="name" className="mb-2 block">{t('Role Name')}</Label>
                   <Input
                     id="name"
-                    placeholder="Enter role name"
+                    placeholder={t('Enter role name')}
                     value={data.name}
                     onChange={(e) => setData('name', e.target.value)}
                     className={errors.name ? 'border-red-500' : ''}
@@ -105,9 +107,9 @@ export default function RoleForm({ role, groupedPermissions }: Props) {
 
                 <div className="space-y-6">
                   <div>
-                    <h2 className="text-lg font-semibold">Permissions</h2>
+                    <h2 className="text-lg font-semibold">{t('Permissions')}</h2>
                     <p className="text-sm text-muted-foreground">
-                      Select permissions to grant to this role
+                      {t('Select permissions to grant to this role')}
                     </p>
                   </div>
 
@@ -163,7 +165,7 @@ export default function RoleForm({ role, groupedPermissions }: Props) {
                     variant="secondary" 
                     className="w-full"
                   >
-                    Cancel
+                    {t('Cancel')}
                   </Button>
                 </Link>
                 <Button 
@@ -174,12 +176,12 @@ export default function RoleForm({ role, groupedPermissions }: Props) {
                   {processing ? (
                     <span className="flex items-center gap-2">
                       <span className="animate-spin">↻</span>
-                      Saving...
+                      {t('Saving...')}
                     </span>
                   ) : isEdit ? (
-                    'Save Changes'
+                    t('Save Changes')
                   ) : (
-                    'Create Role'
+                    t('Create Role')
                   )}
                 </Button>
               </div>

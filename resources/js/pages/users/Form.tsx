@@ -10,6 +10,7 @@ import { Separator } from '@/components/ui/separator';
 import { BreadcrumbItem } from '@/types';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
+import { useTranslation } from '@/lib/i18n'; // Import useTranslation
 
 interface Role {
   id: number;
@@ -30,6 +31,7 @@ interface Props {
 }
 
 export default function UserForm({ user, roles, currentRoles }: Props) {
+  const { t } = useTranslation(); // Use the translation hook
   const isEdit = !!user;
 
   const { data, setData, post, put, processing, errors } = useForm({
@@ -45,21 +47,21 @@ export default function UserForm({ user, roles, currentRoles }: Props) {
   };
 
   const breadcrumbs: BreadcrumbItem[] = [
-    { title: 'User Management', href: '/users' },
-    { title: isEdit ? 'Edit User' : 'Create User', href: '#' },
+    { title: t('User Management'), href: '/users' },
+    { title: isEdit ? t('Edit User') : t('Create User'), href: '#' },
   ];
 
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
-      <Head title={isEdit ? 'Edit User' : 'Create User'} />
+      <Head title={isEdit ? t('Edit User') : t('Create User')} />
       <div className="flex-1 p-4 md:p-6">
         <Card className="max-w-3xl mx-auto">
           <CardHeader className="pb-3">
             <CardTitle className="text-2xl font-bold tracking-tight">
-              {isEdit ? 'Edit User' : 'Create New User'}
+              {isEdit ? t('Edit User') : t('Create New User')}
             </CardTitle>
             <p className="text-sm text-muted-foreground">
-              {isEdit ? 'Update user data and roles' : 'Enter user data and set roles'}
+              {isEdit ? t('Update user data and roles') : t('Enter user data and set roles')}
             </p>
           </CardHeader>
 
@@ -70,10 +72,10 @@ export default function UserForm({ user, roles, currentRoles }: Props) {
               <div className="space-y-4">
                 {/* Name */}
                 <div>
-                  <Label htmlFor="name" className="mb-2 block">Name</Label>
+                  <Label htmlFor="name" className="mb-2 block">{t('Name')}</Label>
                   <Input
                     id="name"
-                    placeholder="Full name"
+                    placeholder={t('Full name')}
                     value={data.name}
                     onChange={(e) => setData('name', e.target.value)}
                     className={errors.name ? 'border-red-500' : ''}
@@ -83,10 +85,10 @@ export default function UserForm({ user, roles, currentRoles }: Props) {
 
                 {/* Email */}
                 <div>
-                  <Label htmlFor="email" className="mb-2 block">Email</Label>
+                  <Label htmlFor="email" className="mb-2 block">{t('Email address')}</Label>
                   <Input
                     id="email"
-                    placeholder="Email address"
+                    placeholder={t('Email address')}
                     value={data.email}
                     onChange={(e) => setData('email', e.target.value)}
                     className={errors.email ? 'border-red-500' : ''}
@@ -96,7 +98,7 @@ export default function UserForm({ user, roles, currentRoles }: Props) {
 
                 {/* Password */}
                 <div>
-                  <Label htmlFor="password" className="mb-2 block">Password {isEdit ? '(Optional)' : ''}</Label>
+                  <Label htmlFor="password" className="mb-2 block">{t('Password')} {isEdit ? t('(Optional)') : ''}</Label>
                   <Input
                     id="password"
                     type="password"
@@ -110,7 +112,7 @@ export default function UserForm({ user, roles, currentRoles }: Props) {
 
                 {/* Roles */}
                 <div>
-                  <Label className="mb-3 block">Roles</Label>
+                  <Label className="mb-3 block">{t('Roles')}</Label>
                   <div className="space-y-3 border rounded-lg p-4">
                     {roles.map((role) => (
                       <div key={role.id} className="flex items-center space-x-2">
@@ -140,15 +142,15 @@ export default function UserForm({ user, roles, currentRoles }: Props) {
               <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-2">
                 <Link href="/users" className="w-full sm:w-auto">
                   <Button type="button" variant="secondary" className="w-full">
-                    Back
+                    {t('Back')}
                   </Button>
                 </Link>
                 <Button type="submit" disabled={processing} className="w-full sm:w-auto">
                   {processing
-                    ? <span className="animate-pulse">Saving...</span>
+                    ? <span className="animate-pulse">{t('Saving...')}</span>
                     : isEdit
-                      ? 'Save Changes'
-                      : 'Create User'
+                      ? t('Save Changes')
+                      : t('Create User')
                   }
                 </Button>
               </div>

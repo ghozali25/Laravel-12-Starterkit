@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
 import { type BreadcrumbItem } from '@/types';
+import { useTranslation } from '@/lib/i18n'; // Import useTranslation
 
 interface Activity {
   id: number;
@@ -24,23 +25,25 @@ interface Props {
   };
 }
 
-const breadcrumbs: BreadcrumbItem[] = [
-  {
-    title: 'Audit Log',
-    href: '/audit-logs',
-  },
-];
-
 export default function AuditLogIndex({ logs }: Props) {
+  const { t } = useTranslation(); // Use the translation hook
+
+  const breadcrumbs: BreadcrumbItem[] = [
+    {
+      title: t('Audit Log'),
+      href: '/audit-logs',
+    },
+  ];
+
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
-      <Head title="Audit Log" />
+      <Head title={t('Audit Log')} />
       <div className="flex-1 p-4 md:p-6">
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-2xl font-bold">Audit Log</CardTitle>
+            <CardTitle className="text-2xl font-bold">{t('Audit Log')}</CardTitle>
             <p className="text-muted-foreground text-sm">
-              User activity history in the system
+              {t('User activity history in the system')}
             </p>
           </CardHeader>
 
@@ -49,7 +52,7 @@ export default function AuditLogIndex({ logs }: Props) {
           <CardContent className="pt-6 space-y-4">
             {/* List Logs */}
             {logs.data.length === 0 ? (
-              <p className="text-muted-foreground text-center">No activity logs.</p>
+              <p className="text-muted-foreground text-center">{t('No activity logs.')}</p>
             ) : (
               logs.data.map((log) => (
                 <div
@@ -60,7 +63,7 @@ export default function AuditLogIndex({ logs }: Props) {
                     {log.description}
                   </div>
                   <div className="text-xs text-muted-foreground">
-                    {log.causer?.name ?? 'System'} • {new Date(log.created_at).toLocaleString()}
+                    {(log.causer?.name ?? t('System'))} • {new Date(log.created_at).toLocaleString()}
                     {log.subject_type ? ` • ${log.subject_type.split('\\').pop()}` : ''}
                   </div>
                   {log.properties && Object.keys(log.properties).length > 0 && (

@@ -11,10 +11,14 @@ use App\Http\Controllers\UserFileController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\SettingAppController;
 use App\Http\Controllers\MediaFolderController;
+use App\Http\Controllers\LanguageController; // Import the new controller
 
 Route::get('/', function () {
     return Inertia::render('welcome');
 })->name('home');
+
+// Language switching route
+Route::get('/lang/{locale}', [LanguageController::class, 'setLocale'])->name('language.set');
 
 Route::middleware(['auth', 'menu.permission'])->group(function () {
     Route::get('dashboard', function () {

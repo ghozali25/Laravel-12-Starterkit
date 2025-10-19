@@ -18,16 +18,10 @@ import {
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import 'dayjs/locale/id';
+import { useTranslation } from '@/lib/i18n'; // Import useTranslation
 
 dayjs.extend(relativeTime);
 dayjs.locale('id');
-
-const breadcrumbs: BreadcrumbItem[] = [
-  {
-    title: 'User Management',
-    href: '/users',
-  },
-];
 
 interface User {
   id: number;
@@ -58,13 +52,21 @@ function getInitials(name: string) {
 }
 
 export default function UserIndex({ users }: Props) {
+  const { t } = useTranslation(); // Use the translation hook
   const { delete: destroy, processing } = useForm();
+
+  const breadcrumbs: BreadcrumbItem[] = [
+    {
+      title: t('User Management'),
+      href: '/users',
+    },
+  ];
 
   const handleDelete = (id: number) => {
     destroy(`/users/${id}`, {
       preserveScroll: true,
       onSuccess: () => {
-        // Data akan otomatis terupdate karena Inertia.js
+        // Data will be automatically updated by Inertia.js
       },
       onError: (errors) => {
         console.error('Delete failed:', errors);
@@ -78,21 +80,21 @@ export default function UserIndex({ users }: Props) {
 
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
-      <Head title="User Management" />
+      <Head title={t('User Management')} />
       <div className="p-4 md:p-6 space-y-6">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">User Management</h1>
-            <p className="text-muted-foreground">Manage user data and their roles within the system.</p>
+            <h1 className="text-2xl font-bold tracking-tight">{t('User Management')}</h1>
+            <p className="text-muted-foreground">{t('Manage user data and their roles within the system.')}</p>
           </div>
           <Link href="/users/create">
-            <Button className="w-full md:w-auto" size="sm">+ Add User</Button>
+            <Button className="w-full md:w-auto" size="sm">{t('+ Add User')}</Button>
           </Link>
         </div>
 
         <div className="space-y-2 divide-y rounded-md border bg-background">
           {users.data.length === 0 ? (
-            <div className="py-8 text-center text-muted-foreground">No user data available.</div>
+            <div className="py-8 text-center text-muted-foreground">{t('No user data available.')}</div>
           ) : (
             users.data.map((user) => (
               <div
@@ -108,7 +110,7 @@ export default function UserIndex({ users }: Props) {
                     <div className="text-base font-medium">{user.name}</div>
                     <div className="text-sm text-muted-foreground">{user.email}</div>
                     <div className="text-xs text-muted-foreground italic">
-                      Registered {dayjs(user.created_at).fromNow()}
+                      {t('Registered')} {dayjs(user.created_at).fromNow()}
                     </div>
                     {user.roles.length > 0 && (
                       <div className="mt-2 flex flex-wrap gap-1">
@@ -125,29 +127,29 @@ export default function UserIndex({ users }: Props) {
                 {/* Aksi */}
                 <div className="flex flex-wrap gap-2 md:justify-end">
                   <Link href={`/users/${user.id}/edit`}>
-                    <Button size="sm" variant="outline">Edit</Button>
+                    <Button size="sm" variant="outline">{t('Edit')}</Button>
                   </Link>
 
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
-                      <Button size="sm" variant="secondary">Reset</Button>
+                      <Button size="sm" variant="secondary">{t('Reset')}</Button>
                     </AlertDialogTrigger>
                     <AlertDialogContent>
                       <AlertDialogHeader>
-                        <AlertDialogTitle>Reset Password?</AlertDialogTitle>
+                        <AlertDialogTitle>{t('Reset Password?')}</AlertDialogTitle>
                         <AlertDialogDescription>
-                          Password for <strong>{user.name}</strong> will be reset to:
+                          {t('Password for')} <strong>{user.name}</strong> {t('will be reset to:')}
                           <br />
                           <code className="bg-muted rounded px-2 py-1 text-sm">ResetPasswordNya</code>
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogCancel>{t('Cancel')}</AlertDialogCancel>
                         <AlertDialogAction
                           onClick={() => handleResetPassword(user.id)}
                           disabled={processing}
                         >
-                          Yes, Reset
+                          {t('Yes, Reset')}
                         </AlertDialogAction>
                       </AlertDialogFooter>
                     </AlertDialogContent>
@@ -155,22 +157,22 @@ export default function UserIndex({ users }: Props) {
 
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
-                      <Button size="sm" variant="destructive">Delete</Button>
+                      <Button size="sm" variant="destructive">{t('Delete')}</Button>
                     </AlertDialogTrigger>
                     <AlertDialogContent>
                       <AlertDialogHeader>
-                        <AlertDialogTitle>Delete User?</AlertDialogTitle>
+                        <AlertDialogTitle>{t('Delete User?')}</AlertDialogTitle>
                         <AlertDialogDescription>
-                          User <strong>{user.name}</strong> will be permanently deleted.
+                          {t('User')} <strong>{user.name}</strong> {t('will be permanently deleted.')}
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogCancel>{t('Cancel')}</AlertDialogCancel>
                         <AlertDialogAction
                           onClick={() => handleDelete(user.id)}
                           disabled={processing}
                         >
-                          Yes, Delete
+                          {t('Yes, Delete')}
                         </AlertDialogAction>
                       </AlertDialogFooter>
                     </AlertDialogContent>

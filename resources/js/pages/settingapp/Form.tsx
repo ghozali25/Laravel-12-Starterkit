@@ -9,6 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { type BreadcrumbItem } from '@/types';
+import { useTranslation } from '@/lib/i18n'; // Import useTranslation
 
 const DEFAULT_WARNA = '#181818';
 
@@ -29,11 +30,13 @@ interface Props {
   setting: SettingApp | null;
 }
 
-const breadcrumbs: BreadcrumbItem[] = [
-  { title: 'Application Settings', href: '/settingsapp' },
-];
-
 export default function SettingForm({ setting }: Props) {
+  const { t } = useTranslation(); // Use the translation hook
+
+  const breadcrumbs: BreadcrumbItem[] = [
+    { title: t('Application Settings'), href: '/settingsapp' },
+  ];
+
   const { data, setData, post, processing, errors } = useForm({
     nama_app: setting?.nama_app || '',
     deskripsi: setting?.deskripsi || '',
@@ -59,20 +62,20 @@ export default function SettingForm({ setting }: Props) {
   };
 
   return (
-    <AppLayout breadcrumbs={breadcrumbs} title="Application Settings">
-      <Head title="Application Settings" />
+    <AppLayout breadcrumbs={breadcrumbs} title={t('Application Settings')}>
+      <Head title={t('Application Settings')} />
       <div className="flex-1 p-4 md:p-6">
         <Card className="max-w-3xl mx-auto">
           <CardHeader>
-            <CardTitle className="text-2xl font-bold tracking-tight">Application Settings</CardTitle>
-            <p className="text-muted-foreground text-sm mt-1">Configure application identity, theme color, logo, and SEO metadata.</p>
+            <CardTitle className="text-2xl font-bold tracking-tight">{t('Application Settings')}</CardTitle>
+            <p className="text-muted-foreground text-sm mt-1">{t('Configure application identity, theme color, logo, and SEO metadata.')}</p>
           </CardHeader>
           <Separator />
           <CardContent className="pt-6">
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Nama App */}
               <div className="space-y-1">
-                <Label htmlFor="nama_app">Application Name</Label>
+                <Label htmlFor="nama_app">{t('Application Name')}</Label>
                 <Input
                   id="nama_app"
                   value={data.nama_app}
@@ -84,7 +87,7 @@ export default function SettingForm({ setting }: Props) {
 
               {/* Deskripsi */}
               <div className="space-y-1">
-                <Label htmlFor="deskripsi">Description</Label>
+                <Label htmlFor="deskripsi">{t('Description')}</Label>
                 <Textarea
                   id="deskripsi"
                   value={data.deskripsi}
@@ -94,7 +97,7 @@ export default function SettingForm({ setting }: Props) {
 
               {/* Warna Tema */}
               <div className="space-y-1">
-                <Label htmlFor="warna">Theme Color</Label>
+                <Label htmlFor="warna">{t('Theme Color')}</Label>
                 <div className="flex items-center gap-4">
                   <Input
                     id="warna"
@@ -109,14 +112,14 @@ export default function SettingForm({ setting }: Props) {
                     size="sm"
                     onClick={() => setData('warna', DEFAULT_WARNA)}
                   >
-                    Reset Default
+                    {t('Reset Default')}
                   </Button>
                 </div>
               </div>
 
               {/* Logo Upload */}
               <div className="space-y-1">
-                <Label htmlFor="logo">Logo (Max 2MB)</Label>
+                <Label htmlFor="logo">{t('Logo (Max 2MB)')}</Label>
                 <Input
                   id="logo"
                   type="file"
@@ -134,7 +137,7 @@ export default function SettingForm({ setting }: Props) {
 
               {/* Favicon Upload */}
               <div className="space-y-1">
-                <Label htmlFor="favicon">Favicon (Max 1MB)</Label>
+                <Label htmlFor="favicon">{t('Favicon (Max 1MB)')}</Label>
                 <Input
                   id="favicon"
                   type="file"
@@ -152,10 +155,10 @@ export default function SettingForm({ setting }: Props) {
 
               {/* SEO Section */}
               <Separator />
-              <h3 className="text-lg font-semibold">SEO Settings</h3>
+              <h3 className="text-lg font-semibold">{t('SEO Settings')}</h3>
 
               <div className="space-y-1">
-                <Label htmlFor="seo_title">SEO Title</Label>
+                <Label htmlFor="seo_title">{t('SEO Title')}</Label>
                 <Input
                   id="seo_title"
                   value={data.seo.title}
@@ -164,7 +167,7 @@ export default function SettingForm({ setting }: Props) {
               </div>
 
               <div className="space-y-1">
-                <Label htmlFor="seo_description">SEO Description</Label>
+                <Label htmlFor="seo_description">{t('SEO Description')}</Label>
                 <Textarea
                   id="seo_description"
                   value={data.seo.description}
@@ -173,7 +176,7 @@ export default function SettingForm({ setting }: Props) {
               </div>
 
               <div className="space-y-1">
-                <Label htmlFor="seo_keywords">SEO Keywords (separate with commas)</Label>
+                <Label htmlFor="seo_keywords">{t('SEO Keywords (separate with commas)')}</Label>
                 <Input
                   id="seo_keywords"
                   value={data.seo.keywords}
@@ -184,7 +187,7 @@ export default function SettingForm({ setting }: Props) {
               {/* Submit Button */}
               <div className="pt-4 flex justify-end">
                 <Button type="submit" disabled={processing} className="px-6">
-                  {processing ? 'Saving...' : 'Save Settings'}
+                  {processing ? t('Saving...') : t('Save Settings')}
                 </Button>
               </div>
             </form>
