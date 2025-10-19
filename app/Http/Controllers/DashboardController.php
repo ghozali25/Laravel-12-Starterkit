@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\DashboardWidget;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
-use Illuminate\Support\Facades\Auth; // Import Auth facade
 use App\Models\User; // Import User model
 
 class DashboardController extends Controller
@@ -13,17 +12,14 @@ class DashboardController extends Controller
     public function index(Request $request)
     {
         /** @var User|null $user */
-        $user = $request->user(); // Dapatkan objek pengguna
+        $user = $request->user();
 
-        // Jika pengguna tidak terautentikasi, redirect ke halaman login.
-        // Middleware 'auth' seharusnya sudah menangani ini, tapi ini sebagai fallback.
+        // Pastikan pengguna terautentikasi sebelum mengakses ID-nya
         if (!$user) {
-            return redirect()->route('login');
+            return redirect()->route('login'); // Atau abort(403) jika ini seharusnya tidak terjadi
         }
 
-        $userId = $user->id; // Akses ID dari objek User yang sudah dipastikan tidak null
-
-        $dashboardConfig = DashboardWidget::where('user_id', $userId)->first();
+        $dashboardConfig = DashboardWidget::where('user_id', $user->id)->first();
 
         return Inertia::render('dashboard', [
             'initialWidgets' => $dashboardConfig ? $dashboardConfig->widgets_data : [],
@@ -43,17 +39,16 @@ class DashboardController extends Controller
         /** @var User|null $user */
         $user = $request->user();
 
+        // Pastikan pengguna terautentikasi sebelum mengakses ID-nya
         if (!$user) {
-            return redirect()->route('login');
+            return response()->json(['message' => 'Unauthorized'], 401); // Atau tangani sesuai kebutuhan
         }
 
-        $userId = $user->id;
-
-        $dashboardWidget = DashboardWidget::updateOrCreate(
-            ['user_id' => $userId],
+        DashboardWidget::updateOrCreate(
+            ['user_id' => $user->id],
             ['widgets_data' => $request->input('widgets_data')]
         );
 
-        return redirect()->route('dashboard')->with('success', 'Dashboard layout saved successfully.');
+        return response()->json(['message' => 'Dashboard layout saved successfully.']);
     }
 }
