@@ -121,7 +121,8 @@ export default function Dashboard() {
   // Make handleAddWidget generic to correctly infer the type
   const handleAddWidget = <T extends keyof WidgetComponentsMap>(widgetType: T) => {
     const newId = `${widgetType}-${Date.now()}`; // Unique ID for the new widget instance
-    const defaultColSpan = (widgetType.includes('SummaryCard') || widgetType.includes('PieChart') || widgetType.includes('RadialChart')) ? 1 : 2; // Default colSpan based on widget type
+    // Cast widgetType to string to use .includes()
+    const defaultColSpan = ((widgetType as string).includes('SummaryCard') || (widgetType as string).includes('PieChart') || (widgetType as string).includes('RadialChart')) ? 1 : 2; // Default colSpan based on widget type
     const newWidget: { id: string; type: T; props: WidgetComponentsMap[T]['defaultProps']; colSpan: number } = {
       id: newId,
       type: widgetType,
@@ -152,7 +153,7 @@ export default function Dashboard() {
       default:
         // This case should ideally not be reached with a discriminated union
         // but is good for robustness.
-        console.warn(`Unknown widget type: ${widget.type}`);
+        console.warn('Unknown widget type', widget);
         return null;
     }
   };
