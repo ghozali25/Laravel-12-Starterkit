@@ -1,5 +1,6 @@
 import { usePage } from '@inertiajs/react';
 import type { SVGAttributes } from 'react';
+import { cn } from '@/lib/utils'; // Import cn utility
 
 export default function AppLogoIcon(props: SVGAttributes<SVGElement>) {
   const setting = usePage().props.setting as {
@@ -23,7 +24,7 @@ export default function AppLogoIcon(props: SVGAttributes<SVGElement>) {
     <img
       src={`/storage/${setting.logo}`}
       alt="App Logo"
-      className="h-8 w-8 object-contain"
+      className={cn("object-contain", props.className)} // Menggunakan props.className
     />
   );
 }

@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { useForm } from '@inertiajs/react';
 import AppLayout from '@/layouts/app-layout';
 import { Head } from '@inertiajs/react';
@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { type BreadcrumbItem } from '@/types';
 import { useTranslation } from '@/lib/i18n'; // Import useTranslation
+import { XCircle } from 'lucide-react'; // Import XCircle icon
 
 const DEFAULT_WARNA = '#181818';
 
@@ -19,6 +20,7 @@ interface SettingApp {
   warna: string;
   logo: string;
   favicon: string;
+  background_image?: string; // Tambahkan ini
   seo: {
     title?: string;
     description?: string;
@@ -48,10 +50,15 @@ export default function SettingForm({ setting }: Props) {
     },
     logo: null as File | null,
     favicon: null as File | null,
+    background_image: null as File | null, // Tambahkan ini
+    remove_background_image: false as boolean, // Tambahkan flag untuk penghapusan
   });
 
   const logoPreview = useRef<string | null>(setting?.logo ? `/storage/${setting.logo}` : null);
   const faviconPreview = useRef<string | null>(setting?.favicon ? `/storage/${setting.favicon}` : null);
+  const [backgroundImagePreview, setBackgroundImagePreview] = useState<string | null>(
+    setting?.background_image ? `/storage/${setting.background_image}` : null
+  );
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -59,6 +66,12 @@ export default function SettingForm({ setting }: Props) {
       forceFormData: true,
       preserveScroll: true,
     });
+  };
+
+  const handleRemoveBackgroundImage = () => {
+    setBackgroundImagePreview(null);
+    setData('background_image', null); // Pastikan file input juga direset
+    setData('remove_background_image', true); // Set flag untuk penghapusan di backend
   };
 
   return (
@@ -150,6 +163,37 @@ export default function SettingForm({ setting }: Props) {
                 />
                 {faviconPreview.current && (
                   <img src={faviconPreview.current} alt="Preview Favicon" className="mt-2 h-10 rounded" />
+                )}
+              </div>
+
+              {/* Background Image Upload */}
+              <div className="space-y-1">
+                <Label htmlFor="background_image">{t('Background Image (Max 2MB)')}</Label>
+                <Input
+                  id="background_image"
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0] || null;
+                    setData('background_image', file);
+                    setData('remove_background_image', false); // Reset remove flag
+                    if (file) setBackgroundImagePreview(URL.createObjectURL(file));
+                    else setBackgroundImagePreview(null);
+                  }}
+                />
+                {backgroundImagePreview && (
+                  <div className="relative mt-2 w-48 h-24 rounded overflow-hidden group">
+                    <img src={backgroundImagePreview} alt="Preview Background" className="w-full h-full object-cover" />
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="icon"
+                      className="absolute top-1 right-1 h-6 w-6 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                      onClick={handleRemoveBackgroundImage}
+                    >
+                      <XCircle className="h-4 w-4" />
+                    </Button>
+                  </div>
                 )}
               </div>
 

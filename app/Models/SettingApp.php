@@ -15,6 +15,7 @@ class SettingApp extends Model
         'favicon',
         'warna',
         'seo',
+        'background_image', // Tambahkan ini
     ];
 
     protected $casts = [
