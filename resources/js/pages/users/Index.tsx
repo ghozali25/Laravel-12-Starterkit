@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Head, Link, router, useForm } from '@inertiajs/react';
 import AppLayout from '@/layouts/app-layout';
 import { Button } from '@/components/ui/button';
@@ -17,11 +17,11 @@ import {
 } from '@/components/ui/alert-dialog';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
-import 'dayjs/locale/id';
+import 'dayjs/locale/id'; // Import Indonesian locale
+import 'dayjs/locale/en'; // Import English locale
 import { useTranslation } from '@/lib/i18n'; // Import useTranslation
 
 dayjs.extend(relativeTime);
-dayjs.locale('id');
 
 interface User {
   id: number;
@@ -52,8 +52,12 @@ function getInitials(name: string) {
 }
 
 export default function UserIndex({ users }: Props) {
-  const { t } = useTranslation(); // Use the translation hook
+  const { t, locale } = useTranslation(); // Use the translation hook and get locale
   const { delete: destroy, processing } = useForm();
+
+  useEffect(() => {
+    dayjs.locale(locale); // Set dayjs locale dynamically
+  }, [locale]);
 
   const breadcrumbs: BreadcrumbItem[] = [
     {

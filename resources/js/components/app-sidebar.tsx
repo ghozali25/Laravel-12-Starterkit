@@ -120,7 +120,7 @@ export function AppSidebar() {
 
   const footerNavItems = [
     {
-      title: t('Ahmad Ghozali'), // Translate footer item title
+      title: t('Creator By Ahmad Ghozali'), // Translate footer item title
       url: 'https://github.com/ghozali25/Laravel-12-Starterkit',
       icon: iconMapper('Star') as LucideIcon,
     },
