@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Head, router, usePage } from '@inertiajs/react';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
-import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent, UniqueIdentifier } from '@dnd-kit/core';
 import { arrayMove, SortableContext, rectSortingStrategy } from '@dnd-kit/sortable';
 import { useTranslation } from '@/lib/i18n';
 import { Button } from '@/components/ui/button';
@@ -18,6 +18,7 @@ import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { DialogDescription } from '@/components/ui/dialog'; // Import DialogDescription
 
 // Widget Components and their Props interfaces
 import MonthlyActivityChart, { MonthlyActivityChartProps } from '@/components/dashboard-widgets/MonthlyActivityChart';
@@ -77,23 +78,23 @@ const widgetComponents: WidgetComponentsMap = {
   SummaryCardUsers: {
     component: SummaryCard,
     label: 'Summary Card (Users)',
-    getInitialProps: (t) => ({ label: t('Users'), value: 420, icon: <Users className="h-4 w-4 text-muted-foreground" /> }),
+    getInitialProps: (t) => ({ label: t('Users'), value: 420, iconName: 'Users' }), // Changed to iconName
     defaultColSpan: 1,
-    icon: <Users className="h-5 w-5" />,
+    icon: <Users className="h-5 w-5" />, // This icon is for the dialog
   },
   SummaryCardBackups: {
     component: SummaryCard,
     label: 'Summary Card (Backups)',
-    getInitialProps: (t) => ({ label: t('Backups'), value: 80, icon: <HardDrive className="h-4 w-4 text-muted-foreground" /> }),
+    getInitialProps: (t) => ({ label: t('Backups'), value: 80, iconName: 'HardDrive' }), // Changed to iconName
     defaultColSpan: 1,
-    icon: <HardDrive className="h-5 w-5" />,
+    icon: <HardDrive className="h-5 w-5" />, // This icon is for the dialog
   },
   SummaryCardActivityLogs: {
     component: SummaryCard,
     label: 'Summary Card (Activity Logs)',
-    getInitialProps: (t) => ({ label: t('Activity Logs'), value: 1570, icon: <Activity className="h-4 w-4 text-muted-foreground" /> }),
+    getInitialProps: (t) => ({ label: t('Activity Logs'), value: 1570, iconName: 'Activity' }), // Changed to iconName
     defaultColSpan: 1,
-    icon: <Activity className="h-5 w-5" />,
+    icon: <Activity className="h-5 w-5" />, // This icon is for the dialog
   },
   MonthlyActivityChart: {
     component: MonthlyActivityChart,
@@ -164,13 +165,11 @@ const widgetComponents: WidgetComponentsMap = {
 
 // Type for a widget instance on the dashboard using a discriminated union
 type DashboardWidget = {
-  [K in keyof WidgetComponentsMap]: {
-    id: string;
-    type: K;
-    props: WidgetComponentsMap[K]['getInitialProps'] extends ((t: any) => infer P) ? P : never;
-    colSpan: number;
-  };
-}[keyof WidgetComponentsMap];
+  id: UniqueIdentifier;
+  type: keyof WidgetComponentsMap;
+  props: any; // Using 'any' for props to simplify, as specific props are handled by widgetComponents
+  colSpan: number;
+};
 
 interface DashboardProps {
   initialWidgets: DashboardWidget[];
@@ -185,14 +184,15 @@ export default function Dashboard({ initialWidgets }: DashboardProps) {
 
   // Initialize widgets from backend or default if empty
   useEffect(() => {
-    if (initialWidgets && initialWidgets.length > 0) {
+    console.log('useEffect: initialWidgets changed', initialWidgets);
+    if (Array.isArray(initialWidgets) && initialWidgets.length > 0) {
       setWidgets(initialWidgets);
     } else {
       // Default widgets if none are saved
       setWidgets([
-        { id: 'summary-users', type: 'SummaryCardUsers', props: widgetComponents.SummaryCardUsers.getInitialProps(t), colSpan: 1 },
-        { id: 'summary-backups', type: 'SummaryCardBackups', props: widgetComponents.SummaryCardBackups.getInitialProps(t), colSpan: 1 },
-        { id: 'summary-activity', type: 'SummaryCardActivityLogs', props: widgetComponents.SummaryCardActivityLogs.getInitialProps(t), colSpan: 1 },
+        { id: 'summary-users', type: 'SummaryCardUsers', props: { label: t('Users'), value: 420, iconName: 'Users' }, colSpan: 1 },
+        { id: 'summary-backups', type: 'SummaryCardBackups', props: { label: t('Backups'), value: 80, iconName: 'HardDrive' }, colSpan: 1 },
+        { id: 'summary-activity', type: 'SummaryCardActivityLogs', props: { label: t('Activity Logs'), value: 1570, iconName: 'Activity' }, colSpan: 1 },
         { id: 'monthly-activity', type: 'MonthlyActivityChart', props: widgetComponents.MonthlyActivityChart.getInitialProps(t), colSpan: 2 },
         { id: 'user-roles', type: 'UserRolesPieChart', props: widgetComponents.UserRolesPieChart.getInitialProps(t), colSpan: 1 },
       ]);
@@ -200,18 +200,19 @@ export default function Dashboard({ initialWidgets }: DashboardProps) {
   }, [initialWidgets, t]);
 
   // Save layout to backend
-  const saveLayout = useCallback(() => {
-    router.post(route('dashboard.save-widgets'), { widgets_data: widgets }, {
-      onSuccess: () => toast.success(t('Dashboard layout saved successfully!')),
-      onError: () => toast.error(t('Failed to save dashboard layout.')),
+  // Now accepts currentWidgets as an argument to ensure it uses the latest state
+  const saveLayout = useCallback((currentWidgets: DashboardWidget[]) => {
+    console.log('saveLayout called with widgets:', currentWidgets);
+    const widgetsToSave = currentWidgets.map(widget => ({
+      ...widget,
+      id: String(widget.id), // Ensure ID is string for backend
+    }));
+    router.post(route('dashboard.save-widgets'), { widgets_data: widgetsToSave }, {
+      // Removed onSuccess/onError toasts here, relying on backend flash messages
       preserveScroll: true,
+      preserveState: true, // Crucial for maintaining DndContext state
     });
-  }, [widgets, t]);
-
-  // Trigger save when widgets state changes
-  useEffect(() => {
-    saveLayout();
-  }, [widgets, saveLayout]);
+  }, [t]); // `t` is a dependency if used inside, otherwise empty array
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -223,23 +224,29 @@ export default function Dashboard({ initialWidgets }: DashboardProps) {
     if (!over || active.id === over.id) return;
 
     setWidgets((items) => {
-      const oldIndex = items.findIndex((item) => item.id === active.id);
-      const newIndex = items.findIndex((item) => item.id === over.id);
-      return arrayMove(items, oldIndex, newIndex);
+      const newItems = arrayMove(items, items.findIndex((item) => item.id === active.id), items.findIndex((item) => item.id === over.id));
+      saveLayout(newItems); // Pass the new state to saveLayout
+      return newItems;
     });
   };
 
-  const handleRemoveWidget = (id: string) => {
-    setWidgets((prevWidgets) => prevWidgets.filter((widget) => widget.id !== id));
+  const handleRemoveWidget = (id: UniqueIdentifier) => {
+    setWidgets((prevWidgets) => {
+      const newWidgets = prevWidgets.filter((widget) => widget.id !== id);
+      saveLayout(newWidgets); // Pass the new state to saveLayout
+      return newWidgets;
+    });
     toast.success(t('Widget removed successfully!'));
   };
 
-  const handleColSpanChange = (id: string, newColSpan: number) => {
-    setWidgets((prevWidgets) =>
-      prevWidgets.map((widget) =>
+  const handleColSpanChange = (id: UniqueIdentifier, newColSpan: number) => {
+    setWidgets((prevWidgets) => {
+      const newWidgets = prevWidgets.map((widget) =>
         widget.id === id ? { ...widget, colSpan: newColSpan } : widget
-      )
-    );
+      );
+      saveLayout(newWidgets); // Pass the new state to saveLayout
+      return newWidgets;
+    });
     toast.success(t('Widget size updated!'));
   };
 
@@ -248,18 +255,24 @@ export default function Dashboard({ initialWidgets }: DashboardProps) {
 
     const widgetDef = widgetComponents[selectedWidgetTypeToAdd];
     const newId = `${selectedWidgetTypeToAdd}-${Date.now()}`;
+    
     const initialProps = widgetDef.getInitialProps(t);
 
     const finalProps = { ...initialProps, ...newWidgetProps };
 
     const newWidget: DashboardWidget = {
       id: newId,
-      type: selectedWidgetTypeToAdd,
+      type: selectedWidgetTypeToAdd as keyof WidgetComponentsMap,
       props: finalProps,
       colSpan: widgetDef.defaultColSpan,
     };
 
-    setWidgets((prevWidgets) => [...prevWidgets, newWidget]);
+    setWidgets((prevWidgets) => {
+      const newWidgets = [...prevWidgets, newWidget];
+      saveLayout(newWidgets); // Pass the new state to saveLayout
+      return newWidgets;
+    });
+
     setIsAddWidgetDialogOpen(false);
     setSelectedWidgetTypeToAdd(null);
     setNewWidgetProps({});
@@ -304,11 +317,13 @@ export default function Dashboard({ initialWidgets }: DashboardProps) {
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>{t('Select Widget to Add')}</DialogTitle>
+                {/* Added DialogDescription to fix accessibility warning */}
+                <DialogDescription>{t('Choose a widget type and configure its properties.')}</DialogDescription>
               </DialogHeader>
               <div className="grid grid-cols-1 gap-3 max-h-[60vh] overflow-y-auto">
                 <Label htmlFor="widget-type-select">{t('Widget Type')}</Label>
                 <Select
-                  value={selectedWidgetTypeToAdd || ''}
+                  value={selectedWidgetTypeToAdd as string || ''}
                   onValueChange={(value: keyof WidgetComponentsMap) => {
                     setSelectedWidgetTypeToAdd(value);
                     setNewWidgetProps({}); // Reset props when type changes
@@ -380,7 +395,7 @@ export default function Dashboard({ initialWidgets }: DashboardProps) {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {widgets.map((widget) => (
                 <DashboardWidgetWrapper
-                  key={widget.id}
+                  key={String(widget.id)}
                   id={widget.id}
                   colSpan={widget.colSpan}
                   onRemove={handleRemoveWidget}

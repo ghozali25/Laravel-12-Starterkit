@@ -43,13 +43,9 @@ export default function AppSidebarLayout({
   const primaryColor = setting?.warna || '#0ea5e9';
   const primaryForeground = '#ffffff';
 
-  useEffect(() => {
-    const unsubscribe = router.on('navigate', () => {
-      router.reload({ only: ['menus', 'translations'] }); // Reload translations on navigation
-    });
-
-    return () => unsubscribe();
-  }, []);
+  // Blok useEffect yang menyebabkan router.reload pada setiap navigasi telah dihapus.
+  // Menus dan translations sudah di-share melalui middleware dan akan diperbarui
+  // secara otomatis saat Inertia merender ulang halaman.
 
   return (
     <>

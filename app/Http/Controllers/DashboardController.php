@@ -29,11 +29,12 @@ class DashboardController extends Controller
         ]);
 
         $user = $request->user();
-        DashboardWidget::updateOrCreate(
+        $dashboardWidget = DashboardWidget::updateOrCreate(
             ['user_id' => $user->id],
             ['widgets_data' => $request->input('widgets_data')]
         );
 
-        return response()->json(['message' => 'Dashboard layout saved successfully.']);
+        // Mengubah ini dari Inertia::render menjadi redirect
+        return redirect()->route('dashboard')->with('success', 'Dashboard layout saved successfully.');
     }
 }

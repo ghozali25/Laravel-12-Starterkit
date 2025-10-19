@@ -12,13 +12,14 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useTranslation } from '@/lib/i18n';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'; // Import Tooltip components
+import { UniqueIdentifier } from '@dnd-kit/core'; // Import UniqueIdentifier
 
 interface DashboardWidgetWrapperProps {
-  id: string;
+  id: UniqueIdentifier; // Changed from string to UniqueIdentifier
   children: React.ReactNode;
-  onRemove: (id: string) => void;
+  onRemove: (id: UniqueIdentifier) => void; // Updated parameter type
   colSpan: number;
-  onColSpanChange: (id: string, newColSpan: number) => void;
+  onColSpanChange: (id: UniqueIdentifier, newColSpan: number) => void; // Updated parameter type
 }
 
 export default function DashboardWidgetWrapper({ id, children, onRemove, colSpan, onColSpanChange }: DashboardWidgetWrapperProps) {
