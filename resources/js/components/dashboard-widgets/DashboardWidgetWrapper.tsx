@@ -37,7 +37,7 @@ export default function DashboardWidgetWrapper({ id, children, onRemove }: Dashb
         isDragging && "ring-2 ring-primary ring-offset-2"
       )}
     >
-      <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+      <div className="absolute top-2 right-2 flex gap-1 z-10"> {/* Removed opacity-0 group-hover:opacity-100 */}
         <Button
           variant="ghost"
           size="icon"
@@ -56,7 +56,7 @@ export default function DashboardWidgetWrapper({ id, children, onRemove }: Dashb
           <GripVertical className="h-4 w-4" />
         </Button>
       </div>
-      <div className="group"> {/* Added group class for hover effects */}
+      <div className="group">
         {children}
       </div>
     </div>

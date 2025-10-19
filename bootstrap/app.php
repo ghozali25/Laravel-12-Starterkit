@@ -17,10 +17,10 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->web(append: [
+            SetLocale::class, // Register the SetLocale middleware FIRST
             HandleInertiaRequests::class,
             AddLinkHeadersForPreloadedAssets::class,
             ShareMenus::class,
-            SetLocale::class, // Register the SetLocale middleware
         ]);
 
         $middleware->alias([
