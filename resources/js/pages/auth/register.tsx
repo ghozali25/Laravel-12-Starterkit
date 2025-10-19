@@ -1,56 +1,55 @@
-import { Head, useForm } from '@inertiajs/react';
+import { Head, Link, useForm } from '@inertiajs/react';
 import { LoaderCircle } from 'lucide-react';
-import { FormEventHandler } from 'react';
+import { FormEventHandler, useEffect } from 'react';
 
 import InputError from '@/components/input-error';
-import TextLink from '@/components/text-link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AuthLayout from '@/layouts/auth-layout';
-import { useTranslation } from '@/lib/i18n'; // Import useTranslation
-
-interface RegisterForm {
-    name: string;
-    email: string;
-    password: string;
-    password_confirmation: string;
-    [key: string]: any;
-}
+import { useTranslation } from '@/lib/i18n';
 
 export default function Register() {
-    const { t } = useTranslation(); // Use the translation hook
-    const { data, setData, post, processing, errors, reset } = useForm<RegisterForm>({
+    const { t } = useTranslation();
+    const { data, setData, post, processing, errors, reset } = useForm({
         name: '',
         email: '',
         password: '',
         password_confirmation: '',
     });
 
+    useEffect(() => {
+        return () => {
+            reset('password', 'password_confirmation');
+        };
+    }, []);
+
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
-        post(route('register'), {
-            onFinish: () => reset('password', 'password_confirmation'),
-        });
+
+        post(route('register'));
     };
 
     return (
-        <AuthLayout title={t('Create an account')} description={t('Enter your details below to create your account')}>
+        <AuthLayout
+            title={t('Create an account')}
+            description={t('Enter your details below to create your account')}
+        >
             <Head title={t('Register')} />
-            <form className="flex flex-col gap-6" onSubmit={submit}>
+
+            <form onSubmit={submit}>
                 <div className="grid gap-6">
                     <div className="grid gap-2">
                         <Label htmlFor="name">{t('Name')}</Label>
                         <Input
                             id="name"
                             type="text"
-                            required
-                            autoFocus
-                            tabIndex={1}
-                            autoComplete="name"
+                            name="name"
                             value={data.name}
+                            className="mt-1 block w-full"
+                            autoComplete="name"
+                            autoFocus
                             onChange={(e) => setData('name', e.target.value)}
-                            disabled={processing}
                             placeholder={t('Full name')}
                         />
                         <InputError message={errors.name} className="mt-2" />
@@ -61,15 +60,14 @@ export default function Register() {
                         <Input
                             id="email"
                             type="email"
-                            required
-                            tabIndex={2}
-                            autoComplete="email"
+                            name="email"
                             value={data.email}
+                            className="mt-1 block w-full"
+                            autoComplete="username"
                             onChange={(e) => setData('email', e.target.value)}
-                            disabled={processing}
                             placeholder="email@example.com"
                         />
-                        <InputError message={errors.email} />
+                        <InputError message={errors.email} className="mt-2" />
                     </div>
 
                     <div className="grid gap-2">
@@ -77,15 +75,14 @@ export default function Register() {
                         <Input
                             id="password"
                             type="password"
-                            required
-                            tabIndex={3}
-                            autoComplete="new-password"
+                            name="password"
                             value={data.password}
+                            className="mt-1 block w-full"
+                            autoComplete="new-password"
                             onChange={(e) => setData('password', e.target.value)}
-                            disabled={processing}
                             placeholder={t('Password')}
                         />
-                        <InputError message={errors.password} />
+                        <InputError message={errors.password} className="mt-2" />
                     </div>
 
                     <div className="grid gap-2">
@@ -93,30 +90,29 @@ export default function Register() {
                         <Input
                             id="password_confirmation"
                             type="password"
-                            required
-                            tabIndex={4}
-                            autoComplete="new-password"
+                            name="password_confirmation"
                             value={data.password_confirmation}
+                            className="mt-1 block w-full"
+                            autoComplete="new-password"
                             onChange={(e) => setData('password_confirmation', e.target.value)}
-                            disabled={processing}
                             placeholder={t('Confirm password')}
                         />
-                        <InputError message={errors.password_confirmation} />
+                        <InputError message={errors.password_confirmation} className="mt-2" />
                     </div>
 
-                    <Button type="submit" className="mt-2 w-full" tabIndex={5} disabled={processing}>
+                    <Button className="mt-4 w-full" disabled={processing}>
                         {processing && <LoaderCircle className="h-4 w-4 animate-spin" />}
-                        {t('Create account')}
+                        {t('Register')}
                     </Button>
                 </div>
-
-                <div className="text-muted-foreground text-center text-sm">
-                    {t('Already have an account?')}{' '}
-                    <TextLink href={route('login')} tabIndex={6}>
-                        {t('Log in')}
-                    </TextLink>
-                </div>
             </form>
+
+            <div className="space-x-1 text-center text-black dark:text-white">
+                <span>{t('Already have an account?')}</span>
+                <Link href={route('login')} className="text-black dark:text-white underline underline-offset-4 hover:underline">
+                    {t('Login')}
+                </Link>
+            </div>
         </AuthLayout>
     );
 }
