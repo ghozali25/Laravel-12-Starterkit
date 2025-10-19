@@ -45,9 +45,11 @@ Route::middleware(['auth', 'menu.permission'])->group(function () {
     Route::resource('media', MediaFolderController::class);
 
     // Employee Management Routes
+    // Sekarang tidak lagi mengecualikan 'show' karena kita sudah menambahkannya di controller
     Route::resource('employees', EmployeeController::class);
     Route::get('employees/export/{format}', [EmployeeController::class, 'export'])->name('employees.export');
     Route::post('employees/import', [EmployeeController::class, 'import'])->name('employees.import');
+    Route::get('employees/download-import-template', [EmployeeController::class, 'downloadImportTemplate'])->name('employees.download-import-template'); // New route
 });
 
 require __DIR__ . '/settings.php';

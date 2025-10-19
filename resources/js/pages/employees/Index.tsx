@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Head, Link, router } from '@inertiajs/react';
 import AppLayout from '@/layouts/app-layout';
 import { Button } from '@/components/ui/button';
@@ -21,7 +21,7 @@ import 'dayjs/locale/id';
 import 'dayjs/locale/en';
 import { useTranslation } from '@/lib/i18n';
 import { Input } from '@/components/ui/input';
-import { Plus, Edit, Trash2, FileDown, FileUp, FileSearch, FileSpreadsheet, FileType, Printer } from 'lucide-react';
+import { Plus, Edit, Trash2, FileDown, FileUp, FileSearch, FileSpreadsheet, FileType, Printer, FileQuestion } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -30,6 +30,15 @@ import {
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 import { toast } from 'sonner';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { debounce } from '@/lib/utils'; // Import debounce
 
 dayjs.extend(relativeTime);
 
@@ -60,14 +69,6 @@ interface Props {
   };
 }
 
-function getInitials(name: string) {
-  return name
-    .split(' ')
-    .map((n) => n[0])
-    .join('')
-    .toUpperCase();
-}
-
 export default function EmployeeIndex({ employees, filters }: Props) {
   const { t, locale } = useTranslation();
   const [search, setSearch] = useState(filters.search || '');
@@ -94,8 +95,18 @@ export default function EmployeeIndex({ employees, filters }: Props) {
     });
   };
 
-  const handleSearch = () => {
-    router.get('/employees', { search }, { preserveState: true, preserveScroll: true });
+  // Debounced search function
+  const debouncedSearch = useCallback(
+    debounce((value: string) => {
+      router.get('/employees', { search: value }, { preserveState: true, preserveScroll: true });
+    }, 500), // 500ms debounce delay
+    []
+  );
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearch(value);
+    debouncedSearch(value);
   };
 
   const handleImportFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -181,87 +192,96 @@ export default function EmployeeIndex({ employees, filters }: Props) {
             type="text"
             placeholder={t('Search employees...')}
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+            onChange={handleSearchChange} // Use the new debounced handler
+            // Removed onKeyDown as auto-search is now active
           />
-          <Button onClick={handleSearch} variant="secondary">
+          {/* The search button can remain for explicit search, or be removed if auto-search is sufficient */}
+          <Button onClick={() => debouncedSearch(search)} variant="secondary">
             <FileSearch className="h-4 w-4" />
           </Button>
         </div>
 
-        <div className="space-y-2 divide-y rounded-md border bg-background">
-          {employees.data.length === 0 ? (
-            <div className="py-8 text-center text-muted-foreground">{t('No employee data available.')}</div>
-          ) : (
-            employees.data.map((employee) => (
-              <div
-                key={employee.id}
-                className="flex flex-col md:flex-row md:items-center justify-between gap-4 px-4 py-5 hover:bg-muted/50 transition"
-              >
-                {/* Avatar dan Informasi */}
-                <div className="flex items-start gap-4 flex-1">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted text-lg font-semibold text-primary">
-                    {getInitials(employee.name)}
-                  </div>
-                  <div className="space-y-1">
-                    <div className="text-base font-medium">{employee.name}</div>
-                    <div className="text-sm text-muted-foreground">
-                      {employee.email} {employee.personal_email && `(${employee.personal_email})`}
-                    </div>
-                    {employee.nik && <div className="text-xs text-muted-foreground">NIK: {employee.nik}</div>}
-                    {employee.phone_number && <div className="text-xs text-muted-foreground">{t('Phone')}: {employee.phone_number}</div>}
-                    {employee.address && <div className="text-xs text-muted-foreground">{t('Address')}: {employee.address}</div>}
-                    <div className="text-xs text-muted-foreground italic">
-                      {t('Registered')} {dayjs(employee.created_at).fromNow()}
-                    </div>
-                    {employee.roles.length > 0 && (
-                      <div className="mt-2 flex flex-wrap gap-1">
-                        {employee.roles.map((role) => (
-                          <Badge key={role.id} variant="secondary" className="text-xs font-normal">
-                            {role.name}
-                          </Badge>
-                        ))}
+        <div className="rounded-md border bg-background overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>{t('NIK')}</TableHead>
+                <TableHead>{t('Name')}</TableHead>
+                <TableHead>{t('Company Email')}</TableHead>
+                <TableHead>{t('Personal Email')}</TableHead>
+                <TableHead>{t('Phone Number')}</TableHead>
+                <TableHead>{t('Address')}</TableHead>
+                <TableHead>{t('Roles')}</TableHead>
+                <TableHead className="text-right">{t('Actions')}</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {employees.data.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={8} className="h-24 text-center text-muted-foreground">
+                    {t('No employee data available.')}
+                  </TableCell>
+                </TableRow>
+              ) : (
+                employees.data.map((employee) => (
+                  <TableRow key={employee.id}>
+                    <TableCell className="font-medium">{employee.nik || '-'}</TableCell>
+                    <TableCell>{employee.name}</TableCell>
+                    <TableCell>{employee.email}</TableCell>
+                    <TableCell>{employee.personal_email || '-'}</TableCell>
+                    <TableCell>{employee.phone_number || '-'}</TableCell>
+                    <TableCell>{employee.address || '-'}</TableCell>
+                    <TableCell>
+                      {employee.roles.length > 0 ? (
+                        <div className="flex flex-wrap gap-1">
+                          {employee.roles.map((role) => (
+                            <Badge key={role.id} variant="secondary" className="text-xs font-normal">
+                              {role.name}
+                            </Badge>
+                          ))}
+                        </div>
+                      ) : (
+                        '-'
+                      )}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex justify-end gap-2">
+                        <Link href={`/employees/${employee.id}/edit`}>
+                          <Button size="sm" variant="outline">
+                            <Edit className="h-4 w-4 mr-1" /> {t('Edit')}
+                          </Button>
+                        </Link>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button size="sm" variant="destructive">
+                              <Trash2 className="h-4 w-4 mr-1" /> {t('Delete')}
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>{t('Delete Employee?')}</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                {t('Employee')} <strong>{employee.name}</strong> {t('will be permanently deleted.')}
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>{t('Cancel')}</AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={() => handleDelete(employee.id)}
+                                disabled={false}
+                              >
+                                {t('Yes, Delete')}
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
                       </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Aksi */}
-                <div className="flex flex-wrap gap-2 md:justify-end">
-                  <Link href={`/employees/${employee.id}/edit`}>
-                    <Button size="sm" variant="outline">
-                      <Edit className="h-4 w-4 mr-1" /> {t('Edit')}
-                    </Button>
-                  </Link>
-
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <Button size="sm" variant="destructive">
-                        <Trash2 className="h-4 w-4 mr-1" /> {t('Delete')}
-                      </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>{t('Delete Employee?')}</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          {t('Employee')} <strong>{employee.name}</strong> {t('will be permanently deleted.')}
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>{t('Cancel')}</AlertDialogCancel>
-                        <AlertDialogAction
-                          onClick={() => handleDelete(employee.id)}
-                          disabled={false} // processing state can be added here if needed
-                        >
-                          {t('Yes, Delete')}
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
-                </div>
-              </div>
-            ))
-          )}
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
         </div>
 
         {/* Pagination */}
@@ -292,6 +312,13 @@ export default function EmployeeIndex({ employees, filters }: Props) {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <div className="space-y-4">
+            <Button
+              variant="outline"
+              className="w-full gap-2"
+              onClick={() => window.open(route('employees.download-import-template'), '_blank')}
+            >
+              <FileQuestion className="h-4 w-4" /> {t('Download Import Template')}
+            </Button>
             <Input type="file" accept=".xlsx,.xls,.csv" onChange={handleImportFileChange} />
             {importFile && (
               <p className="text-sm text-muted-foreground">

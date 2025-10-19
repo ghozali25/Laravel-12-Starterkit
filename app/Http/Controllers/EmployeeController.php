@@ -12,6 +12,9 @@ use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\EmployeesExport;
 use App\Imports\EmployeesImport;
 use Barryvdh\DomPDF\Facade\Pdf;
+use App\Exports\EmployeeImportTemplateExport;
+use Maatwebsite\Excel\Validators\ValidationException; // Import this
+use Maatwebsite\Excel\Validators\Failure; // Import this
 
 class EmployeeController extends Controller
 {
@@ -35,6 +38,16 @@ class EmployeeController extends Controller
             'employees' => $employees,
             'filters' => $request->only('search'),
         ]);
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(User $employee)
+    {
+        // Karena tidak ada tampilan 'show' khusus, kita arahkan ke halaman 'edit'
+        // yang sudah menampilkan semua detail karyawan.
+        return redirect()->route('employees.edit', $employee)->with('info', 'Redirected to edit page for employee details.');
     }
 
     public function create()
@@ -146,8 +159,33 @@ class EmployeeController extends Controller
             'file' => 'required|file|mimes:xlsx,xls,csv',
         ]);
 
-        Excel::import(new EmployeesImport, $request->file('file'));
+        try {
+            $import = new EmployeesImport;
+            Excel::import($import, $request->file('file'));
 
-        return redirect()->back()->with('success', 'Employees imported successfully.');
+            if ($import->failures()->isNotEmpty()) {
+                $errors = $import->failures()->map(function (Failure $failure) {
+                    return 'Baris ' . $failure->row() . ': ' . implode(', ', $failure->errors());
+                })->implode('<br>');
+
+                return redirect()->back()->with('error', 'Impor selesai dengan beberapa kegagalan:<br>' . $errors);
+            }
+
+            return redirect()->back()->with('success', 'Karyawan berhasil diimpor.');
+
+        } catch (ValidationException $e) {
+            $failures = $e->failures();
+            $errors = collect($failures)->map(function (Failure $failure) {
+                return 'Baris ' . $failure->row() . ': ' . implode(', ', $failure->errors());
+            })->implode('<br>');
+            return redirect()->back()->with('error', 'Impor gagal karena kesalahan validasi:<br>' . $errors);
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Terjadi kesalahan tak terduga selama impor: ' . $e->getMessage());
+        }
+    }
+
+    public function downloadImportTemplate()
+    {
+        return Excel::download(new EmployeeImportTemplateExport, 'employee_import_template.xlsx');
     }
 }

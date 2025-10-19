@@ -12,8 +12,10 @@ use Maatwebsite\Excel\Concerns\SkipsOnFailure;
 use Maatwebsite\Excel\Validators\Failure;
 use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Role;
+use Maatwebsite\Excel\Concerns\WithChunkReading; // Ditambahkan
+use Maatwebsite\Excel\Concerns\WithBatchInserts; // Ditambahkan
 
-class EmployeesImport implements ToCollection, WithHeadingRow, WithValidation, SkipsOnFailure
+class EmployeesImport implements ToCollection, WithHeadingRow, WithValidation, SkipsOnFailure, WithChunkReading, WithBatchInserts // Diperbarui
 {
     use SkipsFailures;
 
@@ -62,7 +64,7 @@ class EmployeesImport implements ToCollection, WithHeadingRow, WithValidation, S
             '*.email_perusahaan' => ['required', 'email', 'unique:users,email'],
             '*.nik' => ['nullable', 'string', 'unique:users,nik'],
             '*.email_pribadi' => ['nullable', 'email', 'max:255'],
-            '*.no_telepon' => ['nullable', 'string', 'max:20'],
+            '*.no_telepon' => ['nullable', 'string', 'max:20'], // Rule ini akan bekerja setelah prepareForValidation
             '*.alamat' => ['nullable', 'string'],
             '*.roles' => ['nullable', 'string'],
         ];
@@ -74,5 +76,36 @@ class EmployeesImport implements ToCollection, WithHeadingRow, WithValidation, S
             '*.email_perusahaan.unique' => 'Email perusahaan :input sudah digunakan.',
             '*.nik.unique' => 'NIK :input sudah digunakan.',
         ];
+    }
+
+    /**
+     * Metode ini dipanggil sebelum validasi untuk setiap baris.
+     * Digunakan untuk membersihkan atau mengubah format data.
+     */
+    public function prepareForValidation($data, $index)
+    {
+        // Pastikan 'no_telepon' diperlakukan sebagai string
+        if (isset($data['no_telepon']) && !is_string($data['no_telepon'])) {
+            $data['no_telepon'] = (string) $data['no_telepon'];
+        }
+        return $data;
+    }
+
+    /**
+     * Tentukan ukuran chunk untuk membaca file.
+     * Diperlukan oleh WithChunkReading.
+     */
+    public function chunkSize(): int
+    {
+        return 1000; // Memproses 1000 baris sekaligus
+    }
+
+    /**
+     * Tentukan ukuran batch untuk insert database.
+     * Diperlukan oleh WithBatchInserts.
+     */
+    public function batchSize(): int
+    {
+        return 1000; // Menyimpan 1000 record sekaligus
     }
 }
