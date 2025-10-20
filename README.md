@@ -104,10 +104,14 @@ chown -R www-data:www-data .
 
 | Feature                  | Status |
 | ------------------------ | ------ |
+| Dashboard drag, resize   | ✅     |
+| Dashboard add widget     | ✅     |
 | Authentication (Login)   | ✅     |
 | CRUD User                | ✅     |
 | CRUD Role & Permission   | ✅     |
 | Dynamic Menu + Sidebar   | ✅     |
+| Division                 | ✅     |
+| Role Manager & Leader    | ✅     |
 | Access Protection (403)  | ✅     |
 | Drag & Drop Menu Sorting | ✅     |
 | Theme Color via DB       | ✅     |
