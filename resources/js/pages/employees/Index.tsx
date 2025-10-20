@@ -38,7 +38,8 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { debounce } from '@/lib/utils'; // Import debounce
+import { debounce } from '@/lib/utils';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'; // Import Select components
 
 dayjs.extend(relativeTime);
 
@@ -55,6 +56,15 @@ interface Employee {
     id: number;
     name: string;
   }[];
+  manager?: { // Add manager relationship
+    id: number;
+    name: string;
+  } | null;
+}
+
+interface PotentialManager {
+  id: number;
+  name: string;
 }
 
 interface Props {
@@ -66,12 +76,15 @@ interface Props {
   };
   filters: {
     search?: string;
+    manager_id?: string; // Add manager_id to filters
   };
+  potentialManagers: PotentialManager[]; // Pass potential managers for filter
 }
 
-export default function EmployeeIndex({ employees, filters }: Props) {
+export default function EmployeeIndex({ employees, filters, potentialManagers }: Props) {
   const { t, locale } = useTranslation();
   const [search, setSearch] = useState(filters.search || '');
+  const [selectedManagerFilter, setSelectedManagerFilter] = useState(filters.manager_id || 'all'); // Default to 'all'
   const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
   const [importFile, setImportFile] = useState<File | null>(null);
   const [importProcessing, setImportProcessing] = useState(false);
@@ -97,16 +110,21 @@ export default function EmployeeIndex({ employees, filters }: Props) {
 
   // Debounced search function
   const debouncedSearch = useCallback(
-    debounce((value: string) => {
-      router.get('/employees', { search: value }, { preserveState: true, preserveScroll: true });
-    }, 500), // 500ms debounce delay
+    debounce((value: string, managerId: string) => {
+      router.get('/employees', { search: value, manager_id: managerId === 'all' ? '' : managerId }, { preserveState: true, preserveScroll: true });
+    }, 500),
     []
   );
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setSearch(value);
-    debouncedSearch(value);
+    debouncedSearch(value, selectedManagerFilter);
+  };
+
+  const handleManagerFilterChange = (value: string) => {
+    setSelectedManagerFilter(value);
+    debouncedSearch(search, value);
   };
 
   const handleImportFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -187,16 +205,30 @@ export default function EmployeeIndex({ employees, filters }: Props) {
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-col md:flex-row items-center gap-2">
           <Input
             type="text"
             placeholder={t('Search employees...')}
             value={search}
-            onChange={handleSearchChange} // Use the new debounced handler
-            // Removed onKeyDown as auto-search is now active
+            onChange={handleSearchChange}
           />
-          {/* The search button can remain for explicit search, or be removed if auto-search is sufficient */}
-          <Button onClick={() => debouncedSearch(search)} variant="secondary">
+          <Select
+            value={selectedManagerFilter}
+            onValueChange={handleManagerFilterChange}
+          >
+            <SelectTrigger className="w-full md:w-[200px]">
+              <SelectValue placeholder={t('Filter by Manager')} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">{t('All Managers')}</SelectItem>
+              {potentialManagers.map((manager) => (
+                <SelectItem key={manager.id} value={String(manager.id)}>
+                  {manager.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Button onClick={() => debouncedSearch(search, selectedManagerFilter)} variant="secondary">
             <FileSearch className="h-4 w-4" />
           </Button>
         </div>
@@ -211,6 +243,7 @@ export default function EmployeeIndex({ employees, filters }: Props) {
                 <TableHead>{t('Personal Email')}</TableHead>
                 <TableHead>{t('Phone Number')}</TableHead>
                 <TableHead>{t('Address')}</TableHead>
+                <TableHead>{t('Reports To')}</TableHead>
                 <TableHead>{t('Roles')}</TableHead>
                 <TableHead className="text-right">{t('Actions')}</TableHead>
               </TableRow>
@@ -218,7 +251,7 @@ export default function EmployeeIndex({ employees, filters }: Props) {
             <TableBody>
               {employees.data.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={8} className="h-24 text-center text-muted-foreground">
+                  <TableCell colSpan={9} className="h-24 text-center text-muted-foreground">
                     {t('No employee data available.')}
                   </TableCell>
                 </TableRow>
@@ -231,6 +264,7 @@ export default function EmployeeIndex({ employees, filters }: Props) {
                     <TableCell>{employee.personal_email || '-'}</TableCell>
                     <TableCell>{employee.phone_number || '-'}</TableCell>
                     <TableCell>{employee.address || '-'}</TableCell>
+                    <TableCell>{employee.manager?.name || '-'}</TableCell>
                     <TableCell>
                       {employee.roles.length > 0 ? (
                         <div className="flex flex-wrap gap-1">

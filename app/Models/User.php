@@ -9,6 +9,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\MediaLibrary\HasMedia;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class User extends Authenticatable implements HasMedia
 {
@@ -28,6 +30,7 @@ class User extends Authenticatable implements HasMedia
         'personal_email', // Tambahkan ini
         'phone_number', // Tambahkan ini
         'address', // Tambahkan ini
+        'manager_id', // Tambahkan ini
     ];
 
     /**
@@ -56,5 +59,21 @@ class User extends Authenticatable implements HasMedia
     public function mediaFolders()
     {
         return $this->hasMany(MediaFolder::class);
+    }
+
+    /**
+     * Get the manager of the user.
+     */
+    public function manager(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'manager_id');
+    }
+
+    /**
+     * Get the users that report to this user.
+     */
+    public function reports(): HasMany
+    {
+        return $this->hasMany(User::class, 'manager_id');
     }
 }

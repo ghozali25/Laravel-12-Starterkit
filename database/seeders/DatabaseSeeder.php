@@ -12,18 +12,20 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             RolePermissionSeeder::class,
+            MenuSeeder::class, // Panggil MenuSeeder setelah RolePermissionSeeder
         ]);
 
-        $user = User::factory()->create([
+        // Pastikan admin user dibuat dan diberi peran admin
+        $admin = User::factory()->create([
             'name' => 'Admin',
             'email' => 'admin@admin.com',
             'password' => Hash::make('admin123'),
         ]);
+        $admin->assignRole('admin');
 
-        $user->assignRole('admin');
-
+        // Panggil seeder tambahan untuk user, manager, dan leader
         $this->call([
-            MenuSeeder::class,
+            AdditionalUserSeeder::class,
         ]);
     }
 }

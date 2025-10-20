@@ -13,16 +13,17 @@ use App\Exports\EmployeesExport;
 use App\Imports\EmployeesImport;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Exports\EmployeeImportTemplateExport;
-use Maatwebsite\Excel\Validators\ValidationException; // Import this
-use Maatwebsite\Excel\Validators\Failure; // Import this
+use Maatwebsite\Excel\Validators\ValidationException;
+use Maatwebsite\Excel\Validators\Failure;
 
 class EmployeeController extends Controller
 {
     public function index(Request $request)
     {
-        $query = User::with('roles')->whereHas('roles', function ($q) {
-            $q->where('name', '!=', 'admin'); // Hanya tampilkan non-admin
-        });
+        $query = User::with(['roles', 'manager']) // Eager load manager relationship
+            ->whereHas('roles', function ($q) {
+                $q->where('name', '!=', 'admin'); // Hanya tampilkan non-admin
+            });
 
         if ($request->filled('search')) {
             $query->where(function ($q) use ($request) {
@@ -32,11 +33,22 @@ class EmployeeController extends Controller
             });
         }
 
+        // Filter by manager_id
+        if ($request->filled('manager_id')) {
+            $query->where('manager_id', $request->manager_id);
+        }
+
         $employees = $query->latest()->paginate(10)->withQueryString();
+
+        // Get potential managers/leaders for the filter dropdown
+        $potentialManagers = User::whereHas('roles', function ($q) {
+            $q->whereIn('name', ['manager', 'leader']);
+        })->select('id', 'name')->get();
 
         return Inertia::render('employees/Index', [
             'employees' => $employees,
-            'filters' => $request->only('search'),
+            'filters' => $request->only('search', 'manager_id'),
+            'potentialManagers' => $potentialManagers, // Pass to frontend
         ]);
     }
 
@@ -45,16 +57,19 @@ class EmployeeController extends Controller
      */
     public function show(User $employee)
     {
-        // Karena tidak ada tampilan 'show' khusus, kita arahkan ke halaman 'edit'
-        // yang sudah menampilkan semua detail karyawan.
         return redirect()->route('employees.edit', $employee)->with('info', 'Redirected to edit page for employee details.');
     }
 
     public function create()
     {
-        $roles = Role::where('name', '!=', 'admin')->get(); // Hanya role non-admin
+        $roles = Role::where('name', '!=', 'admin')->get();
+        $potentialManagers = User::whereHas('roles', function ($q) {
+            $q->whereIn('name', ['manager', 'leader']);
+        })->select('id', 'name')->get();
+
         return Inertia::render('employees/Form', [
             'roles' => $roles,
+            'potentialManagers' => $potentialManagers,
         ]);
     }
 
@@ -62,7 +77,7 @@ class EmployeeController extends Controller
     {
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email', 'max:255', 'unique:users,email'], // Email perusahaan
+            'email' => ['required', 'email', 'max:255', 'unique:users,email'],
             'nik' => ['nullable', 'string', 'max:255', 'unique:users,nik'],
             'personal_email' => ['nullable', 'email', 'max:255'],
             'phone_number' => ['nullable', 'string', 'max:20'],
@@ -70,6 +85,7 @@ class EmployeeController extends Controller
             'password' => ['required', 'string', 'min:6'],
             'roles' => ['required', 'array', 'min:1'],
             'roles.*' => ['required', Rule::exists('roles', 'name')],
+            'manager_id' => ['nullable', 'exists:users,id'], // Add validation for manager_id
         ]);
 
         $employee = User::create([
@@ -80,6 +96,7 @@ class EmployeeController extends Controller
             'phone_number' => $validated['phone_number'],
             'address' => $validated['address'],
             'password' => Hash::make($validated['password']),
+            'manager_id' => $validated['manager_id'] ?? null, // Save manager_id
         ]);
 
         $employee->assignRole($validated['roles']);
@@ -91,10 +108,17 @@ class EmployeeController extends Controller
     {
         $roles = Role::where('name', '!=', 'admin')->get();
         $employee->load('roles');
+        $potentialManagers = User::whereHas('roles', function ($q) {
+            $q->whereIn('name', ['manager', 'leader']);
+        })
+        ->where('id', '!=', $employee->id) // An employee cannot be their own manager
+        ->select('id', 'name')->get();
+
         return Inertia::render('employees/Form', [
-            'employee' => $employee->only(['id', 'name', 'email', 'nik', 'personal_email', 'phone_number', 'address']),
+            'employee' => $employee->only(['id', 'name', 'email', 'nik', 'personal_email', 'phone_number', 'address', 'manager_id']), // Include manager_id
             'roles' => $roles,
             'currentRoles' => $employee->roles->pluck('name')->toArray(),
+            'potentialManagers' => $potentialManagers,
         ]);
     }
 
@@ -110,6 +134,7 @@ class EmployeeController extends Controller
             'password' => ['nullable', 'string', 'min:6'],
             'roles' => ['required', 'array', 'min:1'],
             'roles.*' => ['required', Rule::exists('roles', 'name')],
+            'manager_id' => ['nullable', 'exists:users,id', Rule::notIn([$employee->id])], // Add validation for manager_id
         ]);
 
         $employee->update([
@@ -122,6 +147,7 @@ class EmployeeController extends Controller
             'password' => $validated['password']
                 ? Hash::make($validated['password'])
                 : $employee->password,
+            'manager_id' => $validated['manager_id'] ?? null, // Update manager_id
         ]);
 
         $employee->syncRoles($validated['roles']);

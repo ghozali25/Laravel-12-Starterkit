@@ -14,7 +14,7 @@ import { NavUser } from '@/components/nav-user';
 import { iconMapper } from '@/lib/iconMapper';
 import type { LucideIcon } from 'lucide-react';
 import { ChevronDown, ChevronRight } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react'; // Import useCallback
 import { cn } from '@/lib/utils';
 import { useTranslation } from '@/lib/i18n'; // Import useTranslation
 
@@ -26,16 +26,18 @@ interface MenuItem {
   children?: MenuItem[];
 }
 
-function RenderMenu({ items, level = 0 }: { items: MenuItem[]; level?: number }) {
+interface RenderMenuProps {
+  items: MenuItem[];
+  level?: number;
+  openMenus: Record<number, boolean>;
+  toggleMenu: (id: number) => void;
+}
+
+function RenderMenu({ items, level = 0, openMenus, toggleMenu }: RenderMenuProps) {
   const { url: currentUrl } = usePage();
-  const [openMenus, setOpenMenus] = useState<Record<number, boolean>>({});
   const { t } = useTranslation(); // Use the translation hook
 
   if (!Array.isArray(items)) return null;
-
-  const toggleMenu = (id: number) => {
-    setOpenMenus((prev) => ({ ...prev, [id]: !prev[id] }));
-  };
 
   return (
     <>
@@ -85,7 +87,7 @@ function RenderMenu({ items, level = 0 }: { items: MenuItem[]; level?: number })
                   )}
                 >
                   <SidebarMenu className="ml-2 border-l border-muted pl-2">
-                    <RenderMenu items={children} level={level + 1} />
+                    <RenderMenu items={children} level={level + 1} openMenus={openMenus} toggleMenu={toggleMenu} />
                   </SidebarMenu>
                 </div>
               </>
@@ -117,6 +119,18 @@ function RenderMenu({ items, level = 0 }: { items: MenuItem[]; level?: number })
 export function AppSidebar() {
   const { menus = [] } = usePage().props as { menus?: MenuItem[] };
   const { t } = useTranslation(); // Use the translation hook
+  const [openMenus, setOpenMenus] = useState<Record<number, boolean>>({});
+
+  // Function to toggle menu expansion
+  const toggleMenu = useCallback((id: number) => {
+    setOpenMenus((prev) => ({
+      ...prev,
+      [id]: !prev[id],
+    }));
+  }, []);
+
+  // Log untuk memeriksa prop menus
+  console.log('AppSidebar received menus:', menus);
 
   const footerNavItems = [
     {
@@ -146,7 +160,7 @@ export function AppSidebar() {
 
       <SidebarContent className="px-2 py-4">
         <SidebarMenu>
-          <RenderMenu items={menus} />
+          <RenderMenu items={menus} openMenus={openMenus} toggleMenu={toggleMenu} />
         </SidebarMenu>
       </SidebarContent>
 

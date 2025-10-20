@@ -30,7 +30,7 @@ class MenuSeeder extends Seeder
             'route' => '/employees',
             'parent_id' => null, // Penting: Set ke null untuk menjadi menu tingkat atas
             'order' => 2, // Urutan setelah Dashboard
-            'permission_name' => 'employee-view',
+            'permission_name' => 'employee-view', // Pastikan permission ini ada
         ]);
 
         // Access Management (Parent Menu) - Urutan disesuaikan

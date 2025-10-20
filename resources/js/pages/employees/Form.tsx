@@ -12,6 +12,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Textarea } from '@/components/ui/textarea';
 import { useTranslation } from '@/lib/i18n';
 import { Save, ArrowLeft } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'; // Import Select components
 
 interface Role {
   id: number;
@@ -26,16 +27,23 @@ interface Employee {
   personal_email: string | null;
   phone_number: string | null;
   address: string | null;
+  manager_id: number | null; // Add manager_id
   roles?: string[];
+}
+
+interface PotentialManager {
+  id: number;
+  name: string;
 }
 
 interface Props {
   employee?: Employee;
   roles: Role[];
   currentRoles?: string[];
+  potentialManagers: PotentialManager[]; // Pass potential managers
 }
 
-export default function EmployeeForm({ employee, roles, currentRoles }: Props) {
+export default function EmployeeForm({ employee, roles, currentRoles, potentialManagers }: Props) {
   const { t } = useTranslation();
   const isEdit = !!employee;
 
@@ -46,6 +54,7 @@ export default function EmployeeForm({ employee, roles, currentRoles }: Props) {
     personal_email: employee?.personal_email || '',
     phone_number: employee?.phone_number || '',
     address: employee?.address || '',
+    manager_id: employee?.manager_id || null, // Initialize manager_id
     password: '',
     roles: currentRoles || [],
   });
@@ -157,6 +166,28 @@ export default function EmployeeForm({ employee, roles, currentRoles }: Props) {
                     className={errors.address ? 'border-red-500' : ''}
                   />
                   {errors.address && <p className="text-sm text-red-500 mt-2">{errors.address}</p>}
+                </div>
+
+                {/* Manager ID */}
+                <div>
+                  <Label htmlFor="manager_id" className="mb-2 block">{t('Reports To')}</Label>
+                  <Select
+                    value={data.manager_id ? String(data.manager_id) : '-1'} // Default to '-1' for 'None'
+                    onValueChange={(value) => setData('manager_id', value === '-1' ? null : Number(value))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder={t('Select Manager')} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="-1">{t('— None —')}</SelectItem> {/* Use '-1' as value */}
+                      {potentialManagers.map((manager) => (
+                        <SelectItem key={manager.id} value={String(manager.id)}>
+                          {manager.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {errors.manager_id && <p className="text-sm text-red-500 mt-2">{errors.manager_id}</p>}
                 </div>
 
                 {/* Password */}

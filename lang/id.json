@@ -229,5 +229,9 @@
     "Employee address": "Alamat Karyawan",
     "Back": "Kembali",
     "Create New Employee": "Buat Karyawan Baru",
-    "Download Import Template": "Unduh Template Impor"
+    "Download Import Template": "Unduh Template Impor",
+    "Reports To": "Melapor Kepada",
+    "Select Manager": "Pilih Atasan",
+    "All Managers": "Semua Atasan",
+    "Filter by Manager": "Filter berdasarkan Atasan"
 }

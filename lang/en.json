@@ -228,5 +228,9 @@
     "Employee address": "Employee address",
     "Back": "Back",
     "Create New Employee": "Create New Employee",
-    "Download Import Template": "Download Import Template"
+    "Download Import Template": "Download Import Template",
+    "Reports To": "Reports To",
+    "Select Manager": "Select Manager",
+    "All Managers": "All Managers",
+    "Filter by Manager": "Filter by Manager"
 }
