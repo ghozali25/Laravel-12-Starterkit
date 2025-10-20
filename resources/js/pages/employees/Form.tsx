@@ -7,12 +7,12 @@ import AppLayout from '@/layouts/app-layout';
 import { Head } from '@inertiajs/react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { BreadcrumbItem } from '@/types';
+import { BreadcrumbItem, type Division } from '@/types'; // Import Division type
 import { Checkbox } from '@/components/ui/checkbox';
 import { Textarea } from '@/components/ui/textarea';
 import { useTranslation } from '@/lib/i18n';
 import { Save, ArrowLeft } from 'lucide-react';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'; // Import Select components
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface Role {
   id: number;
@@ -27,7 +27,8 @@ interface Employee {
   personal_email: string | null;
   phone_number: string | null;
   address: string | null;
-  manager_id: number | null; // Add manager_id
+  manager_id: number | null;
+  division_id: number | null; // Add division_id
   roles?: string[];
 }
 
@@ -40,10 +41,11 @@ interface Props {
   employee?: Employee;
   roles: Role[];
   currentRoles?: string[];
-  potentialManagers: PotentialManager[]; // Pass potential managers
+  potentialManagers: PotentialManager[];
+  divisions: Division[]; // Pass divisions
 }
 
-export default function EmployeeForm({ employee, roles, currentRoles, potentialManagers }: Props) {
+export default function EmployeeForm({ employee, roles, currentRoles, potentialManagers, divisions }: Props) {
   const { t } = useTranslation();
   const isEdit = !!employee;
 
@@ -54,7 +56,8 @@ export default function EmployeeForm({ employee, roles, currentRoles, potentialM
     personal_email: employee?.personal_email || '',
     phone_number: employee?.phone_number || '',
     address: employee?.address || '',
-    manager_id: employee?.manager_id || null, // Initialize manager_id
+    manager_id: employee?.manager_id || null,
+    division_id: employee?.division_id || null, // Initialize division_id
     password: '',
     roles: currentRoles || [],
   });
@@ -172,14 +175,14 @@ export default function EmployeeForm({ employee, roles, currentRoles, potentialM
                 <div>
                   <Label htmlFor="manager_id" className="mb-2 block">{t('Reports To')}</Label>
                   <Select
-                    value={data.manager_id ? String(data.manager_id) : '-1'} // Default to '-1' for 'None'
+                    value={data.manager_id ? String(data.manager_id) : '-1'}
                     onValueChange={(value) => setData('manager_id', value === '-1' ? null : Number(value))}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder={t('Select Manager')} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="-1">{t('— None —')}</SelectItem> {/* Use '-1' as value */}
+                      <SelectItem value="-1">{t('— None —')}</SelectItem>
                       {potentialManagers.map((manager) => (
                         <SelectItem key={manager.id} value={String(manager.id)}>
                           {manager.name}
@@ -188,6 +191,28 @@ export default function EmployeeForm({ employee, roles, currentRoles, potentialM
                     </SelectContent>
                   </Select>
                   {errors.manager_id && <p className="text-sm text-red-500 mt-2">{errors.manager_id}</p>}
+                </div>
+
+                {/* Division ID */}
+                <div>
+                  <Label htmlFor="division_id" className="mb-2 block">{t('Division')}</Label>
+                  <Select
+                    value={data.division_id ? String(data.division_id) : '-1'} // Default to '-1' for 'None'
+                    onValueChange={(value) => setData('division_id', value === '-1' ? null : Number(value))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder={t('Select Division')} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="-1">{t('— None —')}</SelectItem>
+                      {divisions.map((division) => (
+                        <SelectItem key={division.id} value={String(division.id)}>
+                          {division.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {errors.division_id && <p className="text-sm text-red-500 mt-2">{errors.division_id}</p>}
                 </div>
 
                 {/* Password */}

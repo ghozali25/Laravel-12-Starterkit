@@ -20,6 +20,7 @@
                 <th>Email Pribadi</th>
                 <th>No. Telepon</th>
                 <th>Alamat</th>
+                <th>Divisi</th> <!-- Tambahkan ini -->
                 <th>Roles</th>
             </tr>
         </thead>
@@ -32,6 +33,7 @@
                     <td><?php echo e($employee->personal_email); ?></td>
                     <td><?php echo e($employee->phone_number); ?></td>
                     <td><?php echo e($employee->address); ?></td>
+                    <td><?php echo e($employee->division->name ?? '-'); ?></td> <!-- Tampilkan nama divisi -->
                     <td><?php echo e($employee->roles->pluck('name')->implode(', ')); ?></td>
                 </tr>
             <?php endforeach; ?>

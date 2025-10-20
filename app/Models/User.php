@@ -31,6 +31,7 @@ class User extends Authenticatable implements HasMedia
         'phone_number', // Tambahkan ini
         'address', // Tambahkan ini
         'manager_id', // Tambahkan ini
+        'division_id', // Tambahkan ini
     ];
 
     /**
@@ -75,5 +76,13 @@ class User extends Authenticatable implements HasMedia
     public function reports(): HasMany
     {
         return $this->hasMany(User::class, 'manager_id');
+    }
+
+    /**
+     * Get the division that the user belongs to.
+     */
+    public function division(): BelongsTo
+    {
+        return $this->belongsTo(Division::class);
     }
 }

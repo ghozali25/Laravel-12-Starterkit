@@ -13,7 +13,8 @@ use App\Http\Controllers\SettingAppController;
 use App\Http\Controllers\MediaFolderController;
 use App\Http\Controllers\LanguageController;
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\EmployeeController; // Import the new EmployeeController
+use App\Http\Controllers\EmployeeController;
+use App\Http\Controllers\DivisionController; // Import the new DivisionController
 
 Route::get('/', function () {
     return Inertia::render('welcome');
@@ -45,11 +46,13 @@ Route::middleware(['auth', 'menu.permission'])->group(function () {
     Route::resource('media', MediaFolderController::class);
 
     // Employee Management Routes
-    // Sekarang tidak lagi mengecualikan 'show' karena kita sudah menambahkannya di controller
     Route::resource('employees', EmployeeController::class);
     Route::get('employees/export/{format}', [EmployeeController::class, 'export'])->name('employees.export');
     Route::post('employees/import', [EmployeeController::class, 'import'])->name('employees.import');
-    Route::get('employees/download-import-template', [EmployeeController::class, 'downloadImportTemplate'])->name('employees.download-import-template'); // New route
+    Route::get('employees/download-import-template', [EmployeeController::class, 'downloadImportTemplate'])->name('employees.download-import-template');
+
+    // Division Management Routes
+    Route::resource('divisions', DivisionController::class);
 });
 
 require __DIR__ . '/settings.php';

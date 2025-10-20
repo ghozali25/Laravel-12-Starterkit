@@ -278,6 +278,7 @@ import {
     Zap,
     ZoomIn,
     ZoomOut,
+    Building2, // Add Building2 icon
   } from 'lucide-react';
   
   export const icons = [
@@ -522,9 +523,9 @@ import {
     { name: 'Timer', icon: Timer },
     { name: 'ToggleLeft', icon: ToggleLeft },
     { name: 'ToggleRight', icon: ToggleRight },
+    { name: 'Triangle', icon: Triangle },
     { name: 'TrendingDown', icon: TrendingDown },
     { name: 'TrendingUp', icon: TrendingUp },
-    { name: 'Triangle', icon: Triangle },
     { name: 'Truck', icon: Truck },
     { name: 'Tv', icon: Tv },
     { name: 'Twitch', icon: Twitch },
@@ -552,4 +553,5 @@ import {
     { name: 'Zap', icon: Zap },
     { name: 'ZoomIn', icon: ZoomIn },
     { name: 'ZoomOut', icon: ZoomOut },
+    { name: 'Building2', icon: Building2 }, // Add Building2 icon
   ];

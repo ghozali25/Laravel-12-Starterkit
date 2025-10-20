@@ -232,5 +232,19 @@
     "Reports To": "Reports To",
     "Select Manager": "Select Manager",
     "All Managers": "All Managers",
-    "Filter by Manager": "Filter by Manager"
+    "Filter by Manager": "Filter by Manager",
+    "Division": "Division",
+    "Select Division": "Select Division",
+    "All Divisions": "All Divisions",
+    "Filter by Division": "Filter by Division",
+    "Division Management": "Division Management",
+    "Manage company divisions": "Manage company divisions",
+    "Divisions": "Divisions",
+    "Add Division": "Add Division",
+    "Delete this division?": "Delete this division?",
+    "Division Name": "Division Name",
+    "Edit Division": "Edit Division",
+    "Edit division details": "Edit division details",
+    "Create a new division": "Create a new division",
+    "Failed to delete division.": "Failed to delete division."
 }

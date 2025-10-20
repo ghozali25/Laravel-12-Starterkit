@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\User;
+use App\Models\Division; // Import Division model
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Role;
@@ -19,12 +20,16 @@ class AdditionalUserSeeder extends Seeder
         $managerRole = Role::firstOrCreate(['name' => 'manager']);
         $leaderRole = Role::firstOrCreate(['name' => 'leader']);
 
+        // Ambil semua divisi yang ada
+        $divisions = Division::all();
+
         // Create 10 regular users
         for ($i = 1; $i <= 10; $i++) {
             $user = User::factory()->create([
                 'name' => 'User ' . $i,
                 'email' => 'user' . $i . '@bach-project.com',
                 'password' => Hash::make('password'),
+                'division_id' => $divisions->random()->id, // Assign random division
             ]);
             $user->assignRole($userRole);
         }
@@ -35,6 +40,7 @@ class AdditionalUserSeeder extends Seeder
                 'name' => 'Manager ' . $i,
                 'email' => 'manager' . $i . '@bach-project.com',
                 'password' => Hash::make('password'),
+                'division_id' => $divisions->random()->id, // Assign random division
             ]);
             $manager->assignRole($managerRole);
         }
@@ -45,6 +51,7 @@ class AdditionalUserSeeder extends Seeder
                 'name' => 'Leader ' . $i,
                 'email' => 'leader' . $i . '@bach-project.com',
                 'password' => Hash::make('password'),
+                'division_id' => $divisions->random()->id, // Assign random division
             ]);
             $leader->assignRole($leaderRole);
         }

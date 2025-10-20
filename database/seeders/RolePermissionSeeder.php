@@ -36,6 +36,13 @@ class RolePermissionSeeder extends Seeder
                 'employee-export',
                 'employee-import',
                 'employee-assign-manager', // New permission for assigning managers
+                'employee-assign-division', // New permission for assigning divisions
+            ],
+            'Divisions' => [ // New group for divisions
+                'division-view',
+                'division-create',
+                'division-edit',
+                'division-delete',
             ],
             'Settings' => [
                 'settings-view',
@@ -69,13 +76,20 @@ class RolePermissionSeeder extends Seeder
                         if (!$manager->hasPermissionTo($permission)) $manager->givePermissionTo($permission);
                         if (!$leader->hasPermissionTo($permission)) $leader->givePermissionTo($permission);
                         if (!$staff->hasPermissionTo($permission)) $staff->givePermissionTo($permission);
-                    } elseif ($name === 'employee-create' || $name === 'employee-edit' || $name === 'employee-delete' || $name === 'employee-import' || $name === 'employee-assign-manager') {
-                        // Manager can create, edit, delete, import, assign manager
+                    } elseif ($name === 'employee-create' || $name === 'employee-edit' || $name === 'employee-delete' || $name === 'employee-import' || $name === 'employee-assign-manager' || $name === 'employee-assign-division') {
+                        // Manager can create, edit, delete, import, assign manager, assign division
                         if (!$manager->hasPermissionTo($permission)) $manager->givePermissionTo($permission);
-                        // Leader can edit their direct reports, but not assign managers
-                        // For simplicity, let's give leader employee-edit for now, but in real app, it would be more granular
+                        // Leader can edit their direct reports, but not assign managers or divisions
                         if ($name === 'employee-edit' && !$leader->hasPermissionTo($permission)) $leader->givePermissionTo($permission);
                     }
+                }
+                // Assign division permissions
+                if (str_starts_with($name, 'division-')) {
+                    if ($name === 'division-view') {
+                        if (!$manager->hasPermissionTo($permission)) $manager->givePermissionTo($permission);
+                        if (!$leader->hasPermissionTo($permission)) $leader->givePermissionTo($permission);
+                    }
+                    // Only admin can create, edit, delete divisions by default
                 }
             }
         }

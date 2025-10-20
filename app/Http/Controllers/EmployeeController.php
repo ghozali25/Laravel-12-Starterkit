@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\Division; // Import Division model
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Hash;
@@ -20,7 +21,7 @@ class EmployeeController extends Controller
 {
     public function index(Request $request)
     {
-        $query = User::with(['roles', 'manager']) // Eager load manager relationship
+        $query = User::with(['roles', 'manager', 'division']) // Eager load manager and division relationships
             ->whereHas('roles', function ($q) {
                 $q->where('name', '!=', 'admin'); // Hanya tampilkan non-admin
             });
@@ -38,6 +39,11 @@ class EmployeeController extends Controller
             $query->where('manager_id', $request->manager_id);
         }
 
+        // Filter by division_id
+        if ($request->filled('division_id')) {
+            $query->where('division_id', $request->division_id);
+        }
+
         $employees = $query->latest()->paginate(10)->withQueryString();
 
         // Get potential managers/leaders for the filter dropdown
@@ -45,10 +51,14 @@ class EmployeeController extends Controller
             $q->whereIn('name', ['manager', 'leader']);
         })->select('id', 'name')->get();
 
+        // Get all divisions for the filter dropdown
+        $divisions = Division::select('id', 'name')->get();
+
         return Inertia::render('employees/Index', [
             'employees' => $employees,
-            'filters' => $request->only('search', 'manager_id'),
-            'potentialManagers' => $potentialManagers, // Pass to frontend
+            'filters' => $request->only('search', 'manager_id', 'division_id'),
+            'potentialManagers' => $potentialManagers,
+            'divisions' => $divisions, // Pass divisions to frontend
         ]);
     }
 
@@ -66,10 +76,12 @@ class EmployeeController extends Controller
         $potentialManagers = User::whereHas('roles', function ($q) {
             $q->whereIn('name', ['manager', 'leader']);
         })->select('id', 'name')->get();
+        $divisions = Division::all(); // Get all divisions
 
         return Inertia::render('employees/Form', [
             'roles' => $roles,
             'potentialManagers' => $potentialManagers,
+            'divisions' => $divisions, // Pass divisions to frontend
         ]);
     }
 
@@ -85,7 +97,8 @@ class EmployeeController extends Controller
             'password' => ['required', 'string', 'min:6'],
             'roles' => ['required', 'array', 'min:1'],
             'roles.*' => ['required', Rule::exists('roles', 'name')],
-            'manager_id' => ['nullable', 'exists:users,id'], // Add validation for manager_id
+            'manager_id' => ['nullable', 'exists:users,id'],
+            'division_id' => ['nullable', 'exists:divisions,id'], // Add validation for division_id
         ]);
 
         $employee = User::create([
@@ -96,7 +109,8 @@ class EmployeeController extends Controller
             'phone_number' => $validated['phone_number'],
             'address' => $validated['address'],
             'password' => Hash::make($validated['password']),
-            'manager_id' => $validated['manager_id'] ?? null, // Save manager_id
+            'manager_id' => $validated['manager_id'] ?? null,
+            'division_id' => $validated['division_id'] ?? null, // Save division_id
         ]);
 
         $employee->assignRole($validated['roles']);
@@ -113,12 +127,14 @@ class EmployeeController extends Controller
         })
         ->where('id', '!=', $employee->id) // An employee cannot be their own manager
         ->select('id', 'name')->get();
+        $divisions = Division::all(); // Get all divisions
 
         return Inertia::render('employees/Form', [
-            'employee' => $employee->only(['id', 'name', 'email', 'nik', 'personal_email', 'phone_number', 'address', 'manager_id']), // Include manager_id
+            'employee' => $employee->only(['id', 'name', 'email', 'nik', 'personal_email', 'phone_number', 'address', 'manager_id', 'division_id']), // Include manager_id and division_id
             'roles' => $roles,
             'currentRoles' => $employee->roles->pluck('name')->toArray(),
             'potentialManagers' => $potentialManagers,
+            'divisions' => $divisions, // Pass divisions to frontend
         ]);
     }
 
@@ -134,7 +150,8 @@ class EmployeeController extends Controller
             'password' => ['nullable', 'string', 'min:6'],
             'roles' => ['required', 'array', 'min:1'],
             'roles.*' => ['required', Rule::exists('roles', 'name')],
-            'manager_id' => ['nullable', 'exists:users,id', Rule::notIn([$employee->id])], // Add validation for manager_id
+            'manager_id' => ['nullable', 'exists:users,id', Rule::notIn([$employee->id])],
+            'division_id' => ['nullable', 'exists:divisions,id'], // Add validation for division_id
         ]);
 
         $employee->update([
@@ -147,7 +164,8 @@ class EmployeeController extends Controller
             'password' => $validated['password']
                 ? Hash::make($validated['password'])
                 : $employee->password,
-            'manager_id' => $validated['manager_id'] ?? null, // Update manager_id
+            'manager_id' => $validated['manager_id'] ?? null,
+            'division_id' => $validated['division_id'] ?? null, // Update division_id
         ]);
 
         $employee->syncRoles($validated['roles']);
@@ -163,9 +181,10 @@ class EmployeeController extends Controller
 
     public function export(Request $request, $format)
     {
-        $employees = User::whereHas('roles', function ($q) {
-            $q->where('name', '!=', 'admin');
-        })->get();
+        $employees = User::with(['roles', 'division']) // Eager load division for export
+            ->whereHas('roles', function ($q) {
+                $q->where('name', '!=', 'admin');
+            })->get();
 
         if ($format === 'xlsx') {
             return Excel::download(new EmployeesExport($employees), 'employees.xlsx');

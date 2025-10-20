@@ -3,7 +3,7 @@ import { Head, Link, router } from '@inertiajs/react';
 import AppLayout from '@/layouts/app-layout';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { type BreadcrumbItem } from '@/types';
+import { type BreadcrumbItem, type Division } from '@/types'; // Import Division type
 import {
   AlertDialog,
   AlertDialogTrigger,
@@ -39,7 +39,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { debounce } from '@/lib/utils';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'; // Import Select components
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 dayjs.extend(relativeTime);
 
@@ -56,10 +56,11 @@ interface Employee {
     id: number;
     name: string;
   }[];
-  manager?: { // Add manager relationship
+  manager?: {
     id: number;
     name: string;
   } | null;
+  division?: Division | null; // Add division relationship
 }
 
 interface PotentialManager {
@@ -76,15 +77,18 @@ interface Props {
   };
   filters: {
     search?: string;
-    manager_id?: string; // Add manager_id to filters
+    manager_id?: string;
+    division_id?: string; // Add division_id to filters
   };
-  potentialManagers: PotentialManager[]; // Pass potential managers for filter
+  potentialManagers: PotentialManager[];
+  divisions: Division[]; // Pass divisions for filter
 }
 
-export default function EmployeeIndex({ employees, filters, potentialManagers }: Props) {
+export default function EmployeeIndex({ employees, filters, potentialManagers, divisions }: Props) {
   const { t, locale } = useTranslation();
   const [search, setSearch] = useState(filters.search || '');
-  const [selectedManagerFilter, setSelectedManagerFilter] = useState(filters.manager_id || 'all'); // Default to 'all'
+  const [selectedManagerFilter, setSelectedManagerFilter] = useState(filters.manager_id || 'all');
+  const [selectedDivisionFilter, setSelectedDivisionFilter] = useState(filters.division_id || 'all'); // New state for division filter
   const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
   const [importFile, setImportFile] = useState<File | null>(null);
   const [importProcessing, setImportProcessing] = useState(false);
@@ -110,8 +114,12 @@ export default function EmployeeIndex({ employees, filters, potentialManagers }:
 
   // Debounced search function
   const debouncedSearch = useCallback(
-    debounce((value: string, managerId: string) => {
-      router.get('/employees', { search: value, manager_id: managerId === 'all' ? '' : managerId }, { preserveState: true, preserveScroll: true });
+    debounce((searchValue: string, managerId: string, divisionId: string) => {
+      router.get('/employees', {
+        search: searchValue,
+        manager_id: managerId === 'all' ? '' : managerId,
+        division_id: divisionId === 'all' ? '' : divisionId, // Include division_id in search
+      }, { preserveState: true, preserveScroll: true });
     }, 500),
     []
   );
@@ -119,12 +127,17 @@ export default function EmployeeIndex({ employees, filters, potentialManagers }:
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setSearch(value);
-    debouncedSearch(value, selectedManagerFilter);
+    debouncedSearch(value, selectedManagerFilter, selectedDivisionFilter);
   };
 
   const handleManagerFilterChange = (value: string) => {
     setSelectedManagerFilter(value);
-    debouncedSearch(search, value);
+    debouncedSearch(search, value, selectedDivisionFilter);
+  };
+
+  const handleDivisionFilterChange = (value: string) => { // New handler for division filter
+    setSelectedDivisionFilter(value);
+    debouncedSearch(search, selectedManagerFilter, value);
   };
 
   const handleImportFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -228,7 +241,23 @@ export default function EmployeeIndex({ employees, filters, potentialManagers }:
               ))}
             </SelectContent>
           </Select>
-          <Button onClick={() => debouncedSearch(search, selectedManagerFilter)} variant="secondary">
+          <Select
+            value={selectedDivisionFilter}
+            onValueChange={handleDivisionFilterChange}
+          >
+            <SelectTrigger className="w-full md:w-[200px]">
+              <SelectValue placeholder={t('Filter by Division')} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">{t('All Divisions')}</SelectItem>
+              {divisions.map((division) => (
+                <SelectItem key={division.id} value={String(division.id)}>
+                  {division.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Button onClick={() => debouncedSearch(search, selectedManagerFilter, selectedDivisionFilter)} variant="secondary">
             <FileSearch className="h-4 w-4" />
           </Button>
         </div>
@@ -244,6 +273,7 @@ export default function EmployeeIndex({ employees, filters, potentialManagers }:
                 <TableHead>{t('Phone Number')}</TableHead>
                 <TableHead>{t('Address')}</TableHead>
                 <TableHead>{t('Reports To')}</TableHead>
+                <TableHead>{t('Division')}</TableHead> {/* New TableHead for Division */}
                 <TableHead>{t('Roles')}</TableHead>
                 <TableHead className="text-right">{t('Actions')}</TableHead>
               </TableRow>
@@ -251,7 +281,7 @@ export default function EmployeeIndex({ employees, filters, potentialManagers }:
             <TableBody>
               {employees.data.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={9} className="h-24 text-center text-muted-foreground">
+                  <TableCell colSpan={10} className="h-24 text-center text-muted-foreground"> {/* Update colspan */}
                     {t('No employee data available.')}
                   </TableCell>
                 </TableRow>
@@ -265,6 +295,7 @@ export default function EmployeeIndex({ employees, filters, potentialManagers }:
                     <TableCell>{employee.phone_number || '-'}</TableCell>
                     <TableCell>{employee.address || '-'}</TableCell>
                     <TableCell>{employee.manager?.name || '-'}</TableCell>
+                    <TableCell>{employee.division?.name || '-'}</TableCell> {/* Display Division Name */}
                     <TableCell>
                       {employee.roles.length > 0 ? (
                         <div className="flex flex-wrap gap-1">

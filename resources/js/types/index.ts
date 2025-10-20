@@ -40,6 +40,11 @@ export interface Setting {
       [key: string]: unknown;
   }
 
+export interface Division { // New interface for Division
+    id: number;
+    name: string;
+}
+
 export interface User {
     id: number;
     name: string;
@@ -48,6 +53,14 @@ export interface User {
     email_verified_at: string | null;
     created_at: string;
     updated_at: string;
+    nik?: string | null;
+    personal_email?: string | null;
+    phone_number?: string | null;
+    address?: string | null;
+    manager_id?: number | null;
+    manager?: User | null; // Nested manager object
+    division_id?: number | null;
+    division?: Division | null; // Nested division object
     [key: string]: unknown; // This allows for additional properties...
 }
 
@@ -59,4 +72,3 @@ export interface Permission {
     created_at?: string;
     updated_at?: string;
   }
-  

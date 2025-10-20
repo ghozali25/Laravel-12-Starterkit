@@ -31,6 +31,7 @@ class EmployeesExport implements FromCollection, WithHeadings, WithMapping
             'Email Pribadi',
             'No. Telepon',
             'Alamat',
+            'Divisi', // Tambahkan ini
             'Roles',
         ];
     }
@@ -44,6 +45,7 @@ class EmployeesExport implements FromCollection, WithHeadings, WithMapping
             $employee->personal_email,
             $employee->phone_number,
             $employee->address,
+            $employee->division->name ?? '-', // Ambil nama divisi
             $employee->roles->pluck('name')->implode(', '),
         ];
     }

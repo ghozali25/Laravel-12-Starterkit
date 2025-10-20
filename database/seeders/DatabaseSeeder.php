@@ -11,8 +11,9 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call([
+            DivisionSeeder::class, // Panggil DivisionSeeder pertama
             RolePermissionSeeder::class,
-            MenuSeeder::class, // Panggil MenuSeeder setelah RolePermissionSeeder
+            MenuSeeder::class,
         ]);
 
         // Pastikan admin user dibuat dan diberi peran admin

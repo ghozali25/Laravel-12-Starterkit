@@ -5,7 +5,8 @@ namespace App\Providers;
 use App\Models\Menu;
 use App\Models\User;
 use App\Models\SettingApp;
-use App\Models\DashboardWidget; // Import the new model
+use App\Models\DashboardWidget;
+use App\Models\Division; // Import the new model
 use Spatie\Permission\Models\Role;
 use App\Observers\GlobalActivityLogger;
 use Illuminate\Support\ServiceProvider;
@@ -34,6 +35,7 @@ class AppServiceProvider extends ServiceProvider
         Permission::observe(GlobalActivityLogger::class);
         Menu::observe(GlobalActivityLogger::class);
         SettingApp::observe(GlobalActivityLogger::class);
-        DashboardWidget::observe(GlobalActivityLogger::class); // Add DashboardWidget observer
+        DashboardWidget::observe(GlobalActivityLogger::class);
+        Division::observe(GlobalActivityLogger::class); // Add Division observer
     }
 }

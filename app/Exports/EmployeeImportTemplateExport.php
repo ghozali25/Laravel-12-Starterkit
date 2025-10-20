@@ -23,6 +23,7 @@ class EmployeeImportTemplateExport implements FromCollection, WithHeadings
             'email_pribadi',
             'no_telepon',
             'alamat',
+            'divisi', // Tambahkan ini
             'roles', // Contoh: user, editor (pisahkan dengan koma)
         ];
     }

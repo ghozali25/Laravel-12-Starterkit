@@ -67,7 +67,14 @@ class MenuSeeder extends Seeder
             'order' => 3,
             'permission_name' => 'permission-view',
         ]);
-        // Menu Employees yang sebelumnya ada di sini dihapus karena sudah dipindahkan ke atas.
+        Menu::create([ // New menu for Divisions
+            'title' => 'Divisions',
+            'icon' => 'Building2', // Using Building2 icon for divisions
+            'route' => '/divisions',
+            'parent_id' => $accessMenu->id,
+            'order' => 4,
+            'permission_name' => 'division-view',
+        ]);
 
         // Settings (Parent Menu) - Urutan disesuaikan
         $settingsMenu = Menu::create([
