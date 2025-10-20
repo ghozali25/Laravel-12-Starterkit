@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useForm, Link } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,11 +7,11 @@ import AppLayout from '@/layouts/app-layout';
 import { Head } from '@inertiajs/react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { BreadcrumbItem, type Division } from '@/types'; // Import Division type
+import { BreadcrumbItem, type Division } from '@/types';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Textarea } from '@/components/ui/textarea';
 import { useTranslation } from '@/lib/i18n';
-import { Save, ArrowLeft } from 'lucide-react';
+import { Save, ArrowLeft, XCircle } from 'lucide-react'; // Import XCircle
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface Role {
@@ -28,7 +28,7 @@ interface Employee {
   phone_number: string | null;
   address: string | null;
   manager_id: number | null;
-  division_id: number | null; // Add division_id
+  division_id: number | null;
   roles?: string[];
 }
 
@@ -42,12 +42,16 @@ interface Props {
   roles: Role[];
   currentRoles?: string[];
   potentialManagers: PotentialManager[];
-  divisions: Division[]; // Pass divisions
+  divisions: Division[];
+  avatar_url?: string | null; // Existing avatar URL
 }
 
-export default function EmployeeForm({ employee, roles, currentRoles, potentialManagers, divisions }: Props) {
+export default function EmployeeForm({ employee, roles, currentRoles, potentialManagers, divisions, avatar_url }: Props) {
   const { t } = useTranslation();
   const isEdit = !!employee;
+
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(avatar_url || null);
+  const [removeAvatar, setRemoveAvatar] = useState(false);
 
   const { data, setData, post, put, processing, errors } = useForm({
     name: employee?.name || '',
@@ -57,14 +61,38 @@ export default function EmployeeForm({ employee, roles, currentRoles, potentialM
     phone_number: employee?.phone_number || '',
     address: employee?.address || '',
     manager_id: employee?.manager_id || null,
-    division_id: employee?.division_id || null, // Initialize division_id
+    division_id: employee?.division_id || null,
     password: '',
     roles: currentRoles || [],
+    avatar: null as File | null, // For new avatar file
+    remove_avatar: false as boolean, // Flag to tell backend to remove avatar
   });
+
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
+    setData('avatar', file);
+    setData('remove_avatar', false); // Reset remove flag if new file is selected
+    if (file) {
+      setAvatarPreview(URL.createObjectURL(file));
+    } else {
+      setAvatarPreview(null);
+    }
+  };
+
+  const handleRemoveAvatar = () => {
+    setAvatarPreview(null);
+    setData('avatar', null); // Clear file input
+    setData('remove_avatar', true); // Set flag for backend
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    isEdit ? put(`/employees/${employee?.id}`) : post('/employees');
+    const submitData = { ...data, remove_avatar: removeAvatar }; // Include remove_avatar flag
+    if (isEdit) {
+      put(`/employees/${employee?.id}`, submitData as any); // Cast to any to allow File type
+    } else {
+      post('/employees', submitData as any); // Cast to any to allow File type
+    }
   };
 
   const breadcrumbs: BreadcrumbItem[] = [
@@ -91,6 +119,32 @@ export default function EmployeeForm({ employee, roles, currentRoles, potentialM
           <CardContent className="pt-5">
             <form onSubmit={handleSubmit} className="space-y-8">
               <div className="space-y-4">
+                {/* Avatar Upload */}
+                <div className="space-y-1">
+                  <Label htmlFor="avatar">{t('Employee Photo (Max 2MB)')}</Label>
+                  <Input
+                    id="avatar"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleAvatarChange}
+                  />
+                  {avatarPreview && (
+                    <div className="relative mt-2 w-24 h-24 rounded-full overflow-hidden group">
+                      <img src={avatarPreview} alt="Preview Avatar" className="w-full h-full object-cover" />
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="icon"
+                        className="absolute top-0 right-0 h-6 w-6 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                        onClick={handleRemoveAvatar}
+                      >
+                        <XCircle className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  )}
+                  {errors.avatar && <p className="text-sm text-red-500 mt-2">{errors.avatar}</p>}
+                </div>
+
                 {/* Name */}
                 <div>
                   <Label htmlFor="name" className="mb-2 block">{t('Name')}</Label>
@@ -197,7 +251,7 @@ export default function EmployeeForm({ employee, roles, currentRoles, potentialM
                 <div>
                   <Label htmlFor="division_id" className="mb-2 block">{t('Division')}</Label>
                   <Select
-                    value={data.division_id ? String(data.division_id) : '-1'} // Default to '-1' for 'None'
+                    value={data.division_id ? String(data.division_id) : '-1'}
                     onValueChange={(value) => setData('division_id', value === '-1' ? null : Number(value))}
                   >
                     <SelectTrigger>

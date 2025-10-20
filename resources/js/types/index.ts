@@ -40,9 +40,34 @@ export interface Setting {
       [key: string]: unknown;
   }
 
-export interface Division { // New interface for Division
+export interface Division {
     id: number;
     name: string;
+}
+
+export interface AssetCategory {
+    id: number;
+    name: string;
+    description?: string | null;
+    custom_fields_schema?: Record<string, any> | null;
+}
+
+export interface Asset { // New interface for Asset
+    id: number;
+    asset_category_id: number;
+    user_id: number | null;
+    serial_number: string | null;
+    brand: string | null;
+    model: string | null;
+    purchase_date: string | null; // YYYY-MM-DD
+    warranty_end_date: string | null; // YYYY-MM-DD
+    status: 'available' | 'assigned' | 'in_repair' | 'retired';
+    notes: string | null;
+    custom_fields_data: Record<string, any> | null;
+    last_used_at: string | null; // Human readable diffForHumans
+    created_at: string; // Human readable diffForHumans
+    category?: AssetCategory; // Eager loaded relationship
+    user?: User; // Eager loaded relationship
 }
 
 export interface User {
@@ -50,6 +75,7 @@ export interface User {
     name: string;
     email: string;
     avatar?: string;
+    avatar_url?: string | null;
     email_verified_at: string | null;
     created_at: string;
     updated_at: string;
@@ -58,10 +84,10 @@ export interface User {
     phone_number?: string | null;
     address?: string | null;
     manager_id?: number | null;
-    manager?: User | null; // Nested manager object
+    manager?: User | null;
     division_id?: number | null;
-    division?: Division | null; // Nested division object
-    [key: string]: unknown; // This allows for additional properties...
+    division?: Division | null;
+    [key: string]: unknown;
 }
 
 export interface Permission {

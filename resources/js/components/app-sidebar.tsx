@@ -14,9 +14,9 @@ import { NavUser } from '@/components/nav-user';
 import { iconMapper } from '@/lib/iconMapper';
 import type { LucideIcon } from 'lucide-react';
 import { ChevronDown, ChevronRight } from 'lucide-react';
-import { useEffect, useState, useCallback } from 'react'; // Import useCallback
+import { useEffect, useState, useCallback } from 'react';
 import { cn } from '@/lib/utils';
-import { useTranslation } from '@/lib/i18n'; // Import useTranslation
+import { useTranslation } from '@/lib/i18n';
 
 interface MenuItem {
   id: number;
@@ -35,7 +35,7 @@ interface RenderMenuProps {
 
 function RenderMenu({ items, level = 0, openMenus, toggleMenu }: RenderMenuProps) {
   const { url: currentUrl } = usePage();
-  const { t } = useTranslation(); // Use the translation hook
+  const { t } = useTranslation();
 
   if (!Array.isArray(items)) return null;
 
@@ -69,7 +69,7 @@ function RenderMenu({ items, level = 0, openMenus, toggleMenu }: RenderMenuProps
                 >
                   <div className="flex items-center">
                     <Icon className="size-4 mr-3 opacity-80 group-hover:opacity-100" />
-                    <span>{t(menu.title)}</span> {/* Translate menu title */}
+                    <span>{t(menu.title)}</span>
                   </div>
                   <ChevronDown
                     className={cn(
@@ -102,7 +102,7 @@ function RenderMenu({ items, level = 0, openMenus, toggleMenu }: RenderMenuProps
               >
                 <Link href={menu.route || '#'}>
                   <Icon className="size-4 mr-3 opacity-80 group-hover:opacity-100" />
-                  <span>{t(menu.title)}</span> {/* Translate menu title */}
+                  <span>{t(menu.title)}</span>
                   {level > 0 && (
                     <ChevronRight className="ml-auto size-4 opacity-0 group-hover:opacity-50" />
                   )}
@@ -118,10 +118,9 @@ function RenderMenu({ items, level = 0, openMenus, toggleMenu }: RenderMenuProps
 
 export function AppSidebar() {
   const { menus = [] } = usePage().props as { menus?: MenuItem[] };
-  const { t } = useTranslation(); // Use the translation hook
+  const { t } = useTranslation();
   const [openMenus, setOpenMenus] = useState<Record<number, boolean>>({});
 
-  // Function to toggle menu expansion
   const toggleMenu = useCallback((id: number) => {
     setOpenMenus((prev) => ({
       ...prev,
@@ -129,12 +128,9 @@ export function AppSidebar() {
     }));
   }, []);
 
-  // Log untuk memeriksa prop menus
-  console.log('AppSidebar received menus:', menus);
-
   const footerNavItems = [
     {
-      title: t('Creator By Ahmad Ghozali'), // Translate footer item title
+      title: t('Creator By Ahmad Ghozali'),
       url: 'https://github.com/ghozali25/Laravel-12-Starterkit',
       icon: iconMapper('Star') as LucideIcon,
     },

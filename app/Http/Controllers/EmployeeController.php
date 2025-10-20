@@ -55,7 +55,20 @@ class EmployeeController extends Controller
         $divisions = Division::select('id', 'name')->get();
 
         return Inertia::render('employees/Index', [
-            'employees' => $employees,
+            'employees' => $employees->through(fn ($employee) => [
+                'id' => $employee->id,
+                'name' => $employee->name,
+                'email' => $employee->email,
+                'nik' => $employee->nik,
+                'personal_email' => $employee->personal_email,
+                'phone_number' => $employee->phone_number,
+                'address' => $employee->address,
+                'created_at' => $employee->created_at,
+                'roles' => $employee->roles,
+                'manager' => $employee->manager ? ['id' => $employee->manager->id, 'name' => $employee->manager->name] : null,
+                'division' => $employee->division ? ['id' => $employee->division->id, 'name' => $employee->division->name] : null,
+                'avatar_url' => $employee->getFirstMediaUrl('avatars'), // Get avatar URL
+            ]),
             'filters' => $request->only('search', 'manager_id', 'division_id'),
             'potentialManagers' => $potentialManagers,
             'divisions' => $divisions, // Pass divisions to frontend
@@ -98,7 +111,8 @@ class EmployeeController extends Controller
             'roles' => ['required', 'array', 'min:1'],
             'roles.*' => ['required', Rule::exists('roles', 'name')],
             'manager_id' => ['nullable', 'exists:users,id'],
-            'division_id' => ['nullable', 'exists:divisions,id'], // Add validation for division_id
+            'division_id' => ['nullable', 'exists:divisions,id'],
+            'avatar' => ['nullable', 'image', 'max:2048'], // Add avatar validation
         ]);
 
         $employee = User::create([
@@ -110,10 +124,14 @@ class EmployeeController extends Controller
             'address' => $validated['address'],
             'password' => Hash::make($validated['password']),
             'manager_id' => $validated['manager_id'] ?? null,
-            'division_id' => $validated['division_id'] ?? null, // Save division_id
+            'division_id' => $validated['division_id'] ?? null,
         ]);
 
         $employee->assignRole($validated['roles']);
+
+        if ($request->hasFile('avatar')) {
+            $employee->addMediaFromRequest('avatar')->toMediaCollection('avatars');
+        }
 
         return redirect()->route('employees.index')->with('success', 'Employee berhasil dibuat.');
     }
@@ -125,16 +143,17 @@ class EmployeeController extends Controller
         $potentialManagers = User::whereHas('roles', function ($q) {
             $q->whereIn('name', ['manager', 'leader']);
         })
-        ->where('id', '!=', $employee->id) // An employee cannot be their own manager
+        ->where('id', '!=', $employee->id)
         ->select('id', 'name')->get();
-        $divisions = Division::all(); // Get all divisions
+        $divisions = Division::all();
 
         return Inertia::render('employees/Form', [
-            'employee' => $employee->only(['id', 'name', 'email', 'nik', 'personal_email', 'phone_number', 'address', 'manager_id', 'division_id']), // Include manager_id and division_id
+            'employee' => $employee->only(['id', 'name', 'email', 'nik', 'personal_email', 'phone_number', 'address', 'manager_id', 'division_id']),
             'roles' => $roles,
             'currentRoles' => $employee->roles->pluck('name')->toArray(),
             'potentialManagers' => $potentialManagers,
-            'divisions' => $divisions, // Pass divisions to frontend
+            'divisions' => $divisions,
+            'avatar_url' => $employee->getFirstMediaUrl('avatars'), // Pass existing avatar URL
         ]);
     }
 
@@ -151,7 +170,9 @@ class EmployeeController extends Controller
             'roles' => ['required', 'array', 'min:1'],
             'roles.*' => ['required', Rule::exists('roles', 'name')],
             'manager_id' => ['nullable', 'exists:users,id', Rule::notIn([$employee->id])],
-            'division_id' => ['nullable', 'exists:divisions,id'], // Add validation for division_id
+            'division_id' => ['nullable', 'exists:divisions,id'],
+            'avatar' => ['nullable', 'image', 'max:2048'], // Add avatar validation
+            'remove_avatar' => ['boolean'], // Flag to remove existing avatar
         ]);
 
         $employee->update([
@@ -165,10 +186,17 @@ class EmployeeController extends Controller
                 ? Hash::make($validated['password'])
                 : $employee->password,
             'manager_id' => $validated['manager_id'] ?? null,
-            'division_id' => $validated['division_id'] ?? null, // Update division_id
+            'division_id' => $validated['division_id'] ?? null,
         ]);
 
         $employee->syncRoles($validated['roles']);
+
+        if ($request->hasFile('avatar')) {
+            $employee->clearMediaCollection('avatars'); // Remove old avatar
+            $employee->addMediaFromRequest('avatar')->toMediaCollection('avatars');
+        } elseif ($request->input('remove_avatar')) {
+            $employee->clearMediaCollection('avatars');
+        }
 
         return redirect()->route('employees.index')->with('success', 'Employee berhasil diperbarui.');
     }
@@ -181,7 +209,7 @@ class EmployeeController extends Controller
 
     public function export(Request $request, $format)
     {
-        $employees = User::with(['roles', 'division']) // Eager load division for export
+        $employees = User::with(['roles', 'division'])
             ->whereHas('roles', function ($q) {
                 $q->where('name', '!=', 'admin');
             })->get();

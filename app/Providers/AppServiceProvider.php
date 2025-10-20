@@ -6,7 +6,9 @@ use App\Models\Menu;
 use App\Models\User;
 use App\Models\SettingApp;
 use App\Models\DashboardWidget;
-use App\Models\Division; // Import the new model
+use App\Models\Division;
+use App\Models\AssetCategory;
+use App\Models\Asset; // Import the new Asset model
 use Spatie\Permission\Models\Role;
 use App\Observers\GlobalActivityLogger;
 use Illuminate\Support\ServiceProvider;
@@ -32,10 +34,13 @@ class AppServiceProvider extends ServiceProvider
         Schema::defaultStringLength(191);
         User::observe(GlobalActivityLogger::class);
         Role::observe(GlobalActivityLogger::class);
+    
         Permission::observe(GlobalActivityLogger::class);
         Menu::observe(GlobalActivityLogger::class);
         SettingApp::observe(GlobalActivityLogger::class);
         DashboardWidget::observe(GlobalActivityLogger::class);
-        Division::observe(GlobalActivityLogger::class); // Add Division observer
+        Division::observe(GlobalActivityLogger::class);
+        AssetCategory::observe(GlobalActivityLogger::class);
+        Asset::observe(GlobalActivityLogger::class); // Add Asset observer
     }
 }

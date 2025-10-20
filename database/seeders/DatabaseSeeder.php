@@ -11,9 +11,10 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call([
-            DivisionSeeder::class, // Panggil DivisionSeeder pertama
+            DivisionSeeder::class,
             RolePermissionSeeder::class,
             MenuSeeder::class,
+            AssetCategorySeeder::class, // Pastikan kategori aset sudah ada
         ]);
 
         // Pastikan admin user dibuat dan diberi peran admin
@@ -25,8 +26,14 @@ class DatabaseSeeder extends Seeder
         $admin->assignRole('admin');
 
         // Panggil seeder tambahan untuk user, manager, dan leader
+        // Ini harus berjalan sebelum AssetSeeder agar ada karyawan yang tersedia
         $this->call([
             AdditionalUserSeeder::class,
+        ]);
+
+        // Panggil AssetSeeder setelah kategori aset dan karyawan sudah ada
+        $this->call([
+            AssetSeeder::class,
         ]);
     }
 }

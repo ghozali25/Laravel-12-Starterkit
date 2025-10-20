@@ -3,7 +3,7 @@ import { Head, Link, router } from '@inertiajs/react';
 import AppLayout from '@/layouts/app-layout';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { type BreadcrumbItem, type Division } from '@/types'; // Import Division type
+import { type BreadcrumbItem, type Division } from '@/types';
 import {
   AlertDialog,
   AlertDialogTrigger,
@@ -40,6 +40,9 @@ import {
 } from '@/components/ui/table';
 import { debounce } from '@/lib/utils';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'; // Import Avatar components
+import { useInitials } from '@/hooks/use-initials'; // Import useInitials hook
+import ImagePreviewDialog from '@/components/ImagePreviewDialog'; // Import new dialog component
 
 dayjs.extend(relativeTime);
 
@@ -60,7 +63,8 @@ interface Employee {
     id: number;
     name: string;
   } | null;
-  division?: Division | null; // Add division relationship
+  division?: Division | null;
+  avatar_url?: string | null; // Add avatar_url
 }
 
 interface PotentialManager {
@@ -78,20 +82,24 @@ interface Props {
   filters: {
     search?: string;
     manager_id?: string;
-    division_id?: string; // Add division_id to filters
+    division_id?: string;
   };
   potentialManagers: PotentialManager[];
-  divisions: Division[]; // Pass divisions for filter
+  divisions: Division[];
 }
 
 export default function EmployeeIndex({ employees, filters, potentialManagers, divisions }: Props) {
   const { t, locale } = useTranslation();
   const [search, setSearch] = useState(filters.search || '');
   const [selectedManagerFilter, setSelectedManagerFilter] = useState(filters.manager_id || 'all');
-  const [selectedDivisionFilter, setSelectedDivisionFilter] = useState(filters.division_id || 'all'); // New state for division filter
+  const [selectedDivisionFilter, setSelectedDivisionFilter] = useState(filters.division_id || 'all');
   const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
   const [importFile, setImportFile] = useState<File | null>(null);
   const [importProcessing, setImportProcessing] = useState(false);
+  const [isImagePreviewOpen, setIsImagePreviewOpen] = useState(false);
+  const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
+  const [previewImageAlt, setPreviewImageAlt] = useState('');
+  const getInitials = useInitials(); // Initialize useInitials
 
   useEffect(() => {
     dayjs.locale(locale);
@@ -112,13 +120,12 @@ export default function EmployeeIndex({ employees, filters, potentialManagers, d
     });
   };
 
-  // Debounced search function
   const debouncedSearch = useCallback(
     debounce((searchValue: string, managerId: string, divisionId: string) => {
       router.get('/employees', {
         search: searchValue,
         manager_id: managerId === 'all' ? '' : managerId,
-        division_id: divisionId === 'all' ? '' : divisionId, // Include division_id in search
+        division_id: divisionId === 'all' ? '' : divisionId,
       }, { preserveState: true, preserveScroll: true });
     }, 500),
     []
@@ -135,7 +142,7 @@ export default function EmployeeIndex({ employees, filters, potentialManagers, d
     debouncedSearch(search, value, selectedDivisionFilter);
   };
 
-  const handleDivisionFilterChange = (value: string) => { // New handler for division filter
+  const handleDivisionFilterChange = (value: string) => {
     setSelectedDivisionFilter(value);
     debouncedSearch(search, selectedManagerFilter, value);
   };
@@ -172,6 +179,12 @@ export default function EmployeeIndex({ employees, filters, potentialManagers, d
       },
       onFinish: () => setImportProcessing(false),
     });
+  };
+
+  const openImagePreview = (src: string | null, alt: string) => {
+    setPreviewImageUrl(src);
+    setPreviewImageAlt(alt);
+    setIsImagePreviewOpen(true);
   };
 
   return (
@@ -266,6 +279,7 @@ export default function EmployeeIndex({ employees, filters, potentialManagers, d
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead>{t('Photo')}</TableHead> {/* New TableHead for Photo */}
                 <TableHead>{t('NIK')}</TableHead>
                 <TableHead>{t('Name')}</TableHead>
                 <TableHead>{t('Company Email')}</TableHead>
@@ -273,7 +287,7 @@ export default function EmployeeIndex({ employees, filters, potentialManagers, d
                 <TableHead>{t('Phone Number')}</TableHead>
                 <TableHead>{t('Address')}</TableHead>
                 <TableHead>{t('Reports To')}</TableHead>
-                <TableHead>{t('Division')}</TableHead> {/* New TableHead for Division */}
+                <TableHead>{t('Division')}</TableHead>
                 <TableHead>{t('Roles')}</TableHead>
                 <TableHead className="text-right">{t('Actions')}</TableHead>
               </TableRow>
@@ -281,13 +295,19 @@ export default function EmployeeIndex({ employees, filters, potentialManagers, d
             <TableBody>
               {employees.data.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={10} className="h-24 text-center text-muted-foreground"> {/* Update colspan */}
+                  <TableCell colSpan={11} className="h-24 text-center text-muted-foreground"> {/* Update colspan */}
                     {t('No employee data available.')}
                   </TableCell>
                 </TableRow>
               ) : (
                 employees.data.map((employee) => (
                   <TableRow key={employee.id}>
+                    <TableCell>
+                      <Avatar className="h-8 w-8 cursor-pointer" onClick={() => openImagePreview(employee.avatar_url ?? null, employee.name)}>
+                        <AvatarImage src={employee.avatar_url || undefined} alt={employee.name} />
+                        <AvatarFallback>{getInitials(employee.name)}</AvatarFallback>
+                      </Avatar>
+                    </TableCell>
                     <TableCell className="font-medium">{employee.nik || '-'}</TableCell>
                     <TableCell>{employee.name}</TableCell>
                     <TableCell>{employee.email}</TableCell>
@@ -295,7 +315,7 @@ export default function EmployeeIndex({ employees, filters, potentialManagers, d
                     <TableCell>{employee.phone_number || '-'}</TableCell>
                     <TableCell>{employee.address || '-'}</TableCell>
                     <TableCell>{employee.manager?.name || '-'}</TableCell>
-                    <TableCell>{employee.division?.name || '-'}</TableCell> {/* Display Division Name */}
+                    <TableCell>{employee.division?.name || '-'}</TableCell>
                     <TableCell>
                       {employee.roles.length > 0 ? (
                         <div className="flex flex-wrap gap-1">
@@ -399,6 +419,14 @@ export default function EmployeeIndex({ employees, filters, potentialManagers, d
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Image Preview Dialog */}
+      <ImagePreviewDialog
+        src={previewImageUrl}
+        alt={previewImageAlt}
+        open={isImagePreviewOpen}
+        onOpenChange={setIsImagePreviewOpen}
+      />
     </AppLayout>
   );
 }

@@ -76,12 +76,39 @@ class MenuSeeder extends Seeder
             'permission_name' => 'division-view',
         ]);
 
+        // Asset Management (Parent Menu)
+        $assetMenu = Menu::create([
+            'title' => 'Assets',
+            'icon' => 'Package', // Using Package icon for assets
+            'route' => null,
+            'order' => 4, // Urutan setelah Access
+            'permission_name' => 'asset-view', // Placeholder permission for main asset menu
+        ]);
+
+        // Sub-menu untuk Asset Management
+        Menu::create([
+            'title' => 'Asset Categories',
+            'icon' => 'Tags', // Using Tags icon for asset categories
+            'route' => '/asset-categories',
+            'parent_id' => $assetMenu->id,
+            'order' => 1,
+            'permission_name' => 'asset-category-view',
+        ]);
+        Menu::create([ // New menu for Assets List
+            'title' => 'Assets List',
+            'icon' => 'Laptop', // Using Laptop icon for assets list
+            'route' => '/assets',
+            'parent_id' => $assetMenu->id,
+            'order' => 2,
+            'permission_name' => 'asset-view',
+        ]);
+
         // Settings (Parent Menu) - Urutan disesuaikan
         $settingsMenu = Menu::create([
             'title' => 'Settings',
             'icon' => 'Settings',
             'route' => null,
-            'order' => 4, // Urutan setelah Access
+            'order' => 5, // Urutan setelah Assets
             'permission_name' => 'settings-view',
         ]);
 
@@ -116,7 +143,7 @@ class MenuSeeder extends Seeder
             'title' => 'Utilities',
             'icon' => 'Tool',
             'route' => null,
-            'order' => 5, // Urutan setelah Settings
+            'order' => 6, // Urutan setelah Settings
             'permission_name' => 'utilities-view',
         ]);
 

@@ -44,6 +44,17 @@ class RolePermissionSeeder extends Seeder
                 'division-edit',
                 'division-delete',
             ],
+            'Assets' => [ // New group for assets
+                'asset-view', // Main permission for Assets menu
+                'asset-create',
+                'asset-edit',
+                'asset-delete',
+                'asset-category-view',
+                'asset-category-create',
+                'asset-category-edit',
+                'asset-category-delete',
+                // Add more asset permissions later
+            ],
             'Settings' => [
                 'settings-view',
                 'menu-view',
@@ -90,6 +101,23 @@ class RolePermissionSeeder extends Seeder
                         if (!$leader->hasPermissionTo($permission)) $leader->givePermissionTo($permission);
                     }
                     // Only admin can create, edit, delete divisions by default
+                }
+                // Assign asset category permissions
+                if (str_starts_with($name, 'asset-category-')) {
+                    if ($name === 'asset-category-view') {
+                        if (!$manager->hasPermissionTo($permission)) $manager->givePermissionTo($permission);
+                    }
+                    // Only admin can create, edit, delete asset categories by default
+                }
+                // Assign asset permissions
+                if (str_starts_with($name, 'asset-')) {
+                    if ($name === 'asset-view') {
+                        if (!$manager->hasPermissionTo($permission)) $manager->givePermissionTo($permission);
+                        if (!$leader->hasPermissionTo($permission)) $leader->givePermissionTo($permission);
+                        if (!$staff->hasPermissionTo($permission)) $staff->givePermissionTo($permission);
+                    } elseif ($name === 'asset-create' || $name === 'asset-edit' || $name === 'asset-delete') {
+                        if (!$manager->hasPermissionTo($permission)) $manager->givePermissionTo($permission);
+                    }
                 }
             }
         }

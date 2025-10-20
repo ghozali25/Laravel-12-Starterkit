@@ -14,7 +14,9 @@ use App\Http\Controllers\MediaFolderController;
 use App\Http\Controllers\LanguageController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EmployeeController;
-use App\Http\Controllers\DivisionController; // Import the new DivisionController
+use App\Http\Controllers\DivisionController;
+use App\Http\Controllers\AssetCategoryController;
+use App\Http\Controllers\AssetController; // Import the new AssetController
 
 Route::get('/', function () {
     return Inertia::render('welcome');
@@ -53,6 +55,12 @@ Route::middleware(['auth', 'menu.permission'])->group(function () {
 
     // Division Management Routes
     Route::resource('divisions', DivisionController::class);
+
+    // Asset Category Management Routes
+    Route::resource('asset-categories', AssetCategoryController::class);
+
+    // Asset Management Routes
+    Route::resource('assets', AssetController::class);
 });
 
 require __DIR__ . '/settings.php';

@@ -278,7 +278,9 @@ import {
     Zap,
     ZoomIn,
     ZoomOut,
-    Building2, // Add Building2 icon
+    Building2,
+    Tags,
+    Laptop, // Add Laptop icon
   } from 'lucide-react';
   
   export const icons = [
@@ -553,5 +555,7 @@ import {
     { name: 'Zap', icon: Zap },
     { name: 'ZoomIn', icon: ZoomIn },
     { name: 'ZoomOut', icon: ZoomOut },
-    { name: 'Building2', icon: Building2 }, // Add Building2 icon
+    { name: 'Building2', icon: Building2 },
+    { name: 'Tags', icon: Tags },
+    { name: 'Laptop', icon: Laptop }, // Add Laptop icon
   ];
