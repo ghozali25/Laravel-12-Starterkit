@@ -8,6 +8,13 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Carbon\Carbon;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\AssetsExport;
+use App\Exports\AssetImportTemplateExport;
+use App\Imports\AssetsImport;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Maatwebsite\Excel\Validators\ValidationException;
+use Maatwebsite\Excel\Validators\Failure;
 
 class AssetController extends Controller
 {
@@ -152,5 +159,57 @@ class AssetController extends Controller
     {
         $asset->delete();
         return redirect()->route('assets.index')->with('success', 'Aset berhasil dihapus.');
+    }
+
+    public function export(Request $request, $format)
+    {
+        $assets = Asset::with(['category', 'user'])->get();
+
+        if ($format === 'xlsx') {
+            return Excel::download(new AssetsExport($assets), 'assets.xlsx');
+        } elseif ($format === 'csv') {
+            return Excel::download(new AssetsExport($assets), 'assets.csv', \Maatwebsite\Excel\Excel::CSV);
+        } elseif ($format === 'pdf') {
+            $pdf = Pdf::loadView('exports.assets_pdf', ['assets' => $assets]);
+            return $pdf->download('assets.pdf');
+        }
+
+        return redirect()->back()->with('error', 'Format ekspor tidak valid.');
+    }
+
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:xlsx,xls,csv',
+        ]);
+
+        try {
+            $import = new AssetsImport;
+            Excel::import($import, $request->file('file'));
+
+            if ($import->failures()->isNotEmpty()) {
+                $errors = $import->failures()->map(function (Failure $failure) {
+                    return 'Baris ' . $failure->row() . ': ' . implode(', ', $failure->errors());
+                })->implode('<br>');
+
+                return redirect()->back()->with('error', 'Impor selesai dengan beberapa kegagalan:<br>' . $errors);
+            }
+
+            return redirect()->back()->with('success', 'Aset berhasil diimpor.');
+
+        } catch (ValidationException $e) {
+            $failures = $e->failures();
+            $errors = collect($failures)->map(function (Failure $failure) {
+                return 'Baris ' . $failure->row() . ': ' . implode(', ', $failure->errors());
+            })->implode('<br>');
+            return redirect()->back()->with('error', 'Impor gagal karena kesalahan validasi:<br>' . $errors);
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Terjadi kesalahan tak terduga selama impor: ' . $e->getMessage());
+        }
+    }
+
+    public function downloadImportTemplate()
+    {
+        return Excel::download(new AssetImportTemplateExport, 'asset_import_template.xlsx');
     }
 }

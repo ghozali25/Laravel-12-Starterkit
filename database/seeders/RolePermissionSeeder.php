@@ -49,6 +49,8 @@ class RolePermissionSeeder extends Seeder
                 'asset-create',
                 'asset-edit',
                 'asset-delete',
+                'asset-export', // New permission
+                'asset-import', // New permission
                 'asset-category-view',
                 'asset-category-create',
                 'asset-category-edit',
@@ -111,11 +113,11 @@ class RolePermissionSeeder extends Seeder
                 }
                 // Assign asset permissions
                 if (str_starts_with($name, 'asset-')) {
-                    if ($name === 'asset-view') {
+                    if ($name === 'asset-view' || $name === 'asset-export') { // Added asset-export
                         if (!$manager->hasPermissionTo($permission)) $manager->givePermissionTo($permission);
                         if (!$leader->hasPermissionTo($permission)) $leader->givePermissionTo($permission);
                         if (!$staff->hasPermissionTo($permission)) $staff->givePermissionTo($permission);
-                    } elseif ($name === 'asset-create' || $name === 'asset-edit' || $name === 'asset-delete') {
+                    } elseif ($name === 'asset-create' || $name === 'asset-edit' || $name === 'asset-delete' || $name === 'asset-import') { // Added asset-import
                         if (!$manager->hasPermissionTo($permission)) $manager->givePermissionTo($permission);
                     }
                 }

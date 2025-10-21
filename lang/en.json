@@ -302,5 +302,9 @@
     "Retired": "Retired",
     "Notes": "Notes",
     "Any additional notes about the asset": "Any additional notes about the asset",
-    "Custom Fields": "Custom Fields"
+    "Custom Fields": "Custom Fields",
+    "Upload an Excel (.xlsx, .xls) or CSV file to import asset data.": "Upload an Excel (.xlsx, .xls) or CSV file to import asset data.",
+    "Import Assets": "Import Assets",
+    "Assets imported successfully.": "Assets imported successfully.",
+    "Failed to import assets.": "Failed to import assets."
 }

@@ -214,7 +214,7 @@
     "Failed to import employees.": "Gagal mengimpor karyawan.",
     "Importing...": "Mengimpor...",
     "Import Employees": "Impor Karyawan",
-    "Upload an Excel (.xlsx, .xls) atau CSV file to import employee data.": "Unggah file Excel (.xlsx, .xls) atau CSV untuk mengimpor data karyawan.",
+    "Upload an Excel (.xlsx, .xls) or CSV file to import employee data.": "Unggah file Excel (.xlsx, .xls) atau CSV untuk mengimpor data karyawan.",
     "Selected file": "File terpilih",
     "Create Employee": "Buat Karyawan",
     "Edit Employee": "Edit Karyawan",
@@ -302,5 +302,9 @@
     "Retired": "Pensiun",
     "Notes": "Catatan",
     "Any additional notes about the asset": "Catatan tambahan tentang aset",
-    "Custom Fields": "Bidang Kustom"
+    "Custom Fields": "Bidang Kustom",
+    "Upload an Excel (.xlsx, .xls) or CSV file to import asset data.": "Unggah file Excel (.xlsx, .xls) atau CSV untuk mengimpor data aset.",
+    "Import Assets": "Impor Aset",
+    "Assets imported successfully.": "Aset berhasil diimpor.",
+    "Failed to import assets.": "Gagal mengimpor aset."
 }

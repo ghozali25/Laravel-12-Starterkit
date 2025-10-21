@@ -5,9 +5,10 @@ module.exports = {
     './vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php',
     './storage/framework/views/*.php',
     './resources/views/**/*.blade.php',
+    './resources/views/exports/*.blade.php', // Tambahkan ini untuk file PDF export
     './resources/js/**/*.{ts,tsx}',
-    './app/Exports/**/*.php', // Tambahkan ini
-    './app/Imports/**/*.php', // Tambahkan ini
+    './app/Exports/**/*.php',
+    './app/Imports/**/*.php',
   ],
   theme: {
     container: {

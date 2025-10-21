@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Input } from '@/components/ui/input';
 import { type BreadcrumbItem, type Asset, type AssetCategory, type User } from '@/types';
-import { Plus, Edit, Trash2, FileSearch, Laptop } from 'lucide-react';
+import { Plus, Edit, Trash2, FileSearch, FileDown, FileUp, FileSpreadsheet, FileType, Printer, FileQuestion } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogTrigger,
@@ -30,6 +30,12 @@ import {
 import { debounce } from '@/lib/utils';
 import { useTranslation } from '@/lib/i18n';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import 'dayjs/locale/id';
@@ -58,6 +64,9 @@ export default function AssetIndex({ assets, categories, employees, filters }: P
   const [search, setSearch] = useState(filters.search || '');
   const [selectedCategoryFilter, setSelectedCategoryFilter] = useState(filters.category_id || 'all');
   const [selectedUserFilter, setSelectedUserFilter] = useState(filters.user_id || 'all');
+  const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
+  const [importFile, setImportFile] = useState<File | null>(null);
+  const [importProcessing, setImportProcessing] = useState(false);
 
   useEffect(() => {
     dayjs.locale(locale);
@@ -105,6 +114,40 @@ export default function AssetIndex({ assets, categories, employees, filters }: P
     debouncedSearch(search, selectedCategoryFilter, value);
   };
 
+  const handleImportFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      setImportFile(e.target.files[0]);
+    } else {
+      setImportFile(null);
+    }
+  };
+
+  const handleImportSubmit = () => {
+    if (!importFile) {
+      toast.error(t('Please select a file to import.'));
+      return;
+    }
+
+    setImportProcessing(true);
+    const formData = new FormData();
+    formData.append('file', importFile);
+
+    router.post('/assets/import', formData, {
+      forceFormData: true,
+      onSuccess: () => {
+        toast.success(t('Assets imported successfully.'));
+        setIsImportDialogOpen(false);
+        setImportFile(null);
+        router.reload({ only: ['assets'] });
+      },
+      onError: (errors) => {
+        toast.error(t('Failed to import assets.'));
+        console.error(errors);
+      },
+      onFinish: () => setImportProcessing(false),
+    });
+  };
+
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
       <Head title={t('Assets List')} />
@@ -115,12 +158,39 @@ export default function AssetIndex({ assets, categories, employees, filters }: P
               <CardTitle className="text-2xl font-bold">{t('Assets List')}</CardTitle>
               <p className="text-muted-foreground text-sm">{t('Manage all company assets and their assignments.')}</p>
             </div>
-            <Link href="/assets/create">
-              <Button>
-                <Plus className="h-4 w-4 mr-2" />
-                {t('Add Asset')}
+            <div className="flex flex-wrap gap-2">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="gap-2">
+                    <FileDown className="h-4 w-4" />
+                    {t('Export')}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => window.open(route('assets.export', 'xlsx'), '_blank')}>
+                    <FileSpreadsheet className="mr-2 h-4 w-4" /> {t('Export to Excel')}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => window.open(route('assets.export', 'csv'), '_blank')}>
+                    <FileType className="mr-2 h-4 w-4" /> {t('Export to CSV')}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => window.open(route('assets.export', 'pdf'), '_blank')}>
+                    <Printer className="mr-2 h-4 w-4" /> {t('Export to PDF')}
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              <Button variant="outline" onClick={() => setIsImportDialogOpen(true)} className="gap-2">
+                <FileUp className="h-4 w-4" />
+                {t('Import')}
               </Button>
-            </Link>
+
+              <Link href="/assets/create">
+                <Button>
+                  <Plus className="h-4 w-4 mr-2" />
+                  {t('Add Asset')}
+                </Button>
+              </Link>
+            </div>
           </CardHeader>
 
           <Separator />
@@ -262,6 +332,39 @@ export default function AssetIndex({ assets, categories, employees, filters }: P
           </CardContent>
         </Card>
       </div>
+
+      {/* Import Dialog */}
+      <AlertDialog open={isImportDialogOpen} onOpenChange={setIsImportDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t('Import Assets')}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t('Upload an Excel (.xlsx, .xls) or CSV file to import asset data.')}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="space-y-4">
+            <Button
+              variant="outline"
+              className="w-full gap-2"
+              onClick={() => window.open(route('assets.download-import-template'), '_blank')}
+            >
+              <FileQuestion className="h-4 w-4" /> {t('Download Import Template')}
+            </Button>
+            <Input type="file" accept=".xlsx,.xls,.csv" onChange={handleImportFileChange} />
+            {importFile && (
+              <p className="text-sm text-muted-foreground">
+                {t('Selected file')}: {importFile.name}
+              </p>
+            )}
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={importProcessing}>{t('Cancel')}</AlertDialogCancel>
+            <AlertDialogAction onClick={handleImportSubmit} disabled={importProcessing || !importFile}>
+              {importProcessing ? t('Importing...') : t('Import')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </AppLayout>
   );
 }
