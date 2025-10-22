@@ -79,6 +79,15 @@ export default function DashboardWidgetWrapper({ id, children, onRemove, colSpan
                 <DropdownMenuItem onClick={() => onColSpanChange(id, 3)}>
                   {t('3 Columns')}
                 </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => onColSpanChange(id, 4)}>
+                  {t('4 Columns')}
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => onColSpanChange(id, 5)}>
+                  {t('5 Columns')}
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => onColSpanChange(id, 6)}>
+                  {t('6 Columns')}
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </TooltipTrigger>
