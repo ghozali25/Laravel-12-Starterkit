@@ -1,11 +1,5 @@
 @import 'tailwindcss';
 
-@plugin 'tailwindcss-animate';
-
-@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
-
-@custom-variant dark (&:is(.dark *));
-
 @theme {
     --font-sans: 'Inter var', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
 
@@ -41,11 +35,11 @@
     --color-input: var(--input);
     --color-ring: var(--ring);
 
-    --color-chart-1: var(--chart-1);
-    --color-chart-2: var(--chart-2);
-    --color-chart-3: var(--chart-3);
-    --color-chart-4: var(--chart-4);
-    --color-chart-5: var(--chart-5);
+    --color-chart-1: hsl(12, 76%, 61%);
+    --color-chart-2: hsl(173, 58%, 39%);
+    --color-chart-3: hsl(197, 37%, 24%);
+    --color-chart-4: hsl(43, 74%, 66%);
+    --color-chart-5: hsl(27, 87%, 67%);
 
     --color-sidebar: var(--sidebar-background);
     --color-sidebar-foreground: var(--sidebar-foreground);
@@ -152,8 +146,14 @@
     }
 
     body {
-        @apply bg-background text-foreground;
+        /* Menghapus bg-background untuk memungkinkan gambar latar belakang kustom */
+        @apply text-foreground; 
     }
+}
+
+/* Custom backdrop blur utility */
+.backdrop-blur-90 {
+    backdrop-filter: blur(90px); /* Menggunakan 90px untuk efek blur yang kuat */
 }
 
 /*
@@ -164,3 +164,6 @@
 .lg\:col-span-1 { grid-column: span 1 / span 1; }
 .lg\:col-span-2 { grid-column: span 2 / span 2; }
 .lg\:col-span-3 { grid-column: span 3 / span 3; }
+.lg\:col-span-4 { grid-column: span 4 / span 4; } /* Added */
+.lg\:col-span-5 { grid-column: span 5 / span 5; } /* Added */
+.lg\:col-span-6 { grid-column: span 6 / span 6; } /* Added */

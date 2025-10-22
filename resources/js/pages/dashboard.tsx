@@ -6,7 +6,7 @@ import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, us
 import { arrayMove, SortableContext, rectSortingStrategy } from '@dnd-kit/sortable';
 import { useTranslation } from '@/lib/i18n';
 import { Button } from '@/components/ui/button';
-import { Plus, Users, HardDrive, Activity, LineChart, BarChart, PieChart, Radar, Building2, Tags, Package } from 'lucide-react'; // Added Building2, Tags, Package
+import { Plus, Users, HardDrive, Activity, LineChart, BarChart, PieChart, Radar, Building2, Tags, Package, Gauge, TrendingUp, ShieldCheck } from 'lucide-react'; // Added Gauge, TrendingUp, ShieldCheck
 import {
   Dialog,
   DialogContent,
@@ -19,6 +19,7 @@ import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { iconMapper } from '@/lib/iconMapper'; // Import iconMapper
 
 // Widget Components and their Props interfaces
 import MonthlyActivityChart, { MonthlyActivityChartProps } from '@/components/dashboard-widgets/MonthlyActivityChart';
@@ -100,21 +101,21 @@ const widgetComponents: WidgetComponentsMap = {
   SummaryCardDivisions: { // New Summary Card
     component: SummaryCard,
     label: 'Summary Card (Divisions)',
-    getInitialProps: (t, data) => ({ label: t('Divisions'), value: data?.totalDivisions ?? 0, iconName: 'Building2' }),
+    getInitialProps: (t, data) => ({ label: t('Total Divisions'), value: data?.totalDivisions ?? 0, iconName: 'Building2' }),
     defaultColSpan: 1,
     icon: <Building2 className="h-5 w-5" />,
   },
   SummaryCardAssetCategories: { // New Summary Card
     component: SummaryCard,
     label: 'Summary Card (Asset Categories)',
-    getInitialProps: (t, data) => ({ label: t('Asset Categories'), value: data?.totalAssetCategories ?? 0, iconName: 'Tags' }),
+    getInitialProps: (t, data) => ({ label: t('Total Asset Categories'), value: data?.totalAssetCategories ?? 0, iconName: 'Tags' }),
     defaultColSpan: 1,
     icon: <Tags className="h-5 w-5" />,
   },
   SummaryCardTotalAssets: { // New Summary Card
     component: SummaryCard,
     label: 'Summary Card (Total Assets)',
-    getInitialProps: (t, data) => ({ label: t('Assets'), value: data?.totalAssets ?? 0, iconName: 'Package' }),
+    getInitialProps: (t, data) => ({ label: t('Total Assets'), value: data?.totalAssets ?? 0, iconName: 'Package' }),
     defaultColSpan: 1,
     icon: <Package className="h-5 w-5" />,
   },
@@ -126,13 +127,14 @@ const widgetComponents: WidgetComponentsMap = {
       xAxisDataKey: 'name',
       yAxisDataKey1: 'Users',
       yAxisDataKey2: 'Backups',
+      iconName: 'BarChart',
     }),
     configurableProps: [
       { key: 'xAxisDataKey', label: 'X-Axis Data Key', type: 'select', dataOptions: ['name'] }, // 'name' is the month
       { key: 'yAxisDataKey1', label: 'Y-Axis Data Key 1', type: 'select', dataOptions: ['Users', 'Backups', 'Assets'] },
       { key: 'yAxisDataKey2', label: 'Y-Axis Data Key 2', type: 'select', dataOptions: ['Users', 'Backups', 'Assets'] },
     ],
-    defaultColSpan: 2,
+    defaultColSpan: 3, // Adjusted for 6-column layout
     icon: <BarChart className="h-5 w-5" />,
   },
   MonthlyTrendsChart: {
@@ -143,34 +145,35 @@ const widgetComponents: WidgetComponentsMap = {
       xAxisDataKey: 'name',
       yAxisDataKey1: 'Users',
       yAxisDataKey2: 'Backups',
+      iconName: 'TrendingUp',
     }),
     configurableProps: [
       { key: 'xAxisDataKey', label: 'X-Axis Data Key', type: 'select', dataOptions: ['name'] },
       { key: 'yAxisDataKey1', label: 'Y-Axis Data Key 1', type: 'select', dataOptions: ['Users', 'Backups', 'Assets'] },
       { key: 'yAxisDataKey2', label: 'Y-Axis Data Key 2', type: 'select', dataOptions: ['Users', 'Backups', 'Assets'] },
     ],
-    defaultColSpan: 2,
+    defaultColSpan: 3, // Adjusted for 6-column layout
     icon: <LineChart className="h-5 w-5" />,
   },
   UserRolesPieChart: {
     component: UserRolesPieChart,
     label: 'User Roles Pie Chart',
-    getInitialProps: (t, data) => ({ data: data?.userRoleDistribution ?? [], title: t('User Roles') }), // Pass title
-    defaultColSpan: 1,
+    getInitialProps: (t, data) => ({ data: data?.userRoleDistribution ?? [], title: t('User Roles'), iconName: 'ShieldCheck' }), // Pass title and icon
+    defaultColSpan: 2, // Adjusted for 6-column layout
     icon: <PieChart className="h-5 w-5" />,
   },
   AssetCategoryDistributionPieChart: { // New Pie Chart
     component: UserRolesPieChart, // Reusing UserRolesPieChart as it's generic enough
     label: 'Asset Category Distribution',
-    getInitialProps: (t, data) => ({ data: data?.assetCategoryDistribution ?? [], title: t('Asset Category Distribution') }), // Pass title
-    defaultColSpan: 1,
+    getInitialProps: (t, data) => ({ data: data?.assetCategoryDistribution ?? [], title: t('Asset Category Distribution'), iconName: 'Tags' }), // Pass title and icon
+    defaultColSpan: 2, // Adjusted for 6-column layout
     icon: <PieChart className="h-5 w-5" />,
   },
   AssetStatusDistributionPieChart: { // New Pie Chart
     component: UserRolesPieChart, // Reusing UserRolesPieChart
     label: 'Asset Status Distribution',
-    getInitialProps: (t, data) => ({ data: data?.assetStatusDistribution ?? [], title: t('Asset Status Distribution') }), // Pass title
-    defaultColSpan: 1,
+    getInitialProps: (t, data) => ({ data: data?.assetStatusDistribution ?? [], title: t('Asset Status Distribution'), iconName: 'Package' }), // Pass title and icon
+    defaultColSpan: 2, // Adjusted for 6-column layout
     icon: <PieChart className="h-5 w-5" />,
   },
   ResourceUsageAreaChart: {
@@ -181,21 +184,22 @@ const widgetComponents: WidgetComponentsMap = {
       xAxisDataKey: 'month',
       yAxisDataKey1: 'users',
       yAxisDataKey2: 'backups',
+      iconName: 'Radar',
     }),
     configurableProps: [
       { key: 'xAxisDataKey', label: 'X-Axis Data Key', type: 'select', dataOptions: ['month'] },
       { key: 'yAxisDataKey1', label: 'Y-Axis Data Key 1', type: 'select', dataOptions: ['users', 'backups', 'assets'] }, // Updated
       { key: 'yAxisDataKey2', label: 'Y-Axis Data Key 2', type: 'select', dataOptions: ['users', 'backups', 'assets'] }, // Updated
     ],
-    defaultColSpan: 2,
+    defaultColSpan: 3, // Adjusted for 6-column layout
     icon: <Radar className="h-5 w-5" />,
   },
   PerformanceMetricsRadialChart: {
     component: PerformanceMetricsRadialChart,
     label: 'Performance Metrics Radial Chart',
-    getInitialProps: (t, data) => ({ data: dummyRadialData }), // Still dummy as real-time system metrics are complex
-    defaultColSpan: 1,
-    icon: <Radar className="h-5 w-5" />,
+    getInitialProps: (t, data) => ({ data: dummyRadialData, iconName: 'Gauge' }), // Still dummy as real-time system metrics are complex, added icon
+    defaultColSpan: 2, // Adjusted for 6-column layout
+    icon: <Gauge className="h-5 w-5" />,
   },
 };
 
@@ -261,8 +265,13 @@ export default function Dashboard(props: DashboardProps) { // Receive props dire
         { id: 'summary-users', type: 'SummaryCardUsers', props: widgetComponents.SummaryCardUsers.getInitialProps(t, dashboardData), colSpan: 1 },
         { id: 'summary-backups', type: 'SummaryCardBackups', props: widgetComponents.SummaryCardBackups.getInitialProps(t, dashboardData), colSpan: 1 },
         { id: 'summary-activity', type: 'SummaryCardActivityLogs', props: widgetComponents.SummaryCardActivityLogs.getInitialProps(t, dashboardData), colSpan: 1 },
-        { id: 'monthly-activity', type: 'MonthlyActivityChart', props: widgetComponents.MonthlyActivityChart.getInitialProps(t, dashboardData), colSpan: 2 },
-        { id: 'user-roles', type: 'UserRolesPieChart', props: widgetComponents.UserRolesPieChart.getInitialProps(t, dashboardData), colSpan: 1 },
+        { id: 'summary-divisions', type: 'SummaryCardDivisions', props: widgetComponents.SummaryCardDivisions.getInitialProps(t, dashboardData), colSpan: 1 },
+        { id: 'summary-asset-categories', type: 'SummaryCardAssetCategories', props: widgetComponents.SummaryCardAssetCategories.getInitialProps(t, dashboardData), colSpan: 1 },
+        { id: 'summary-total-assets', type: 'SummaryCardTotalAssets', props: widgetComponents.SummaryCardTotalAssets.getInitialProps(t, dashboardData), colSpan: 1 },
+        { id: 'monthly-activity', type: 'MonthlyActivityChart', props: widgetComponents.MonthlyActivityChart.getInitialProps(t, dashboardData), colSpan: 3 },
+        { id: 'user-roles', type: 'UserRolesPieChart', props: widgetComponents.UserRolesPieChart.getInitialProps(t, dashboardData), colSpan: 2 },
+        { id: 'asset-category-distribution', type: 'AssetCategoryDistributionPieChart', props: widgetComponents.AssetCategoryDistributionPieChart.getInitialProps(t, dashboardData), colSpan: 2 },
+        { id: 'asset-status-distribution', type: 'AssetStatusDistributionPieChart', props: widgetComponents.AssetStatusDistributionPieChart.getInitialProps(t, dashboardData), colSpan: 2 },
       ]);
     }
   }, [initialWidgets, t,
@@ -460,7 +469,7 @@ export default function Dashboard(props: DashboardProps) { // Receive props dire
 
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
           <SortableContext items={widgets.map((w) => w.id)} strategy={rectSortingStrategy}>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-6">
               {widgets.map((widget) => (
                 <DashboardWidgetWrapper
                   key={String(widget.id)}
