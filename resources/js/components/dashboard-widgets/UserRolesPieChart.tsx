@@ -5,14 +5,15 @@ import { useTranslation } from '@/lib/i18n';
 
 export interface UserRolesPieChartProps {
   data: { name: string; value: number; color: string }[];
+  title?: string; // Add title prop
 }
 
-export default function UserRolesPieChart({ data }: UserRolesPieChartProps) {
+export default function UserRolesPieChart({ data, title }: UserRolesPieChartProps) {
   const { t } = useTranslation();
   return (
     <Card className="bg-white dark:bg-gray-800 shadow-md rounded-lg overflow-hidden h-full">
       <CardHeader className="px-4 py-3">
-        <CardTitle className="text-lg font-semibold text-gray-800 dark:text-white">{t('User Roles')}</CardTitle>
+        <CardTitle className="text-lg font-semibold text-gray-800 dark:text-white">{title || t('User Roles')}</CardTitle>
       </CardHeader>
       <CardContent className="h-[300px] flex items-center justify-center">
         <ResponsiveContainer width="100%" height="100%">

@@ -6,6 +6,9 @@ use App\Models\DashboardWidget;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Models\User;
+use App\Models\Asset; // Import Asset model
+use App\Models\AssetCategory; // Import AssetCategory model
+use App\Models\Division; // Import Division model
 use Spatie\Activitylog\Models\Activity;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\File;
@@ -30,15 +33,18 @@ class DashboardController extends Controller
         // --- Fetch Real Data ---
         $totalUsers = User::count();
         $totalActivityLogs = Activity::count();
+        $totalDivisions = Division::count(); // New: Total Divisions
+        $totalAssetCategories = AssetCategory::count(); // New: Total Asset Categories
+        $totalAssets = Asset::count(); // New: Total Assets
 
         // Total Backups (similar logic to BackupController)
         $realBackupPath = storage_path('app/' . $this->backupPath);
         $totalBackups = File::exists($realBackupPath) ? count(File::files($realBackupPath)) : 0;
 
-        // Monthly Data for Charts (Users and Backups)
+        // Monthly Data for Charts (Users, Backups, Assets)
         $months = collect([]);
         for ($i = 5; $i >= 0; $i--) { // Last 6 months
-            $months->push(Carbon::now()->subMonths($i)->format('M Y'));
+            $months->push(Carbon::now()->subMonths($i)->startOfMonth());
         }
 
         $monthlyUsers = User::select(
@@ -51,7 +57,6 @@ class DashboardController extends Controller
             ->get()
             ->keyBy('month');
 
-        // For backups, we need to parse file modification times
         $monthlyBackups = collect([]);
         if (File::exists($realBackupPath)) {
             $backupFiles = File::files($realBackupPath);
@@ -61,11 +66,23 @@ class DashboardController extends Controller
             }
         }
 
-        $monthlyData = $months->map(function ($month) use ($monthlyUsers, $monthlyBackups) {
+        $monthlyAssetsCreated = Asset::select(
+                DB::raw('DATE_FORMAT(created_at, "%b %Y") as month'),
+                DB::raw('count(*) as count')
+            )
+            ->where('created_at', '>=', Carbon::now()->subMonths(6)->startOfMonth())
+            ->groupBy('month')
+            ->orderBy('month')
+            ->get()
+            ->keyBy('month');
+
+        $monthlyData = $months->map(function ($monthDate) use ($monthlyUsers, $monthlyBackups, $monthlyAssetsCreated) {
+            $monthKey = $monthDate->format('M Y');
             return [
-                'name' => $month,
-                'Users' => $monthlyUsers[$month]['count'] ?? 0,
-                'Backups' => $monthlyBackups[$month] ?? 0,
+                'name' => $monthKey,
+                'Users' => $monthlyUsers[$monthKey]['count'] ?? 0,
+                'Backups' => $monthlyBackups[$monthKey] ?? 0,
+                'Assets' => $monthlyAssetsCreated[$monthKey]['count'] ?? 0, // New: Monthly Assets
             ];
         })->values();
 
@@ -74,11 +91,12 @@ class DashboardController extends Controller
         $userRoleDistribution = Role::withCount('users')
             ->get()
             ->map(function ($role) {
-                // Assign a consistent color for each role, or generate dynamically
                 $colors = [
                     'admin' => '#fbbf24', // yellow-400
                     'user' => '#a78bfa',  // purple-400
-                    // Add more roles and colors as needed
+                    'manager' => '#60a5fa', // blue-400
+                    'leader' => '#34d399',  // emerald-400
+                    'staff' => '#f87171',   // red-400
                 ];
                 return [
                     'name' => $role->name,
@@ -87,13 +105,56 @@ class DashboardController extends Controller
                 ];
             })->toArray();
 
+        // Asset Category Distribution (Pie Chart)
+        $assetCategoryDistribution = AssetCategory::withCount('assets')
+            ->get()
+            ->map(function ($category) {
+                // Generate a consistent color based on category name hash, or use a predefined list
+                $colors = [
+                    'Laptop' => '#ef4444', // red-500
+                    'Mobile Phone' => '#f97316', // orange-500
+                    'Vehicle' => '#eab308', // yellow-500
+                    'Monitor' => '#22c55e', // green-500
+                    // Add more as needed
+                ];
+                return [
+                    'name' => $category->name,
+                    'value' => $category->assets_count,
+                    'color' => $colors[$category->name] ?? '#' . substr(md5($category->name), 0, 6), // Dynamic color
+                ];
+            })->toArray();
+
+        // Asset Status Distribution (Pie Chart)
+        $assetStatusDistribution = Asset::select('status', DB::raw('count(*) as count'))
+            ->groupBy('status')
+            ->get()
+            ->map(function ($status) {
+                $colors = [
+                    'available' => '#22c55e', // green-500
+                    'assigned' => '#3b82f6',  // blue-500
+                    'in_repair' => '#f97316', // orange-500
+                    'retired' => '#ef4444',   // red-500
+                ];
+                return [
+                    'name' => ucfirst($status->status),
+                    'value' => $status->count,
+                    'color' => $colors[$status->status] ?? '#cccccc',
+                ];
+            })->toArray();
+
+
         return Inertia::render('dashboard', [
             'initialWidgets' => $dashboardConfig ? $dashboardConfig->widgets_data : [],
             'totalUsers' => $totalUsers,
             'totalBackups' => $totalBackups,
             'totalActivityLogs' => $totalActivityLogs,
+            'totalDivisions' => $totalDivisions, // New
+            'totalAssetCategories' => $totalAssetCategories, // New
+            'totalAssets' => $totalAssets, // New
             'monthlyData' => $monthlyData,
             'userRoleDistribution' => $userRoleDistribution,
+            'assetCategoryDistribution' => $assetCategoryDistribution, // New
+            'assetStatusDistribution' => $assetStatusDistribution, // New
         ]);
     }
 
@@ -119,6 +180,6 @@ class DashboardController extends Controller
             ['widgets_data' => $request->input('widgets_data')]
         );
 
-        return response()->json(['message' => 'Dashboard layout saved successfully.']);
+        return redirect()->back()->with('success', 'Dashboard layout saved successfully.');
     }
 }

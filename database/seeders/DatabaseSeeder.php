@@ -15,6 +15,7 @@ class DatabaseSeeder extends Seeder
             RolePermissionSeeder::class,
             MenuSeeder::class,
             AssetCategorySeeder::class, // Pastikan kategori aset sudah ada
+            BrandSeeder::class, // Add BrandSeeder here
         ]);
 
         // Pastikan admin user dibuat dan diberi peran admin

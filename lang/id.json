@@ -306,5 +306,15 @@
     "Upload an Excel (.xlsx, .xls) or CSV file to import asset data.": "Unggah file Excel (.xlsx, .xls) atau CSV untuk mengimpor data aset.",
     "Import Assets": "Impor Aset",
     "Assets imported successfully.": "Aset berhasil diimpor.",
-    "Failed to import assets.": "Gagal mengimpor aset."
+    "Failed to import assets.": "Gagal mengimpor aset.",
+    "Total Divisions": "Total Divisi",
+    "Total Asset Categories": "Total Kategori Aset",
+    "Total Assets": "Total Aset",
+    "Asset Category Distribution": "Distribusi Kategori Aset",
+    "Asset Status Distribution": "Distribusi Status Aset",
+    "Change widget size": "Ubah ukuran widget",
+    "Select a widget type": "Pilih jenis widget",
+    "Configure Widget": "Konfigurasi Widget",
+    "Select brand": "Pilih merek",
+    "No brands available for this category": "Tidak ada merek tersedia untuk kategori ini"
 }

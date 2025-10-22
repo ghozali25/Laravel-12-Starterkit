@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import { Save, ArrowLeft } from 'lucide-react';
-import { BreadcrumbItem, type Asset, type AssetCategory, type User } from '@/types';
+import { BreadcrumbItem, type Asset, type AssetCategory, type User, type Brand } from '@/types'; // Import Brand type
 import { useTranslation } from '@/lib/i18n';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
@@ -16,9 +16,10 @@ interface AssetFormProps {
   asset?: Asset;
   categories: AssetCategory[];
   employees: User[];
+  brands: Brand[]; // Receive all brands from backend
 }
 
-export default function AssetForm({ asset, categories, employees }: AssetFormProps) {
+export default function AssetForm({ asset, categories, employees, brands }: AssetFormProps) {
   const { t } = useTranslation();
   const isEdit = !!asset;
 
@@ -26,7 +27,7 @@ export default function AssetForm({ asset, categories, employees }: AssetFormPro
     asset_category_id: asset?.asset_category_id || '',
     user_id: asset?.user_id || null,
     serial_number: asset?.serial_number || '',
-    brand: asset?.brand || '',
+    brand: asset?.brand || null,
     model: asset?.model || '',
     purchase_date: asset?.purchase_date || '',
     warranty_end_date: asset?.warranty_end_date || '',
@@ -38,6 +39,7 @@ export default function AssetForm({ asset, categories, employees }: AssetFormPro
   const [selectedCategory, setSelectedCategory] = useState<AssetCategory | null>(
     categories.find(cat => cat.id === asset?.asset_category_id) || null
   );
+  const [filteredBrands, setFilteredBrands] = useState<Brand[]>([]);
 
   useEffect(() => {
     if (data.asset_category_id) {
@@ -48,8 +50,16 @@ export default function AssetForm({ asset, categories, employees }: AssetFormPro
       if (category && category.id !== asset?.asset_category_id) {
         setData('custom_fields_data', {});
       }
+
+      // Filter brands based on selected category
+      if (category && category.brands) {
+        setFilteredBrands(category.brands);
+      } else {
+        setFilteredBrands([]);
+      }
     } else {
       setSelectedCategory(null);
+      setFilteredBrands([]);
       setData('custom_fields_data', {});
     }
   }, [data.asset_category_id, categories, asset?.asset_category_id]);
@@ -67,7 +77,7 @@ export default function AssetForm({ asset, categories, employees }: AssetFormPro
     const payload = {
       ...data,
       asset_category_id: Number(data.asset_category_id),
-      user_id: data.user_id === null ? null : Number(data.user_id),
+      user_id: data.user_id == null ? null : Number(data.user_id),
     };
 
     if (isEdit) {
@@ -164,16 +174,28 @@ export default function AssetForm({ asset, categories, employees }: AssetFormPro
                 {errors.serial_number && <p className="text-sm text-red-500">{errors.serial_number}</p>}
               </div>
 
-              {/* Brand */}
+              {/* Brand - Now a Select */}
               <div className="space-y-2">
                 <Label htmlFor="brand">{t('Brand')}</Label>
-                <Input
-                  id="brand"
-                  placeholder={t('Enter brand')}
-                  value={data.brand || ''}
-                  onChange={(e) => setData('brand', e.target.value)}
-                  className={errors.brand ? 'border-red-500' : ''}
-                />
+                <Select
+                  value={data.brand || '__NONE_BRAND__'} // Use a distinct placeholder value
+                  onValueChange={(value) => setData('brand', value === '__NONE_BRAND__' ? null : value)}
+                  disabled={!selectedCategory} // Only disable if no category is selected
+                >
+                  <SelectTrigger id="brand">
+                    <SelectValue placeholder={t('Select brand')} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__NONE_BRAND__">{t('— None —')}</SelectItem> {/* Always allow "None" */}
+                    {filteredBrands.length > 0 && (
+                      filteredBrands.map((brand) => (
+                        <SelectItem key={brand.id} value={brand.name}>
+                          {brand.name}
+                        </SelectItem>
+                      ))
+                    )}
+                  </SelectContent>
+                </Select>
                 {errors.brand && <p className="text-sm text-red-500">{errors.brand}</p>}
               </div>
 
@@ -276,7 +298,7 @@ export default function AssetForm({ asset, categories, employees }: AssetFormPro
                           />
                         )}
                         {/* Add more field types as needed (e.g., date, select, checkbox) */}
-                        {(errors as Record<string, any>)[`custom_fields_data.${key}`] && <p className="text-sm text-red-500">{(errors as Record<string, any>)[`custom_fields_data.${key}`]}</p>}
+                        {(errors as Record<string, string>)[`custom_fields_data.${key}`] && <p className="text-sm text-red-500">{(errors as Record<string, string>)[`custom_fields_data.${key}`]}</p>}
                       </div>
                     ))}
                   </div>

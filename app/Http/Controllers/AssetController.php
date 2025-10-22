@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Asset;
 use App\Models\AssetCategory;
 use App\Models\User;
+use App\Models\Brand; // Import Brand model
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Carbon\Carbon;
@@ -75,14 +76,16 @@ class AssetController extends Controller
 
     public function create()
     {
-        $categories = AssetCategory::all();
+        $categories = AssetCategory::with('brands')->get(); // Eager load brands
         $employees = User::whereHas('roles', function ($q) {
             $q->where('name', '!=', 'admin');
         })->select('id', 'name')->get();
+        $brands = Brand::all(); // Fetch all brands (for initial state or if no category selected)
 
         return Inertia::render('assets/Form', [
             'categories' => $categories,
             'employees' => $employees,
+            'brands' => $brands, // Pass all brands to the frontend
         ]);
     }
 
@@ -114,15 +117,17 @@ class AssetController extends Controller
     public function edit(Asset $asset)
     {
         $asset->load('category', 'user');
-        $categories = AssetCategory::all();
+        $categories = AssetCategory::with('brands')->get(); // Eager load brands
         $employees = User::whereHas('roles', function ($q) {
             $q->where('name', '!=', 'admin');
         })->select('id', 'name')->get();
+        $brands = Brand::all(); // Fetch all brands
 
         return Inertia::render('assets/Form', [
             'asset' => $asset->toArray(),
             'categories' => $categories,
             'employees' => $employees,
+            'brands' => $brands, // Pass all brands to the frontend
         ]);
     }
 

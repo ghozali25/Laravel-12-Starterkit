@@ -50,6 +50,12 @@ export interface AssetCategory {
     name: string;
     description?: string | null;
     custom_fields_schema?: Record<string, any> | null;
+    brands?: Brand[]; // Add brands relationship
+}
+
+export interface Brand { // New interface for Brand
+    id: number;
+    name: string;
 }
 
 export interface Asset { // New interface for Asset

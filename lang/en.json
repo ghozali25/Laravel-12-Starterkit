@@ -306,5 +306,15 @@
     "Upload an Excel (.xlsx, .xls) or CSV file to import asset data.": "Upload an Excel (.xlsx, .xls) or CSV file to import asset data.",
     "Import Assets": "Import Assets",
     "Assets imported successfully.": "Assets imported successfully.",
-    "Failed to import assets.": "Failed to import assets."
+    "Failed to import assets.": "Failed to import assets.",
+    "Total Divisions": "Total Divisions",
+    "Total Asset Categories": "Total Asset Categories",
+    "Total Assets": "Total Assets",
+    "Asset Category Distribution": "Asset Category Distribution",
+    "Asset Status Distribution": "Asset Status Distribution",
+    "Change widget size": "Change widget size",
+    "Select a widget type": "Select a widget type",
+    "Configure Widget": "Configure Widget",
+    "Select brand": "Select brand",
+    "No brands available for this category": "No brands available for this category"
 }

@@ -8,7 +8,8 @@ use App\Models\SettingApp;
 use App\Models\DashboardWidget;
 use App\Models\Division;
 use App\Models\AssetCategory;
-use App\Models\Asset; // Import the new Asset model
+use App\Models\Asset;
+use App\Models\Brand; // Import the new Brand model
 use Spatie\Permission\Models\Role;
 use App\Observers\GlobalActivityLogger;
 use Illuminate\Support\ServiceProvider;
@@ -41,6 +42,7 @@ class AppServiceProvider extends ServiceProvider
         DashboardWidget::observe(GlobalActivityLogger::class);
         Division::observe(GlobalActivityLogger::class);
         AssetCategory::observe(GlobalActivityLogger::class);
-        Asset::observe(GlobalActivityLogger::class); // Add Asset observer
+        Asset::observe(GlobalActivityLogger::class);
+        Brand::observe(GlobalActivityLogger::class); // Add Brand observer
     }
 }
