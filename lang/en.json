@@ -316,5 +316,18 @@
     "Select a widget type": "Select a widget type",
     "Configure Widget": "Configure Widget",
     "Select brand": "Select brand",
-    "No brands available for this category": "No brands available for this category"
+    "No brands available for this category": "No brands available for this category",
+    "Brand Management": "Brand Management",
+    "Brands": "Brands",
+    "Manage product brands for assets": "Manage product brands for assets",
+    "Add Brand": "Add Brand",
+    "Search brands...": "Search brands...",
+    "Brand deleted successfully.": "Brand deleted successfully.",
+    "Failed to delete brand.": "Failed to delete brand.",
+    "Delete this brand?": "Delete this brand?",
+    "Brand Name": "Brand Name",
+    "Edit brand details": "Edit brand details",
+    "Create a new brand": "Create a new brand",
+    "Associated Brands": "Associated Brands",
+    "No brands available. Please add brands first.": "No brands available. Please add brands first."
 }

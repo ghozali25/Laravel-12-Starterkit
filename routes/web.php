@@ -17,6 +17,7 @@ use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\DivisionController;
 use App\Http\Controllers\AssetCategoryController;
 use App\Http\Controllers\AssetController;
+use App\Http\Controllers\BrandController; // Import BrandController
 
 Route::get('/', function () {
     return Inertia::render('welcome');
@@ -64,6 +65,9 @@ Route::middleware(['auth', 'menu.permission'])->group(function () {
     Route::get('assets/export/{format}', [AssetController::class, 'export'])->name('assets.export');
     Route::post('assets/import', [AssetController::class, 'import'])->name('assets.import');
     Route::get('assets/download-import-template', [AssetController::class, 'downloadImportTemplate'])->name('assets.download-import-template');
+
+    // Brand Management Routes
+    Route::resource('brands', BrandController::class); // New: Brand Management Routes
 });
 
 require __DIR__ . '/settings.php';

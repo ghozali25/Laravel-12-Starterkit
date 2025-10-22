@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\AssetCategory;
+use App\Models\Brand; // Import Brand model
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -26,7 +27,10 @@ class AssetCategoryController extends Controller
 
     public function create()
     {
-        return Inertia::render('asset-categories/Form');
+        $allBrands = Brand::all(); // Get all brands
+        return Inertia::render('asset-categories/Form', [
+            'allBrands' => $allBrands,
+        ]);
     }
 
     public function store(Request $request)
@@ -35,17 +39,25 @@ class AssetCategoryController extends Controller
             'name' => 'required|string|max:255|unique:asset_categories,name',
             'description' => 'nullable|string',
             'custom_fields_schema' => 'nullable|json',
+            'brands' => 'nullable|array', // Validate brands array
+            'brands.*' => 'exists:brands,id', // Validate each brand ID
         ]);
 
-        AssetCategory::create($request->all());
+        $category = AssetCategory::create($request->only(['name', 'description', 'custom_fields_schema']));
+        $category->brands()->sync($request->input('brands', [])); // Sync brands
 
         return redirect()->route('asset-categories.index')->with('success', 'Kategori aset berhasil dibuat.');
     }
 
     public function edit(AssetCategory $assetCategory)
     {
+        $assetCategory->load('brands'); // Eager load associated brands
+        $allBrands = Brand::all(); // Get all brands
+
         return Inertia::render('asset-categories/Form', [
             'category' => $assetCategory,
+            'allBrands' => $allBrands,
+            'selectedBrands' => $assetCategory->brands->pluck('id')->toArray(), // Pass selected brand IDs
         ]);
     }
 
@@ -55,9 +67,12 @@ class AssetCategoryController extends Controller
             'name' => 'required|string|max:255|unique:asset_categories,name,' . $assetCategory->id,
             'description' => 'nullable|string',
             'custom_fields_schema' => 'nullable|json',
+            'brands' => 'nullable|array',
+            'brands.*' => 'exists:brands,id',
         ]);
 
-        $assetCategory->update($request->all());
+        $assetCategory->update($request->only(['name', 'description', 'custom_fields_schema']));
+        $assetCategory->brands()->sync($request->input('brands', [])); // Sync brands
 
         return redirect()->route('asset-categories.index')->with('success', 'Kategori aset berhasil diperbarui.');
     }

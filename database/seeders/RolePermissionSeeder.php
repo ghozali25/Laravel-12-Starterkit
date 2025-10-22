@@ -55,7 +55,10 @@ class RolePermissionSeeder extends Seeder
                 'asset-category-create',
                 'asset-category-edit',
                 'asset-category-delete',
-                // Add more asset permissions later
+                'brand-view', // New permission for brands
+                'brand-create', // New permission for brands
+                'brand-edit', // New permission for brands
+                'brand-delete', // New permission for brands
             ],
             'Settings' => [
                 'settings-view',
@@ -120,6 +123,13 @@ class RolePermissionSeeder extends Seeder
                     } elseif ($name === 'asset-create' || $name === 'asset-edit' || $name === 'asset-delete' || $name === 'asset-import') { // Added asset-import
                         if (!$manager->hasPermissionTo($permission)) $manager->givePermissionTo($permission);
                     }
+                }
+                // Assign brand permissions
+                if (str_starts_with($name, 'brand-')) {
+                    if ($name === 'brand-view') {
+                        if (!$manager->hasPermissionTo($permission)) $manager->givePermissionTo($permission);
+                    }
+                    // Only admin can create, edit, delete brands by default
                 }
             }
         }

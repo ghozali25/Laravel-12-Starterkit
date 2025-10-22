@@ -102,6 +102,14 @@ class MenuSeeder extends Seeder
             'order' => 2,
             'permission_name' => 'asset-view',
         ]);
+        Menu::create([ // New menu for Brands
+            'title' => 'Brands',
+            'icon' => 'Trademark', // Using Trademark icon for brands
+            'route' => '/brands',
+            'parent_id' => $assetMenu->id,
+            'order' => 3,
+            'permission_name' => 'brand-view',
+        ]);
 
         // Settings (Parent Menu) - Urutan disesuaikan
         $settingsMenu = Menu::create([

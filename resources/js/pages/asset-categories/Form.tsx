@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Head, Link, router, useForm } from '@inertiajs/react';
 import AppLayout from '@/layouts/app-layout';
 import { Button } from '@/components/ui/button';
@@ -8,27 +8,30 @@ import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import { Save, ArrowLeft } from 'lucide-react';
-import { BreadcrumbItem, type AssetCategory } from '@/types';
+import { BreadcrumbItem, type AssetCategory, type Brand } from '@/types';
 import { useTranslation } from '@/lib/i18n';
+import { Checkbox } from '@/components/ui/checkbox'; // Import Checkbox
 
 interface AssetCategoryFormProps {
   category?: AssetCategory;
+  allBrands: Brand[]; // All available brands
+  selectedBrands?: number[]; // IDs of brands already linked to this category
 }
 
-export default function AssetCategoryForm({ category }: AssetCategoryFormProps) {
+export default function AssetCategoryForm({ category, allBrands, selectedBrands = [] }: AssetCategoryFormProps) {
   const { t } = useTranslation();
   const isEdit = !!category;
 
   const { data, setData, processing, errors } = useForm({
     name: category?.name || '',
     description: category?.description || '',
-    custom_fields_schema: JSON.stringify(category?.custom_fields_schema || {}, null, 2), // Prettify JSON
+    custom_fields_schema: JSON.stringify(category?.custom_fields_schema || {}, null, 2),
+    brands: selectedBrands, // Initialize with selected brands
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Validate JSON before sending
     let parsedSchema = null;
     if (data.custom_fields_schema) {
       try {
@@ -43,6 +46,7 @@ export default function AssetCategoryForm({ category }: AssetCategoryFormProps) 
       name: data.name,
       description: data.description,
       custom_fields_schema: parsedSchema,
+      brands: data.brands, // Include selected brands in payload
     };
 
     if (isEdit) {
@@ -50,6 +54,14 @@ export default function AssetCategoryForm({ category }: AssetCategoryFormProps) 
     } else {
       router.post('/asset-categories', payload);
     }
+  };
+
+  const handleBrandToggle = (brandId: number) => {
+    const currentBrands = (data.brands || []) as number[];
+    const newBrands = currentBrands.includes(brandId)
+      ? currentBrands.filter((id) => id !== brandId)
+      : [...currentBrands, brandId];
+    setData('brands', newBrands);
   };
 
   const breadcrumbs: BreadcrumbItem[] = [
@@ -100,6 +112,30 @@ export default function AssetCategoryForm({ category }: AssetCategoryFormProps) 
                   className={errors.description ? 'border-red-500' : ''}
                 />
                 {errors.description && <p className="text-sm text-red-500">{errors.description}</p>}
+              </div>
+
+              {/* Brands Association */}
+              <div className="space-y-2">
+                <Label>{t('Associated Brands')}</Label>
+                <div className="grid grid-cols-2 gap-3 rounded-md border p-4">
+                  {allBrands.length === 0 ? (
+                    <p className="col-span-2 text-sm text-muted-foreground">{t('No brands available. Please add brands first.')}</p>
+                  ) : (
+                    allBrands.map((brand) => (
+                      <div key={brand.id} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={`brand-${brand.id}`}
+                          checked={data.brands.includes(brand.id)}
+                          onCheckedChange={() => handleBrandToggle(brand.id)}
+                        />
+                        <Label htmlFor={`brand-${brand.id}`} className="text-sm font-normal cursor-pointer">
+                          {brand.name}
+                        </Label>
+                      </div>
+                    ))
+                  )}
+                </div>
+                {errors.brands && <p className="text-sm text-red-500">{errors.brands}</p>}
               </div>
 
               {/* Custom Fields Schema (JSON) */}
