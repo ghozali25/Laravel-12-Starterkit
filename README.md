@@ -125,7 +125,7 @@ chown -R www-data:www-data .
 ## Screenshoot
 
 # Welcome Screen
-https://github.com/ghozali25/Laravel-12-Starterkit/example/welcome.png
+![Alt Text](example/welcome.png)
 
 https://github.com/ghozali25/Laravel-12-Starterkit/example/login.png
 
