@@ -48,7 +48,7 @@ export default function AssetForm({ asset, categories, employees, brands }: Asse
       
       // Reset custom fields if category changes and it's not an edit of the same category
       if (category && category.id !== asset?.asset_category_id) {
-        setData('custom_fields_data', {});
+        setData('custom_fields_data', {} as Record<string, any>);
       }
 
       // Filter brands based on selected category
@@ -60,7 +60,7 @@ export default function AssetForm({ asset, categories, employees, brands }: Asse
     } else {
       setSelectedCategory(null);
       setFilteredBrands([]);
-      setData('custom_fields_data', {});
+      setData('custom_fields_data', {} as Record<string, any>);
     }
   }, [data.asset_category_id, categories, asset?.asset_category_id]);
 
@@ -68,7 +68,7 @@ export default function AssetForm({ asset, categories, employees, brands }: Asse
     setData('custom_fields_data', {
       ...data.custom_fields_data,
       [key]: value,
-    });
+    } as Record<string, any>); // Explicitly cast to resolve TS2589
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -243,7 +243,7 @@ export default function AssetForm({ asset, categories, employees, brands }: Asse
                 <Label htmlFor="status">{t('Status')}</Label>
                 <Select
                   value={data.status}
-                  onValueChange={(value) => setData('status', value as 'available' | 'assigned' | 'in_repair' | 'retired')}
+                  onValueChange={(value) => setData('status', value as any)}
                 >
                   <SelectTrigger id="status">
                     <SelectValue placeholder={t('Select status')} />
