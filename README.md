@@ -122,16 +122,19 @@ chown -R www-data:www-data .
 
 ---
 
-## Screenshoot
+# Screenshoot
 
-# Welcome Screen
+## Welcome Screen
 ![Alt Text](example/welcome.png)
 
-https://github.com/ghozali25/Laravel-12-Starterkit/example/login.png
+## Login
+![Alt Text](example/login.png)
 
-https://github.com/ghozali25/Laravel-12-Starterkit/example/register.png
+## Register
+![Alt Text](example/register.png)
 
-https://github.com/ghozali25/Laravel-12-Starterkit/example/dashboard.png
+## Dashboard
+![Alt Text](example/dashboard.png)
 
 ## 📄 License
 
