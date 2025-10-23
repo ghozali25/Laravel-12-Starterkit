@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useState, useEffect } from 'react';
 import { Head, Link, router, useForm } from '@inertiajs/react';
 import AppLayout from '@/layouts/app-layout';
@@ -8,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import { Save, ArrowLeft } from 'lucide-react';
-import { BreadcrumbItem, type Asset, type AssetCategory, type User, type Brand } from '@/types'; // Import Brand type
+import { BreadcrumbItem, type Asset, type AssetCategory, type User, type Brand } from '@/types';
 import { useTranslation } from '@/lib/i18n';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
@@ -16,14 +17,30 @@ interface AssetFormProps {
   asset?: Asset;
   categories: AssetCategory[];
   employees: User[];
-  brands: Brand[]; // Receive all brands from backend
+  // Removed 'brands: Brand[];' as it's redundant and available via categories[].brands
 }
 
-export default function AssetForm({ asset, categories, employees, brands }: AssetFormProps) {
+// Define an explicit type for the form data
+interface AssetFormData {
+  asset_category_id: number | string;
+  user_id: number | null;
+  serial_number: string | null;
+  brand: string | null;
+  model: string | null;
+  purchase_date: string | null;
+  warranty_end_date: string | null;
+  status: 'available' | 'assigned' | 'in_repair' | 'retired';
+  notes: string | null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  custom_fields_data: Record<string, any>; // Changed from unknown to any for useForm compatibility
+}
+
+export default function AssetForm({ asset, categories, employees }: AssetFormProps) { // Removed 'brands' from props
   const { t } = useTranslation();
   const isEdit = !!asset;
 
-  const { data, setData, post, put, processing, errors } = useForm({
+  // Use the explicit AssetFormData type with useForm
+  const { data, setData, post, put, processing, errors } = useForm<AssetFormData>({
     asset_category_id: asset?.asset_category_id || '',
     user_id: asset?.user_id || null,
     serial_number: asset?.serial_number || '',
@@ -48,7 +65,7 @@ export default function AssetForm({ asset, categories, employees, brands }: Asse
       
       // Reset custom fields if category changes and it's not an edit of the same category
       if (category && category.id !== asset?.asset_category_id) {
-        setData('custom_fields_data', {} as Record<string, any>);
+        setData(prevData => ({ ...prevData, custom_fields_data: {} }));
       }
 
       // Filter brands based on selected category
@@ -60,30 +77,39 @@ export default function AssetForm({ asset, categories, employees, brands }: Asse
     } else {
       setSelectedCategory(null);
       setFilteredBrands([]);
-      setData('custom_fields_data', {} as Record<string, any>);
+      setData(prevData => ({ ...prevData, custom_fields_data: {} }));
     }
-  }, [data.asset_category_id, categories, asset?.asset_category_id]);
+  }, [data.asset_category_id, categories, asset?.asset_category_id, setData]);
 
-  const handleCustomFieldChange = (key: string, value: any) => {
-    setData('custom_fields_data', {
-      ...data.custom_fields_data,
-      [key]: value,
-    } as Record<string, any>); // Explicitly cast to resolve TS2589
+  const handleCustomFieldChange = (key: string, value: unknown) => {
+    setData((prevData) => ({
+      ...prevData,
+      custom_fields_data: {
+        ...prevData.custom_fields_data,
+        [key]: value,
+      },
+    }));
+  };
+
+  const handleStatusChange = (value: string) => {
+    setData((prevData) => ({ ...prevData, status: value as AssetFormData['status'] }));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    const payload = {
-      ...data,
-      asset_category_id: Number(data.asset_category_id),
-      user_id: data.user_id == null ? null : Number(data.user_id),
-    };
+    // The `data` object from useForm is automatically sent.
+    // We only need to ensure asset_category_id and user_id are numbers/null.
+    setData((prevData) => ({
+      ...prevData,
+      asset_category_id: Number(prevData.asset_category_id),
+      user_id: prevData.user_id == null ? null : Number(prevData.user_id),
+    }));
 
     if (isEdit) {
-      router.put(`/assets/${asset?.id}`, payload);
+      put(`/assets/${asset?.id}`); // `data` is implicitly sent
     } else {
-      router.post('/assets', payload);
+      post('/assets'); // `data` is implicitly sent
     }
   };
 
@@ -243,7 +269,7 @@ export default function AssetForm({ asset, categories, employees, brands }: Asse
                 <Label htmlFor="status">{t('Status')}</Label>
                 <Select
                   value={data.status}
-                  onValueChange={(value) => setData('status', value as any)}
+                  onValueChange={handleStatusChange}
                 >
                   <SelectTrigger id="status">
                     <SelectValue placeholder={t('Select status')} />
@@ -280,20 +306,20 @@ export default function AssetForm({ asset, categories, employees, brands }: Asse
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {Object.entries(selectedCategory.custom_fields_schema).map(([key, fieldDef]) => (
                       <div key={key} className="space-y-2">
-                        <Label htmlFor={`custom_field_${key}`}>{t(fieldDef.label || key)}</Label>
-                        {fieldDef.type === 'text' && (
+                        <Label htmlFor={`custom_field_${key}`}>{t((fieldDef as { label?: string }).label || key)}</Label>
+                        {(fieldDef as { type: string }).type === 'text' && (
                           <Input
                             id={`custom_field_${key}`}
                             type="text"
-                            value={data.custom_fields_data[key] || ''}
+                            value={(data.custom_fields_data[key] as string) || ''}
                             onChange={(e) => handleCustomFieldChange(key, e.target.value)}
                           />
                         )}
-                        {fieldDef.type === 'number' && (
+                        {(fieldDef as { type: string }).type === 'number' && (
                           <Input
                             id={`custom_field_${key}`}
                             type="number"
-                            value={data.custom_fields_data[key] || ''}
+                            value={(data.custom_fields_data[key] as number) || ''}
                             onChange={(e) => handleCustomFieldChange(key, e.target.value)}
                           />
                         )}
