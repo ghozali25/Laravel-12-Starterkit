@@ -122,6 +122,17 @@ chown -R www-data:www-data .
 
 ---
 
+## Screenshoot
+
+# Welcome Screen
+https://github.com/ghozali25/Laravel-12-Starterkit/example/welcome.png
+
+https://github.com/ghozali25/Laravel-12-Starterkit/example/login.png
+
+https://github.com/ghozali25/Laravel-12-Starterkit/example/register.png
+
+https://github.com/ghozali25/Laravel-12-Starterkit/example/dashboard.png
+
 ## 📄 License
 
 Released under the [MIT License](https://opensource.org/licenses/MIT). Feel free to use it for personal or commercial projects.
