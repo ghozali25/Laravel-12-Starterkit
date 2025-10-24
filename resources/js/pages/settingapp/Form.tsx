@@ -9,9 +9,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { type BreadcrumbItem } from '@/types';
-import { useTranslation } from '@/lib/i18n'; // Import useTranslation
-import { XCircle } from 'lucide-react'; // Import XCircle icon
-import { Checkbox } from '@/components/ui/checkbox'; // Import Checkbox
+import { useTranslation } from '@/lib/i18n';
+import { XCircle } from 'lucide-react';
+import { Switch } from '@/components/ui/switch'; // Import Switch component
 
 const DEFAULT_WARNA = '#181818';
 
@@ -27,7 +27,7 @@ interface SettingApp {
     description?: string;
     keywords?: string;
   };
-  registration_enabled: boolean; // Add this line
+  registration_enabled: boolean;
 }
 
 interface Props {
@@ -35,7 +35,7 @@ interface Props {
 }
 
 export default function SettingForm({ setting }: Props) {
-  const { t } = useTranslation(); // Use the translation hook
+  const { t } = useTranslation();
 
   const breadcrumbs: BreadcrumbItem[] = [
     { title: t('Application Settings'), href: '/settingsapp' },
@@ -53,8 +53,8 @@ export default function SettingForm({ setting }: Props) {
     logo: null as File | null,
     favicon: null as File | null,
     background_image: null as File | null,
-    remove_background_image: false,
-    registration_enabled: setting?.registration_enabled ?? true, // Initialize with existing setting or true
+    remove_background_image: false as boolean,
+    registration_enabled: setting?.registration_enabled ?? true,
   });
 
   const logoPreview = useRef<string | null>(setting?.logo ? `/storage/${setting.logo}` : null);
@@ -95,7 +95,7 @@ export default function SettingForm({ setting }: Props) {
                 <Input
                   id="nama_app"
                   value={data.nama_app}
-                  onChange={(e) => setData('nama_app', e.target.value)}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setData('nama_app', e.target.value)}
                   className={errors.nama_app ? 'border-red-500' : ''}
                 />
                 {errors.nama_app && <p className="text-sm text-red-500">{errors.nama_app}</p>}
@@ -107,7 +107,7 @@ export default function SettingForm({ setting }: Props) {
                 <Textarea
                   id="deskripsi"
                   value={data.deskripsi}
-                  onChange={(e) => setData('deskripsi', e.target.value)}
+                  onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setData('deskripsi', e.target.value)}
                 />
               </div>
 
@@ -119,7 +119,7 @@ export default function SettingForm({ setting }: Props) {
                     id="warna"
                     type="color"
                     value={data.warna}
-                    onChange={(e) => setData('warna', e.target.value)}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setData('warna', e.target.value)}
                     className="w-16 h-10 p-1"
                   />
                   <Button
@@ -140,7 +140,7 @@ export default function SettingForm({ setting }: Props) {
                   id="logo"
                   type="file"
                   accept="image/*"
-                  onChange={(e) => {
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                     const file = e.target.files?.[0] || null;
                     setData('logo', file);
                     if (file) logoPreview.current = URL.createObjectURL(file);
@@ -158,7 +158,7 @@ export default function SettingForm({ setting }: Props) {
                   id="favicon"
                   type="file"
                   accept="image/*"
-                  onChange={(e) => {
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                     const file = e.target.files?.[0] || null;
                     setData('favicon', file);
                     if (file) faviconPreview.current = URL.createObjectURL(file);
@@ -176,7 +176,7 @@ export default function SettingForm({ setting }: Props) {
                   id="background_image"
                   type="file"
                   accept="image/*"
-                  onChange={(e) => {
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                     const file = e.target.files?.[0] || null;
                     setData('background_image', file);
                     setData('remove_background_image', false);
@@ -200,22 +200,15 @@ export default function SettingForm({ setting }: Props) {
                 )}
               </div>
 
-              {/* Registration Enabled Toggle */}
-              <div className="space-y-2">
+              {/* Registration Enabled Switch */}
+              <div className="flex items-center justify-between space-x-2">
                 <Label htmlFor="registration_enabled">{t('User Registration')}</Label>
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="registration_enabled"
-                    checked={data.registration_enabled}
-                    onCheckedChange={(checked) => setData('registration_enabled', checked)}
-                  />
-                  <label
-                    htmlFor="registration_enabled"
-                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                  >
-                    {t('Allow new user registrations')}
-                  </label>
-                </div>
+                <Switch
+                  id="registration_enabled"
+                  checked={data.registration_enabled}
+                  onCheckedChange={(checked) => setData('registration_enabled', checked)}
+                  aria-label={t('Toggle user registration')}
+                />
                 {errors.registration_enabled && <p className="text-sm text-red-500 mt-2">{errors.registration_enabled}</p>}
               </div>
 
@@ -228,7 +221,7 @@ export default function SettingForm({ setting }: Props) {
                 <Input
                   id="seo_title"
                   value={data.seo.title}
-                  onChange={(e) => setData('seo', { ...data.seo, title: e.target.value })}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setData('seo', { ...data.seo, title: e.target.value })}
                 />
               </div>
 
@@ -237,7 +230,7 @@ export default function SettingForm({ setting }: Props) {
                 <Textarea
                   id="seo_description"
                   value={data.seo.description}
-                  onChange={(e) => setData('seo', { ...data.seo, description: e.target.value })}
+                  onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setData('seo', { ...data.seo, description: e.target.value })}
                 />
               </div>
 
@@ -246,7 +239,7 @@ export default function SettingForm({ setting }: Props) {
                 <Input
                   id="seo_keywords"
                   value={data.seo.keywords}
-                  onChange={(e) => setData('seo', { ...data.seo, keywords: e.target.value })}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setData('seo', { ...data.seo, keywords: e.target.value })}
                 />
               </div>
 
