@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useRef } from 'react';
 import { Head, router, Link } from '@inertiajs/react';
 import AppLayout from '@/layouts/app-layout';
 import { Button } from '@/components/ui/button';
@@ -19,14 +19,6 @@ import {
   AlertDialogAction,
 } from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
 import { debounce } from '@/lib/utils';
 import { useTranslation } from '@/lib/i18n';
 
@@ -67,12 +59,11 @@ export default function AssetCategoryIndex({ categories, filters }: Props) {
     });
   };
 
-  const debouncedSearch = useCallback(
+  const debouncedSearch = useRef(
     debounce((value: string) => {
       router.get('/asset-categories', { search: value }, { preserveState: true, preserveScroll: true });
-    }, 500),
-    []
-  );
+    }, 500)
+  ).current;
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
