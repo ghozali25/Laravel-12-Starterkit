@@ -122,6 +122,20 @@ chown -R www-data:www-data .
 
 ---
 
+# Screenshoot
+
+## Welcome Screen
+![Alt Text](example/welcome.png)
+
+## Login
+![Alt Text](example/login.png)
+
+## Register
+![Alt Text](example/register.png)
+
+## Dashboard
+![Alt Text](example/dashboard.png)
+
 ## 📄 License
 
 Released under the [MIT License](https://opensource.org/licenses/MIT). Feel free to use it for personal or commercial projects.
