@@ -11,6 +11,7 @@ import { Separator } from '@/components/ui/separator';
 import { type BreadcrumbItem } from '@/types';
 import { useTranslation } from '@/lib/i18n'; // Import useTranslation
 import { XCircle } from 'lucide-react'; // Import XCircle icon
+import { Checkbox } from '@/components/ui/checkbox'; // Import Checkbox
 
 const DEFAULT_WARNA = '#181818';
 
@@ -20,12 +21,13 @@ interface SettingApp {
   warna: string;
   logo: string;
   favicon: string;
-  background_image?: string; // Tambahkan ini
+  background_image?: string;
   seo: {
     title?: string;
     description?: string;
     keywords?: string;
   };
+  registration_enabled: boolean; // Add this line
 }
 
 interface Props {
@@ -50,8 +52,9 @@ export default function SettingForm({ setting }: Props) {
     },
     logo: null as File | null,
     favicon: null as File | null,
-    background_image: null as File | null, // Tambahkan ini
-    remove_background_image: false as boolean, // Tambahkan flag untuk penghapusan
+    background_image: null as File | null,
+    remove_background_image: false,
+    registration_enabled: setting?.registration_enabled ?? true, // Initialize with existing setting or true
   });
 
   const logoPreview = useRef<string | null>(setting?.logo ? `/storage/${setting.logo}` : null);
@@ -70,8 +73,8 @@ export default function SettingForm({ setting }: Props) {
 
   const handleRemoveBackgroundImage = () => {
     setBackgroundImagePreview(null);
-    setData('background_image', null); // Pastikan file input juga direset
-    setData('remove_background_image', true); // Set flag untuk penghapusan di backend
+    setData('background_image', null);
+    setData('remove_background_image', true);
   };
 
   return (
@@ -176,7 +179,7 @@ export default function SettingForm({ setting }: Props) {
                   onChange={(e) => {
                     const file = e.target.files?.[0] || null;
                     setData('background_image', file);
-                    setData('remove_background_image', false); // Reset remove flag
+                    setData('remove_background_image', false);
                     if (file) setBackgroundImagePreview(URL.createObjectURL(file));
                     else setBackgroundImagePreview(null);
                   }}
@@ -195,6 +198,25 @@ export default function SettingForm({ setting }: Props) {
                     </Button>
                   </div>
                 )}
+              </div>
+
+              {/* Registration Enabled Toggle */}
+              <div className="space-y-2">
+                <Label htmlFor="registration_enabled">{t('User Registration')}</Label>
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="registration_enabled"
+                    checked={data.registration_enabled}
+                    onCheckedChange={(checked) => setData('registration_enabled', checked)}
+                  />
+                  <label
+                    htmlFor="registration_enabled"
+                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                  >
+                    {t('Allow new user registrations')}
+                  </label>
+                </div>
+                {errors.registration_enabled && <p className="text-sm text-red-500 mt-2">{errors.registration_enabled}</p>}
               </div>
 
               {/* SEO Section */}

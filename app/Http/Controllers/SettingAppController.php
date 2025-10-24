@@ -24,8 +24,9 @@ class SettingAppController extends Controller
             'favicon'    => 'nullable|file|image|max:1024',
             'warna'      => 'nullable|string|max:20',
             'seo'        => 'nullable|array',
-            'background_image' => 'nullable|file|image|max:2048', // Tambahkan validasi ini
-            'remove_background_image' => 'boolean', // Tambahkan ini untuk menandai penghapusan
+            'background_image' => 'nullable|file|image|max:2048',
+            'remove_background_image' => 'boolean',
+            'registration_enabled' => 'required|boolean', // Add validation for the new field
         ]);
 
         $setting = SettingApp::firstOrNew();

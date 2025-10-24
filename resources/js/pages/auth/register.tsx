@@ -8,6 +8,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AuthLayout from '@/layouts/auth-layout';
 import { useTranslation } from '@/lib/i18n';
+import { SharedData } from '@/types'; // Import SharedData type
+import { usePage } from '@inertiajs/react'; // Import usePage
 
 export default function Register() {
     const { t } = useTranslation();
@@ -17,6 +19,9 @@ export default function Register() {
         password: '',
         password_confirmation: '',
     });
+
+    const { setting } = usePage<SharedData>().props;
+    const registrationEnabled = setting?.registration_enabled ?? true; // Default to true if not set
 
     useEffect(() => {
         return () => {
@@ -107,12 +112,14 @@ export default function Register() {
                 </div>
             </form>
 
-            <div className="space-x-1 text-center text-black dark:text-white">
-                <span>{t('Already have an account?')}</span>
-                <Link href={route('login')} className="text-black dark:text-white underline underline-offset-4 hover:underline">
-                    {t('Login')}
-                </Link>
-            </div>
+            {registrationEnabled && (
+                <div className="space-x-1 text-center text-black dark:text-white">
+                    <span>{t('Already have an account?')}</span>
+                    <Link href={route('login')} className="text-black dark:text-white underline underline-offset-4 hover:underline">
+                        {t('Login')}
+                    </Link>
+                </div>
+            )}
         </AuthLayout>
     );
 }

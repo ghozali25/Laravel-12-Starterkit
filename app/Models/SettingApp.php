@@ -15,10 +15,12 @@ class SettingApp extends Model
         'favicon',
         'warna',
         'seo',
-        'background_image', // Tambahkan ini
+        'background_image',
+        'registration_enabled', // Add this line
     ];
 
     protected $casts = [
         'seo' => 'array',
+        'registration_enabled' => 'boolean', // Cast to boolean
     ];
 }

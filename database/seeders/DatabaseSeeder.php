@@ -16,14 +16,18 @@ class DatabaseSeeder extends Seeder
             MenuSeeder::class,
             AssetCategorySeeder::class, // Pastikan kategori aset sudah ada
             BrandSeeder::class, // Add BrandSeeder here
+            SettingAppSeeder::class, // Add SettingAppSeeder here
         ]);
 
-        // Pastikan admin user dibuat dan diberi peran admin
-        $admin = User::factory()->create([
-            'name' => 'Admin',
-            'email' => 'admin@admin.com',
-            'password' => Hash::make('admin123'),
-        ]);
+        // Create or retrieve the admin user
+        $admin = User::firstOrCreate(
+            ['email' => 'admin@admin.com'], // Check if user with this email already exists
+            [
+                'name' => 'Admin',
+                'password' => Hash::make('admin123'),
+                'email_verified_at' => now(), // Ensure email is verified for admin
+            ]
+        );
         $admin->assignRole('admin');
 
         // Panggil seeder tambahan untuk user, manager, dan leader

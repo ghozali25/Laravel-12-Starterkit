@@ -42,7 +42,9 @@ class HandleInertiaRequests extends Middleware
                 'success' => session('success'),
                 'error' => session('error'),
             ],
-            'setting' => fn() => SettingApp::first(),
+            'setting' => fn() => SettingApp::first() ? array_merge(SettingApp::first()->toArray(), [
+                'registration_enabled' => SettingApp::first()->registration_enabled,
+            ]) : ['registration_enabled' => true], // Provide a default if no settings exist
             'locale' => app()->getLocale(), // Share current locale
             'translations' => Lang::get('*'), // Share all translations
         ]);

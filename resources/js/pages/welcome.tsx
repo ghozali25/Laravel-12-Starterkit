@@ -1,15 +1,17 @@
 import React, { useEffect } from 'react';
-import { Head, Link, usePage } from '@inertiajs/react';
+import { Head, Link, usePage, router } from '@inertiajs/react';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import { type SharedData } from '@/types';
-import { useTranslation } from '@/lib/i18n'; // Import useTranslation
+import { useTranslation } from '@/lib/i18n';
+import { Button } from '@/components/ui/button';
 
 export default function Welcome() {
   const { auth, setting } = usePage<SharedData>().props;
-  const { t } = useTranslation(); // Use the translation hook
+  const { t } = useTranslation();
 
   const primaryColor = setting?.warna || '#1ccd5aff';
   const primaryForeground = '#ffffff';
+  const registrationEnabled = setting?.registration_enabled ?? true; // Get registration_enabled setting
 
   useEffect(() => {
     document.documentElement.style.setProperty('--primary', primaryColor);
@@ -17,6 +19,14 @@ export default function Welcome() {
     document.documentElement.style.setProperty('--primary-foreground', primaryForeground);
     document.documentElement.style.setProperty('--color-primary-foreground', primaryForeground);
   }, [primaryColor, primaryForeground]);
+
+  const handleAuthRedirect = (mode: 'login' | 'register') => {
+    router.visit(route(mode), {
+      // Removed data: { initialMode: mode } as it's not needed and adds to the URL
+      preserveState: true,
+      preserveScroll: true,
+    });
+  };
 
   return (
     <>
@@ -38,16 +48,17 @@ export default function Welcome() {
               </h1>
 
               {/* 🔹 Lottie animation super close & aligned */}
-              <div className="ml-[-8px] translate-y-[4px] w-[80px] sm:w-[100px] md:w-[140px]">
+              {/* Temporarily removed problematic Lottie animation */}
+              {/* <div className="ml-[-8px] translate-y-[4px] w-[80px] sm:w-[100px] md:w-[140px]">
                 <DotLottieReact
-                  src="https://lottie.host/90eca65f-57a9-4a19-9bd3-1b1961209fed/5wI2rfFT6b.lottie"
+                  src="https://lottie.host/90eca65f-57a9-408a-ae6b-ce4964fba1c8/5wI2rfFT6b.lottie"
                   loop
                   autoplay
                 />
-              </div>
+              </div> */}
             </div>
 
-            <p className="text-lg text-muted-foreground max-w-md mx-auto lg:mx-0">
+            <p className="text-lg text-foreground max-w-md mx-auto lg:mx-0">
               {t('Selamat datang di aplikasi kami. Nikmati pengalaman modern dan mudah digunakan.')}
             </p>
 
@@ -61,29 +72,31 @@ export default function Welcome() {
                 <svg xmlns="http://www.w3.org/2000/svg" className="ml-2 h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                   <path
                     fillRule="evenodd"
-                    d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z"
+                    d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 10 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z"
                     clipRule="evenodd"
                   />
                 </svg>
               </Link>
             ) : (
               <div className="flex flex-col sm:flex-row justify-center lg:justify-start items-center gap-4">
-                <Link
-                  href="/login"
-                  className="px-8 py-3 rounded-lg border border-border bg-white dark:bg-gray-800 font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-all transform hover:-translate-y-0.5 shadow-sm hover:shadow-md"
-                >
-                  {t('Sign In')}
-                </Link>
-                <Link
-                  href="/register"
+                <Button
+                  onClick={() => handleAuthRedirect('login')}
                   className="px-8 py-3 rounded-lg bg-[var(--primary)] text-white font-medium hover:bg-[var(--primary)]/90 transition-all transform hover:-translate-y-0.5 shadow-md hover:shadow-lg"
                 >
-                  {t('Register')}
-                </Link>
+                  {t('Sign In')}
+                </Button>
+                {registrationEnabled && (
+                  <Button
+                    onClick={() => handleAuthRedirect('register')}
+                    className="px-8 py-3 rounded-lg bg-[var(--primary)] text-white font-medium hover:bg-[var(--primary)]/90 transition-all transform hover:-translate-y-0.5 shadow-md hover:shadow-lg"
+                  >
+                    {t('Register')}
+                  </Button>
+                )}
               </div>
             )}
 
-            <div className="pt-6 text-sm text-muted-foreground">
+            <div className="pt-6 text-sm text-foreground">
               {t('Creator By Ahmad Ghozali')}
             </div>
           </div>

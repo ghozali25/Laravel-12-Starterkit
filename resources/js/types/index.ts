@@ -30,6 +30,7 @@ export interface Setting {
       description?: string;
       keywords?: string;
     };
+    registration_enabled: boolean; // Added this line
   }
   
   export interface SharedData {
@@ -49,7 +50,7 @@ export interface AssetCategory {
     id: number;
     name: string;
     description?: string | null;
-    custom_fields_schema?: Record<string, any> | null;
+    custom_fields_schema?: Record<string, unknown> | null;
     brands?: Brand[]; // Add brands relationship
 }
 
@@ -69,7 +70,7 @@ export interface Asset { // New interface for Asset
     warranty_end_date: string | null; // YYYY-MM-DD
     status: 'available' | 'assigned' | 'in_repair' | 'retired';
     notes: string | null;
-    custom_fields_data: Record<string, any> | null;
+    custom_fields_data: Record<string, unknown> | null;
     last_used_at: string | null; // Human readable diffForHumans
     created_at: string; // Human readable diffForHumans
     category?: AssetCategory; // Eager loaded relationship

@@ -1,4 +1,4 @@
-import { Head, Link, useForm } from '@inertiajs/react';
+import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { LoaderCircle } from 'lucide-react';
 import { FormEventHandler, useEffect } from 'react';
 
@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AuthLayout from '@/layouts/auth-layout';
 import { useTranslation } from '@/lib/i18n';
+import { SharedData } from '@/types'; // Import SharedData type
 
 interface LoginProps {
     status?: string;
@@ -17,17 +18,20 @@ interface LoginProps {
 
 export default function Login({ status, canResetPassword }: LoginProps) {
     const { t } = useTranslation();
-    const { data, setData, post, processing, errors, reset } = useForm<{ email: string; password: string; remember: boolean }>({
+    const { data, setData, post, processing, errors, reset } = useForm({
         email: '',
         password: '',
-        remember: false,
+        remember: false as boolean, // Explicitly define as boolean
     });
+
+    const { setting } = usePage<SharedData>().props;
+    const registrationEnabled = setting?.registration_enabled ?? true; // Default to true if not set
 
     useEffect(() => {
         return () => {
             reset('password');
         };
-    }, []);
+    }, [reset]);
 
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
@@ -92,10 +96,10 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                             id="remember"
                             name="remember"
                             checked={data.remember}
-                            onCheckedChange={(checked) => setData('remember', Boolean(checked))}
-                            className="border-black dark:border-white" // Menambahkan kelas border kustom
+                            onCheckedChange={(checked) => setData('remember', checked as boolean)} // Cast to boolean
+                            className="border-black dark:border-white"
                         />
-                        <Label htmlFor="remember" className="text-black dark:text-white">{t('Remember me')}</Label> {/* Menghapus kelas underline */}
+                        <Label htmlFor="remember" className="text-black dark:text-white">{t('Remember me')}</Label>
                     </div>
 
                     <Button className="mt-4 w-full" disabled={processing}>
@@ -105,12 +109,14 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                 </div>
             </form>
 
-            <div className="space-x-1 text-center text-black dark:text-white">
-                <span>{t("Don't have an account?")}</span>
-                <Link href={route('register')} className="text-black dark:text-white underline underline-offset-4 hover:underline">
-                    {t('Sign up')}
-                </Link>
-            </div>
+            {registrationEnabled && (
+                <div className="space-x-1 text-center text-black dark:text-white">
+                    <span>{t("Don't have an account?")}</span>
+                    <Link href={route('register')} className="text-black dark:text-white underline underline-offset-4 hover:underline">
+                        {t('Sign up')}
+                    </Link>
+                </div>
+            )}
         </AuthLayout>
     );
 }
