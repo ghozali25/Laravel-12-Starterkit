@@ -15,6 +15,7 @@ class Menu extends Model
         'parent_id',
         'order',
         'permission_name',
+        'is_enabled',
     ];
 
     /**
@@ -52,5 +53,29 @@ class Menu extends Model
             $q->whereNull('permission_name')
                 ->orWhereIn('permission_name', $user->getAllPermissions()->pluck('name'));
         });
+    }
+
+    /**
+     * Scope: hanya menu yang enabled
+     */
+    public function scopeEnabled($query)
+    {
+        return $query->where('is_enabled', true);
+    }
+
+    /**
+     * Scope: hanya menu yang disabled
+     */
+    public function scopeDisabled($query)
+    {
+        return $query->where('is_enabled', false);
+    }
+
+    /**
+     * Scope: menu yang dapat diakses oleh user dan enabled
+     */
+    public function scopeForUserAndEnabled($query, $user)
+    {
+        return $query->forUser($user)->enabled();
     }
 }

@@ -19,6 +19,7 @@ interface MenuFormProps {
     icon: string;
     parent_id: number | null;
     permission_name: string | null;
+    is_enabled: boolean;
   };
   parentMenus: { id: number; title: string }[];
   permissions: string[];
@@ -34,6 +35,7 @@ export default function MenuForm({ menu, parentMenus, permissions }: MenuFormPro
     icon: menu?.icon || '',
     parent_id: menu?.parent_id ?? null,
     permission_name: menu?.permission_name || '',
+    is_enabled: menu?.is_enabled ?? true,
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -123,6 +125,27 @@ export default function MenuForm({ menu, parentMenus, permissions }: MenuFormPro
                   />
                   {errors.permission_name && (
                     <p className="text-sm text-red-500">{errors.permission_name}</p>
+                  )}
+                </div>
+
+                <div className="space-y-2 md:col-span-2">
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      id="is_enabled"
+                      checked={data.is_enabled}
+                      onChange={(e) => setData('is_enabled', e.target.checked)}
+                      className="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
+                    />
+                    <Label htmlFor="is_enabled" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                      {t('Enable Menu')}
+                    </Label>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    {t('When disabled, this menu will not be visible in the navigation')}
+                  </p>
+                  {errors.is_enabled && (
+                    <p className="text-sm text-red-500">{errors.is_enabled}</p>
                   )}
                 </div>
               </div>

@@ -49,10 +49,16 @@ class MenuController extends Controller
             'parent_id' => 'nullable|exists:menus,id',
             'order' => 'nullable|integer',
             'permission_name' => 'nullable|string|exists:permissions,name',
+            'is_enabled' => 'nullable|boolean',
         ]);
 
         if (!isset($data['order'])) {
             $data['order'] = Menu::where('parent_id', $data['parent_id'] ?? null)->max('order') + 1;
+        }
+
+        // Set default value for is_enabled if not provided
+        if (!isset($data['is_enabled'])) {
+            $data['is_enabled'] = true;
         }
 
         Menu::create($data);
@@ -81,6 +87,7 @@ class MenuController extends Controller
             'parent_id' => 'nullable|exists:menus,id|not_in:' . $menu->id,
             'order' => 'nullable|integer',
             'permission_name' => 'nullable|string|exists:permissions,name',
+            'is_enabled' => 'nullable|boolean',
         ]);
 
         if (!isset($data['order'])) {
@@ -120,5 +127,36 @@ class MenuController extends Controller
         $updateOrder($menus);
 
         return redirect()->back()->with('success', 'Urutan menu berhasil disimpan.');
+    }
+
+    /**
+     * Enable a menu
+     */
+    public function enable(Menu $menu)
+    {
+        $menu->update(['is_enabled' => true]);
+        
+        return redirect()->back()->with('success', 'Menu berhasil diaktifkan.');
+    }
+
+    /**
+     * Disable a menu
+     */
+    public function disable(Menu $menu)
+    {
+        $menu->update(['is_enabled' => false]);
+        
+        return redirect()->back()->with('success', 'Menu berhasil dinonaktifkan.');
+    }
+
+    /**
+     * Toggle menu enabled status
+     */
+    public function toggle(Menu $menu)
+    {
+        $menu->update(['is_enabled' => !$menu->is_enabled]);
+        
+        $status = $menu->is_enabled ? 'diaktifkan' : 'dinonaktifkan';
+        return redirect()->back()->with('success', "Menu berhasil {$status}.");
     }
 }

@@ -33,6 +33,9 @@ Route::middleware(['auth', 'menu.permission'])->group(function () {
     Route::resource('roles', RoleController::class);
     Route::resource('menus', MenuController::class);
     Route::post('menus/reorder', [MenuController::class, 'reorder'])->name('menus.reorder');
+    Route::patch('menus/{menu}/enable', [MenuController::class, 'enable'])->name('menus.enable');
+    Route::patch('menus/{menu}/disable', [MenuController::class, 'disable'])->name('menus.disable');
+    Route::patch('menus/{menu}/toggle', [MenuController::class, 'toggle'])->name('menus.toggle');
     Route::resource('permissions', PermissionController::class);
     Route::resource('users', UserController::class);
     Route::put('/users/{user}/reset-password', [UserController::class, 'resetPassword'])->name('users.reset-password');
