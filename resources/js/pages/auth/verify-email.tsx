@@ -4,12 +4,12 @@ import { LoaderCircle } from 'lucide-react';
 import { FormEventHandler } from 'react';
 
 import TextLink from '@/components/text-link';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/button'; // Fixed import syntax
 import AuthLayout from '@/layouts/auth-layout';
-import { useTranslation } from '@/lib/i18n'; // Import useTranslation
+import { useTranslation } from '@/lib/i18n';
 
 export default function VerifyEmail({ status }: { status?: string }) {
-    const { t } = useTranslation(); // Use the translation hook
+    const { t } = useTranslation();
     const { post, processing } = useForm({});
 
     const submit: FormEventHandler = (e) => {
@@ -37,7 +37,7 @@ export default function VerifyEmail({ status }: { status?: string }) {
                     {t('Resend verification email')}
                 </Button>
 
-                <TextLink href={route('logout')} method="post" className="mx-auto block text-sm">
+                <TextLink href={route('logout')} method="post" className="mx-auto block text-sm text-foreground">
                     {t('Log out')}
                 </TextLink>
             </form>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Head, Link, router, useForm } from '@inertiajs/react';
 import AppLayout from '@/layouts/app-layout';
 import { Button } from '@/components/ui/button';
@@ -10,12 +10,12 @@ import { Textarea } from '@/components/ui/textarea';
 import { Save, ArrowLeft } from 'lucide-react';
 import { BreadcrumbItem, type AssetCategory, type Brand } from '@/types';
 import { useTranslation } from '@/lib/i18n';
-import { Checkbox } from '@/components/ui/checkbox'; // Import Checkbox
+import { Checkbox } from '@/components/ui/checkbox';
 
 interface AssetCategoryFormProps {
   category?: AssetCategory;
-  allBrands: Brand[]; // All available brands
-  selectedBrands?: number[]; // IDs of brands already linked to this category
+  allBrands: Brand[];
+  selectedBrands?: number[];
 }
 
 export default function AssetCategoryForm({ category, allBrands, selectedBrands = [] }: AssetCategoryFormProps) {
@@ -26,7 +26,7 @@ export default function AssetCategoryForm({ category, allBrands, selectedBrands 
     name: category?.name || '',
     description: category?.description || '',
     custom_fields_schema: JSON.stringify(category?.custom_fields_schema || {}, null, 2),
-    brands: selectedBrands, // Initialize with selected brands
+    brands: selectedBrands,
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -36,7 +36,7 @@ export default function AssetCategoryForm({ category, allBrands, selectedBrands 
     if (data.custom_fields_schema) {
       try {
         parsedSchema = JSON.parse(data.custom_fields_schema);
-      } catch (jsonError) {
+      } catch {
         alert(t('Invalid JSON in Custom Fields Schema. Please correct it.'));
         return;
       }
@@ -46,7 +46,7 @@ export default function AssetCategoryForm({ category, allBrands, selectedBrands 
       name: data.name,
       description: data.description,
       custom_fields_schema: parsedSchema,
-      brands: data.brands, // Include selected brands in payload
+      brands: data.brands,
     };
 
     if (isEdit) {
@@ -57,9 +57,9 @@ export default function AssetCategoryForm({ category, allBrands, selectedBrands 
   };
 
   const handleBrandToggle = (brandId: number) => {
-    const currentBrands = (data.brands || []) as number[];
+    const currentBrands = data.brands;
     const newBrands = currentBrands.includes(brandId)
-      ? currentBrands.filter((id) => id !== brandId)
+      ? currentBrands.filter((id: number) => id !== brandId)
       : [...currentBrands, brandId];
     setData('brands', newBrands);
   };
@@ -95,7 +95,7 @@ export default function AssetCategoryForm({ category, allBrands, selectedBrands 
                   id="name"
                   placeholder="Example: Laptop, Vehicle, Mobile Phone"
                   value={data.name}
-                  onChange={(e) => setData('name', e.target.value)}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setData('name', e.target.value)}
                   className={errors.name ? 'border-red-500' : ''}
                 />
                 {errors.name && <p className="text-sm text-red-500">{errors.name}</p>}
@@ -108,7 +108,7 @@ export default function AssetCategoryForm({ category, allBrands, selectedBrands 
                   id="description"
                   placeholder={t('Description for this asset category')}
                   value={data.description || ''}
-                  onChange={(e) => setData('description', e.target.value)}
+                  onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setData('description', e.target.value)}
                   className={errors.description ? 'border-red-500' : ''}
                 />
                 {errors.description && <p className="text-sm text-red-500">{errors.description}</p>}
@@ -145,7 +145,7 @@ export default function AssetCategoryForm({ category, allBrands, selectedBrands 
                   id="custom_fields_schema"
                   placeholder={t('Enter JSON schema for custom fields (e.g., {"serial_number": {"type": "text", "label": "Serial Number"}})')}
                   value={data.custom_fields_schema || ''}
-                  onChange={(e) => setData('custom_fields_schema', e.target.value)}
+                  onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setData('custom_fields_schema', e.target.value)}
                   rows={8}
                   className={errors.custom_fields_schema ? 'border-red-500' : ''}
                 />
