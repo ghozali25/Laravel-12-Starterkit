@@ -16,6 +16,21 @@ export default function MonthlyTrendsChart({ data, xAxisDataKey = 'name', yAxisD
   const { t } = useTranslation();
   const IconComponent = iconName ? iconMapper(iconName) : null;
 
+  const legendColor = (typeof window !== 'undefined' && document.documentElement.classList.contains('dark'))
+    ? '#ffffff'
+    : '#111827';
+
+  const LegendContent = ({ payload }: { payload?: any[] }) => (
+    <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center', fontSize: 10, color: legendColor }}>
+      {(payload || []).map((entry: any, index: number) => (
+        <div key={`item-${index}`} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <span style={{ display: 'inline-block', width: 10, height: 10, background: entry.color || 'var(--primary)', borderRadius: 9999 }} />
+          <span>{entry.value}</span>
+        </div>
+      ))}
+    </div>
+  );
+
   return (
     <Card className="bg-white dark:bg-gray-800 shadow-md rounded-lg overflow-hidden h-full">
       <CardHeader className="px-4 py-3 flex flex-row items-center justify-between space-y-0 pb-2">
@@ -30,9 +45,9 @@ export default function MonthlyTrendsChart({ data, xAxisDataKey = 'name', yAxisD
             <XAxis dataKey={xAxisDataKey} stroke="#6b7280" />
             <YAxis stroke="#6b7280" />
             <Tooltip />
-            <Legend wrapperStyle={{ fontSize: 10 }} />
-            <Line type="monotone" dataKey={yAxisDataKey1} stroke="#22c55e" strokeWidth={2} />
-            <Line type="monotone" dataKey={yAxisDataKey2} stroke="#f43f5e" strokeWidth={2} />
+            <Legend content={<LegendContent />} align="center" verticalAlign="top" />
+            <Line type="monotone" dataKey={yAxisDataKey1} stroke="var(--color-primary, var(--primary))" strokeWidth={2} />
+            <Line type="monotone" dataKey={yAxisDataKey2} stroke="var(--color-primary, var(--primary))" strokeOpacity={0.6} strokeWidth={2} />
           </LineChart>
         </ResponsiveContainer>
       </CardContent>

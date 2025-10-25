@@ -14,6 +14,21 @@ export default function UserRolesPieChart({ data, title, iconName }: UserRolesPi
   const { t } = useTranslation();
   const IconComponent = iconName ? iconMapper(iconName) : null;
 
+  const legendColor = (typeof window !== 'undefined' && document.documentElement.classList.contains('dark'))
+    ? '#ffffff'
+    : '#111827';
+
+  const LegendContent = ({ payload }: { payload?: any[] }) => (
+    <div style={{ width: '100%', display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center', fontSize: 10, color: legendColor }}>
+      {(payload || []).map((entry: any, index: number) => (
+        <div key={`item-${index}`} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <span style={{ display: 'inline-block', width: 10, height: 10, background: entry.color || 'var(--primary)', borderRadius: 9999 }} />
+          <span>{entry.value}</span>
+        </div>
+      ))}
+    </div>
+  );
+
   return (
     <Card className="bg-white dark:bg-gray-800 shadow-md rounded-lg overflow-hidden h-full">
       <CardHeader className="px-4 py-3 flex flex-row items-center justify-between space-y-0 pb-2">
@@ -24,22 +39,23 @@ export default function UserRolesPieChart({ data, title, iconName }: UserRolesPi
       </CardHeader>
       <CardContent className="h-[300px] flex items-center justify-center">
         <ResponsiveContainer width="100%" height="100%">
-          <PieChart>
+          <PieChart margin={{ top: 8, right: 8, bottom: 28, left: 8 }}>
             <Pie
               data={data}
               dataKey="value"
               nameKey="name"
               cx="50%"
-              cy="50%"
-              outerRadius={80}
-              label
+              cy="45%"
+              outerRadius="65%"
+              label={false}
+              labelLine={false}
             >
               {data.map((entry, index) => (
                 <Cell key={`cell-${index}`} fill={entry.color} />
               ))}
             </Pie>
             <Tooltip />
-            <Legend wrapperStyle={{ fontSize: 10 }} />
+            <Legend content={<LegendContent />} align="center" verticalAlign="bottom" />
 
           </PieChart>
         </ResponsiveContainer>

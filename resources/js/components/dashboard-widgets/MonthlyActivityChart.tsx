@@ -29,6 +29,21 @@ export default function MonthlyActivityChart({ data, xAxisDataKey = 'name', yAxi
       })
     : data;
 
+  const legendColor = (typeof window !== 'undefined' && document.documentElement.classList.contains('dark'))
+    ? '#ffffff'
+    : '#111827';
+
+  const LegendContent = ({ payload }: { payload?: any[] }) => (
+    <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center', fontSize: 10, color: legendColor }}>
+      {(payload || []).map((entry: any, index: number) => (
+        <div key={`item-${index}`} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <span style={{ display: 'inline-block', width: 10, height: 10, background: entry.color || 'var(--primary)', borderRadius: 9999 }} />
+          <span>{entry.value}</span>
+        </div>
+      ))}
+    </div>
+  );
+
   return (
     <Card className="bg-white dark:bg-gray-800 shadow-md rounded-lg overflow-hidden h-full">
       <CardHeader className="px-4 py-3 flex flex-row items-center justify-between space-y-0 pb-2">
@@ -50,21 +65,18 @@ export default function MonthlyActivityChart({ data, xAxisDataKey = 'name', yAxi
       <CardContent className="h-[300px]">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={processedData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-            <defs>
-              <linearGradient id="gradPrimaryBar" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="var(--color-primary, var(--primary))" stopOpacity={0.95} />
-                <stop offset="100%" stopColor="var(--color-primary, var(--primary))" stopOpacity={0.4} />
-              </linearGradient>
-              <linearGradient id="gradSecondaryBar" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="var(--color-primary, var(--primary))" stopOpacity={0.6} />
-                <stop offset="100%" stopColor="var(--color-primary, var(--primary))" stopOpacity={0.25} />
-              </linearGradient>
-            </defs>
             <XAxis dataKey={xAxisDataKey} stroke="#6b7280" />
             <YAxis stroke="#6b7280" />
             <Tooltip />
-            <Legend wrapperStyle={{ fontSize: 10, color: 'var(--card-foreground, var(--foreground, #111827))' }} />
-            <Bar dataKey={mode === 'growth' ? 'UsersGrowth' : 'Users'} name={mode === 'growth' ? t('Employees Growth') : t('Employees')} fill="url(#gradPrimaryBar)" stroke="var(--color-primary, var(--primary))" strokeOpacity={0.9} legendType="circle" radius={[4, 4, 0, 0]} />
+            <Legend content={<LegendContent />} align="center" verticalAlign="top" />
+            <Bar
+              dataKey={mode === 'growth' ? 'UsersGrowth' : 'Users'}
+              name={mode === 'growth' ? t('Employees Growth') : t('Employees')}
+              fill="var(--color-primary, var(--primary))"
+              legendType="circle"
+              radius={[4, 4, 0, 0]}
+              label={{ position: 'top', fontSize: 10, fill: legendColor }}
+            />
           </BarChart>
         </ResponsiveContainer>
       </CardContent>

@@ -57,11 +57,19 @@ class DashboardController extends Controller
             $months->push(Carbon::now()->subMonths($i)->startOfMonth());
         }
 
-        $monthlyUsers = User::select(
+        // Build months Jan..Dec for current year
+        $yearStart = Carbon::now()->startOfYear();
+        $currentMonthEnd = Carbon::now()->endOfMonth();
+        $months = collect();
+        for ($m = $yearStart->copy(); $m->lte($currentMonthEnd); $m->addMonth()) {
+            $months->push($m->copy());
+        }
+
+        $monthlyUsers = User::withTrashed()->select(
                 DB::raw('DATE_FORMAT(created_at, "%b %Y") as month'),
                 DB::raw('count(*) as count')
             )
-            ->where('created_at', '>=', Carbon::now()->subMonths(6)->startOfMonth())
+            ->whereBetween('created_at', [$yearStart, $currentMonthEnd])
             ->groupBy('month')
             ->orderBy('month')
             ->get()
@@ -80,19 +88,27 @@ class DashboardController extends Controller
                 DB::raw('DATE_FORMAT(created_at, "%b %Y") as month'),
                 DB::raw('count(*) as count')
             )
-            ->where('created_at', '>=', Carbon::now()->subMonths(6)->startOfMonth())
+            ->whereBetween('created_at', [$yearStart, $currentMonthEnd])
             ->groupBy('month')
             ->orderBy('month')
             ->get()
             ->keyBy('month');
 
-        $monthlyData = $months->map(function ($monthDate) use ($monthlyUsers, $monthlyBackups, $monthlyAssetsCreated) {
+        $monthlyData = $months->map(function ($monthDate) use ($monthlyBackups, $monthlyAssetsCreated) {
             $monthKey = $monthDate->format('M Y');
+            $eom = $monthDate->copy()->endOfMonth();
+            $activeUsers = User::withTrashed()
+                ->where('created_at', '<=', $eom)
+                ->where(function ($q) use ($eom) {
+                    $q->whereNull('deleted_at')
+                      ->orWhere('deleted_at', '>', $eom);
+                })
+                ->count();
             return [
                 'name' => $monthKey,
-                'Users' => $monthlyUsers[$monthKey]['count'] ?? 0,
-                'Backups' => $monthlyBackups[$monthKey] ?? 0,
-                'Assets' => $monthlyAssetsCreated[$monthKey]['count'] ?? 0, // New: Monthly Assets
+                'Users' => $activeUsers,
+                'Backups' => (int) ($monthlyBackups[$monthKey] ?? 0),
+                'Assets' => (int) ($monthlyAssetsCreated[$monthKey]['count'] ?? 0),
             ];
         })->values();
 
@@ -140,34 +156,62 @@ class DashboardController extends Controller
             ];
         })->values();
 
-        // Daily Ticket Status stacked data for current month
-        $ticketStatusDailyRaw = Ticket::select(
-                DB::raw('DATE(created_at) as d'),
-                'status',
-                DB::raw('count(*) as c')
-            )
-            ->whereBetween('created_at', [$startOfMonth, $endOfMonth])
-            ->groupBy('d', 'status')
-            ->get();
+        // Daily Ticket Status from materialized metrics (cached), fallback compute for today if missing
+        $tz = config('app.timezone', 'Asia/Jakarta');
+        $today = now($tz)->toDateString();
+        $statuses = ['open', 'in_progress', 'resolved', 'closed', 'cancelled'];
 
-        $ticketStatusByDate = [];
-        foreach ($ticketStatusDailyRaw as $row) {
-            $dateKey = $row->d;
-            $status = $row->status;
-            $ticketStatusByDate[$dateKey][$status] = (int) $row->c;
+        $cacheKey = 'dashboard:dailyTicketStatus:' . Carbon::now($tz)->format('Y-m');
+        $metrics = \Illuminate\Support\Facades\Cache::remember($cacheKey, 60 * 15, function () use ($startOfMonth, $today) {
+            return DB::table('daily_ticket_status_metrics')
+                ->whereBetween('date', [$startOfMonth->toDateString(), $today])
+                ->orderBy('date')
+                ->get();
+        });
+
+        // If today missing (e.g., before nightly job), compute today only from histories and upsert
+        $haveToday = collect($metrics)->firstWhere('date', $today);
+        if (!$haveToday) {
+            $endOfDay = Carbon::parse($today, $tz)->endOfDay();
+            $rows = DB::select(<<<SQL
+                WITH latest AS (
+                  SELECT ticket_id, status, changed_at,
+                         ROW_NUMBER() OVER (PARTITION BY ticket_id ORDER BY changed_at DESC) rn
+                  FROM ticket_status_histories
+                  WHERE changed_at <= ?
+                )
+                SELECT status, COUNT(*) as c
+                FROM latest
+                WHERE rn = 1
+                GROUP BY status
+            SQL, [$endOfDay]);
+            $todayCounts = array_fill_keys($statuses, 0);
+            foreach ($rows as $r) {
+                if (isset($todayCounts[$r->status])) {
+                    $todayCounts[$r->status] = (int) $r->c;
+                }
+            }
+            DB::table('daily_ticket_status_metrics')->updateOrInsert(
+                ['date' => $today],
+                array_merge($todayCounts, ['updated_at' => now($tz)])
+            );
+            // refresh cache
+            \Illuminate\Support\Facades\Cache::forget($cacheKey);
+            $metrics = DB::table('daily_ticket_status_metrics')
+                ->whereBetween('date', [$startOfMonth->toDateString(), $today])
+                ->orderBy('date')
+                ->get();
         }
 
-        $dailyTicketStatusData = $dateKeys->map(function ($d) use ($ticketStatusByDate) {
-            $dayNum = (int) substr($d, -2);
-            $statuses = $ticketStatusByDate[$d] ?? [];
+        $dailyTicketStatusData = collect($metrics)->map(function ($m) {
             return [
-                'date' => $d,
-                'day' => $dayNum,
-                'open' => (int) ($statuses['open'] ?? 0),
-                'in_progress' => (int) ($statuses['in_progress'] ?? 0),
-                'resolved' => (int) ($statuses['resolved'] ?? 0),
-                'closed' => (int) ($statuses['closed'] ?? 0),
-                'cancelled' => (int) ($statuses['cancelled'] ?? 0),
+                'date' => $m->date,
+                'day' => (int) substr($m->date, -2),
+                'open' => (int) $m->open,
+                'in_progress' => (int) $m->in_progress,
+                'resolved' => (int) $m->resolved,
+                'closed' => (int) $m->closed,
+                'cancelled' => (int) $m->cancelled,
             ];
         })->values();
 

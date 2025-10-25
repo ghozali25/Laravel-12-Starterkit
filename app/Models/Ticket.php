@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Support\Facades\Date;
 
 class Ticket extends Model
 {
@@ -53,6 +54,14 @@ class Ticket extends Model
     }
 
     /**
+     * Status histories.
+     */
+    public function histories(): HasMany
+    {
+        return $this->hasMany(TicketStatusHistory::class);
+    }
+
+    /**
      * Generate unique ticket number.
      */
     public static function generateTicketNumber(): string
@@ -74,6 +83,24 @@ class Ticket extends Model
         static::creating(function ($ticket) {
             if (empty($ticket->ticket_number)) {
                 $ticket->ticket_number = self::generateTicketNumber();
+            }
+        });
+
+        // Create history on created
+        static::created(function (Ticket $ticket) {
+            $ticket->histories()->create([
+                'status' => $ticket->status,
+                'changed_at' => $ticket->created_at ?? now(),
+            ]);
+        });
+
+        // Append history when status changes
+        static::updating(function (Ticket $ticket) {
+            if ($ticket->isDirty('status')) {
+                $ticket->histories()->create([
+                    'status' => $ticket->status,
+                    'changed_at' => now(),
+                ]);
             }
         });
     }

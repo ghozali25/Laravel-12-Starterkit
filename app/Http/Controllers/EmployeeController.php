@@ -225,6 +225,9 @@ class EmployeeController extends Controller
 
     public function export(Request $request, $format)
     {
+        if (!Auth::user()->hasRole('admin')) {
+            abort(403, 'Anda tidak memiliki izin untuk mengekspor data karyawan.');
+        }
         $employees = User::with(['roles', 'division'])
             ->whereHas('roles', function ($q) {
                 $q->where('name', '!=', 'admin');
@@ -244,6 +247,9 @@ class EmployeeController extends Controller
 
     public function import(Request $request)
     {
+        if (!Auth::user()->hasRole('admin')) {
+            abort(403, 'Anda tidak memiliki izin untuk mengimpor data karyawan.');
+        }
         $request->validate([
             'file' => 'required|file|mimes:xlsx,xls,csv',
         ]);
@@ -275,6 +281,9 @@ class EmployeeController extends Controller
 
     public function downloadImportTemplate()
     {
+        if (!Auth::user()->hasRole('admin')) {
+            abort(403, 'Anda tidak memiliki izin untuk mengunduh template impor karyawan.');
+        }
         return Excel::download(new EmployeeImportTemplateExport, 'employee_import_template.xlsx');
     }
 }

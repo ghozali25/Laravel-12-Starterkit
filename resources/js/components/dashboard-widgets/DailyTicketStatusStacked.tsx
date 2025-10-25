@@ -13,6 +13,26 @@ export interface DailyTicketStatusStackedProps {
 export default function DailyTicketStatusStacked({ data, title, iconName }: DailyTicketStatusStackedProps) {
   const { t } = useTranslation();
   const IconComponent = iconName ? iconMapper(iconName) : null;
+  const legendColor = (typeof window !== 'undefined' && document.documentElement.classList.contains('dark'))
+    ? '#ffffff'
+    : '#111827';
+
+  const LegendContent = ({ payload }: { payload?: any[] }) => (
+    <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center', fontSize: 10, color: legendColor }}>
+      {(payload || []).map((entry: any, index: number) => (
+        <div key={`item-${index}`} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <span style={{ display: 'inline-block', width: 10, height: 10, background: entry.color || 'var(--primary)', borderRadius: 9999 }} />
+          <span>{entry.value}</span>
+        </div>
+      ))}
+    </div>
+  );
+
+  // Filter out future dates (only show up to today)
+  const todayStr = typeof window !== 'undefined' ? new Date().toISOString().slice(0, 10) : undefined;
+  const filteredData = Array.isArray(data)
+    ? (todayStr ? data.filter((d) => d.date <= todayStr) : data)
+    : [];
 
   return (
     <Card className="bg-white dark:bg-gray-800 shadow-md rounded-lg overflow-hidden h-full">
@@ -24,39 +44,17 @@ export default function DailyTicketStatusStacked({ data, title, iconName }: Dail
       </CardHeader>
       <CardContent className="h-[300px]">
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={data} margin={{ top: 16, right: 24, left: 8, bottom: 8 }}>
-            <defs>
-              <linearGradient id="gradOpen" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="var(--color-primary, var(--primary))" stopOpacity={0.95} />
-                <stop offset="100%" stopColor="var(--color-primary, var(--primary))" stopOpacity={0.5} />
-              </linearGradient>
-              <linearGradient id="gradInProgress" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="var(--color-primary, var(--primary))" stopOpacity={0.8} />
-                <stop offset="100%" stopColor="var(--color-primary, var(--primary))" stopOpacity={0.35} />
-              </linearGradient>
-              <linearGradient id="gradResolved" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="var(--color-primary, var(--primary))" stopOpacity={0.6} />
-                <stop offset="100%" stopColor="var(--color-primary, var(--primary))" stopOpacity={0.25} />
-              </linearGradient>
-              <linearGradient id="gradClosed" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="var(--color-primary, var(--primary))" stopOpacity={0.45} />
-                <stop offset="100%" stopColor="var(--color-primary, var(--primary))" stopOpacity={0.2} />
-              </linearGradient>
-              <linearGradient id="gradCancelled" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="var(--color-primary, var(--primary))" stopOpacity={0.3} />
-                <stop offset="100%" stopColor="var(--color-primary, var(--primary))" stopOpacity={0.15} />
-              </linearGradient>
-            </defs>
+          <BarChart data={filteredData} margin={{ top: 16, right: 24, left: 8, bottom: 8 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
             <XAxis dataKey="day" stroke="#6b7280" />
             <YAxis stroke="#6b7280" />
             <Tooltip />
-            <Legend wrapperStyle={{ fontSize: 10 }} />
-            <Bar dataKey="open" stackId="tickets" fill="url(#gradOpen)" stroke="var(--color-primary, var(--primary))" radius={[4,4,0,0]} />
-            <Bar dataKey="in_progress" stackId="tickets" fill="url(#gradInProgress)" stroke="var(--color-primary, var(--primary))" radius={[4,4,0,0]} />
-            <Bar dataKey="resolved" stackId="tickets" fill="url(#gradResolved)" stroke="var(--color-primary, var(--primary))" radius={[4,4,0,0]} />
-            <Bar dataKey="closed" stackId="tickets" fill="url(#gradClosed)" stroke="var(--color-primary, var(--primary))" radius={[4,4,0,0]} />
-            <Bar dataKey="cancelled" stackId="tickets" fill="url(#gradCancelled)" stroke="var(--color-primary, var(--primary))" radius={[4,4,0,0]} />
+            <Legend content={<LegendContent />} align="center" verticalAlign="top" />
+            <Bar dataKey="open" stackId="tickets" fill={"color-mix(in srgb, var(--color-primary, var(--primary)) 95%, white 5%)"} legendType="circle" radius={[4,4,0,0]} />
+            <Bar dataKey="in_progress" stackId="tickets" fill={"color-mix(in srgb, var(--color-primary, var(--primary)) 75%, white 25%)"} legendType="circle" radius={[4,4,0,0]} />
+            <Bar dataKey="resolved" stackId="tickets" fill={"color-mix(in srgb, var(--color-primary, var(--primary)) 55%, white 45%)"} legendType="circle" radius={[4,4,0,0]} />
+            <Bar dataKey="closed" stackId="tickets" fill={"color-mix(in srgb, var(--color-primary, var(--primary)) 40%, white 60%)"} legendType="circle" radius={[4,4,0,0]} />
+            <Bar dataKey="cancelled" stackId="tickets" fill={"color-mix(in srgb, var(--color-primary, var(--primary)) 25%, white 75%)"} legendType="circle" radius={[4,4,0,0]} />
           </BarChart>
         </ResponsiveContainer>
       </CardContent>

@@ -4,7 +4,9 @@ namespace Database\Seeders;
 
 use App\Models\Ticket;
 use App\Models\TicketComment;
+use App\Models\TicketStatusHistory;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -140,6 +142,66 @@ class TicketSeeder extends Seeder
             }
         }
 
-        $this->command->info('Sample tickets created successfully!');
+        // Tambahan: generate tiket harian untuk bulan berjalan + riwayat status realistis
+        $tz = config('app.timezone', 'Asia/Jakarta');
+        $startOfMonth = Carbon::now($tz)->startOfMonth();
+        $today = Carbon::now($tz)->toDateString();
+        $creatorIds = User::query()->pluck('id');
+        $categories = ['hardware','email','network','software','access'];
+
+        for ($d = $startOfMonth->copy(); $d->toDateString() <= $today; $d->addDay()) {
+            $base = $d->copy()->setTime(9, 0);
+            $ticketsToday = 2 + ($d->day % 3); // 2-4 per hari
+            for ($i = 0; $i < $ticketsToday; $i++) {
+                $createdAt = $base->copy()->addMinutes($i * 20);
+                $ticket = Ticket::create([
+                    'title' => 'Ticket '.$d->format('Y-m-d').' #'.$i,
+                    'description' => 'Seeded for dashboard demo',
+                    'priority' => ['low','medium','high'][$i % 3],
+                    'category' => $categories[$i % count($categories)],
+                    'status' => 'open',
+                    'user_id' => $creatorIds->random() ?? null,
+                    'created_at' => $createdAt,
+                    'updated_at' => $createdAt,
+                ]);
+
+                // Overwrite auto histories to set exact timeline
+                $ticket->histories()->delete();
+                TicketStatusHistory::create([
+                    'ticket_id' => $ticket->id,
+                    'status' => 'open',
+                    'changed_at' => $createdAt,
+                ]);
+
+                // 50% ke in_progress
+                if ($i % 2 === 0) {
+                    $inprogAt = $createdAt->copy()->addHours(2);
+                    TicketStatusHistory::create([
+                        'ticket_id' => $ticket->id,
+                        'status' => 'in_progress',
+                        'changed_at' => $inprogAt,
+                    ]);
+                    $ticket->forceFill(['status' => 'in_progress', 'updated_at' => $inprogAt])->saveQuietly();
+                }
+
+                // 33% selesai (resolved/closed)
+                if ($i % 3 === 0) {
+                    $doneAt = $createdAt->copy()->addHours(6);
+                    $final = ($i % 6 === 0) ? 'closed' : 'resolved';
+                    TicketStatusHistory::create([
+                        'ticket_id' => $ticket->id,
+                        'status' => $final,
+                        'changed_at' => $doneAt,
+                    ]);
+                    $ticket->forceFill([
+                        'status' => $final,
+                        'resolved_at' => $doneAt,
+                        'updated_at' => $doneAt,
+                    ])->saveQuietly();
+                }
+            }
+        }
+
+        $this->command->info('Sample tickets created successfully! + Daily month tickets with histories');
     }
 }
