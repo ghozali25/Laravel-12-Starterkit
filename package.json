@@ -63,6 +63,7 @@
         "react": "^19.0.0",
         "react-dom": "^19.0.0",
         "react-file-icon": "^1.6.0",
+        "react-image-crop": "^11.0.10",
         "recharts": "^2.12.7",
         "sonner": "^2.0.6",
         "tailwind-merge": "^3.0.1",
