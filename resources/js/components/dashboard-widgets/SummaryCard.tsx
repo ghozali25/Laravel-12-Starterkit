@@ -12,7 +12,7 @@ export default function SummaryCard({ label, value, iconName }: SummaryCardProps
   const IconComponent = iconName ? iconMapper(iconName) : null; // Get the icon component
 
   return (
-    <Card className="bg-white dark:bg-gray-800 shadow-md rounded-lg overflow-hidden h-full">
+    <Card className="h-full border-0 shadow-none rounded-none bg-transparent">
       <CardHeader className="px-4 py-3 flex flex-row items-center gap-2 space-y-0 pb-2">
         {IconComponent && <IconComponent className="h-4 w-4 text-muted-foreground" />}
         <CardTitle className="text-sm font-medium text-gray-800 dark:text-white">{label}</CardTitle>
