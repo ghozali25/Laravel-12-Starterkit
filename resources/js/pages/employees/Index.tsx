@@ -424,6 +424,7 @@ export default function EmployeeIndex({ employees, filters, potentialManagers, d
             <UploadButton
               accept=".xlsx,.xls,.csv"
               label={t('Upload')}
+              placeholder={t('No file chosen')}
               onFileSelected={(file) => setImportFile(file)}
             />
             {importFile && (

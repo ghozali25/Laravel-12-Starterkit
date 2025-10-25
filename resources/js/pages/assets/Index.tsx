@@ -366,6 +366,7 @@ export default function AssetIndex({ assets, categories, employees, filters }: P
             <UploadButton
               accept=".xlsx,.xls,.csv"
               label={t('Upload')}
+              placeholder={t('No file chosen')}
               onFileSelected={(file) => setImportFile(file)}
             />
             {importFile && (

@@ -21,6 +21,9 @@ import 'dayjs/locale/id'; // Import Indonesian locale
 import 'dayjs/locale/en'; // Import English locale
 import { useTranslation } from '@/lib/i18n'; // Import useTranslation
 import { Input } from '@/components/ui/input'; // Import Input
+import { UploadButton } from '@/components/ui/upload-button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Button as UIButton } from '@/components/ui/button';
 import { FileSearch, Edit, Trash2 } from 'lucide-react'; // Import icons
 import {
   Table,
@@ -62,6 +65,9 @@ export default function UserIndex({ users, filters }: Props) {
   const page = usePage();
   const isAdmin = Boolean((page.props as any)?.auth?.is_admin);
   const [search, setSearch] = useState(filters.search || '');
+  const [bulkOpen, setBulkOpen] = useState(false);
+  const [bulkFile, setBulkFile] = useState<File | null>(null);
+  const [bulkProcessing, setBulkProcessing] = useState(false);
 
   useEffect(() => {
     dayjs.locale(locale); // Set dayjs locale dynamically
@@ -104,6 +110,23 @@ export default function UserIndex({ users, filters }: Props) {
     debouncedSearch(value);
   };
 
+  const handleBulkSubmit = () => {
+    if (!bulkFile) return;
+    setBulkProcessing(true);
+    const form = new FormData();
+    form.append('avatar', bulkFile);
+    router.post(route('users.bulk-avatar'), form, {
+      forceFormData: true,
+      preserveScroll: true,
+      onSuccess: () => {
+        setBulkOpen(false);
+        setBulkFile(null);
+        router.reload({ only: ['users'] });
+      },
+      onFinish: () => setBulkProcessing(false),
+    });
+  };
+
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
       <Head title={t('User Management')} />
@@ -114,9 +137,14 @@ export default function UserIndex({ users, filters }: Props) {
             <p className="text-muted-foreground">{t('Manage user data and their roles within the system.')}</p>
           </div>
           {isAdmin && (
-            <Link href="/users/create">
-              <Button className="w-full md:w-auto" size="sm">{t('+ Add User')}</Button>
-            </Link>
+            <div className="flex gap-2 flex-wrap">
+              <UIButton variant="outline" size="sm" onClick={() => setBulkOpen(true)}>
+                {t('Bulk Replace Avatars')}
+              </UIButton>
+              <Link href="/users/create">
+                <Button className="w-full md:w-auto" size="sm">{t('+ Add User')}</Button>
+              </Link>
+            </div>
           )}
         </div>
 
@@ -257,6 +285,32 @@ export default function UserIndex({ users, filters }: Props) {
           </div>
         )}
       </div>
+
+      {/* Bulk Replace Avatars Dialog */}
+      <Dialog open={bulkOpen} onOpenChange={setBulkOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t('Bulk Replace Avatars')}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground">{t('Upload an image (jpg, png, webp, max 2MB) to replace all users\' profile photos.')}</p>
+            <UploadButton
+              accept="image/jpeg,image/png,image/webp"
+              label={t('Upload')}
+              placeholder={t('No file chosen')}
+              onFileSelected={setBulkFile}
+            />
+          </div>
+          <div className="flex justify-end gap-2 pt-2">
+            <UIButton variant="outline" onClick={() => setBulkOpen(false)} disabled={bulkProcessing}>
+              {t('Cancel')}
+            </UIButton>
+            <UIButton onClick={handleBulkSubmit} disabled={bulkProcessing || !bulkFile}>
+              {bulkProcessing ? t('Uploading...') : t('Save Changes')}
+            </UIButton>
+          </div>
+        </DialogContent>
+      </Dialog>
     </AppLayout>
   );
 }
