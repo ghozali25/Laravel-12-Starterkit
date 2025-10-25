@@ -48,15 +48,15 @@ export default function DashboardWidgetWrapper({ id, children, onRemove, colSpan
         isDragging && "ring-2 ring-primary ring-offset-2"
       )}
     >
-      <div className="absolute bottom-1.5 right-1.5 z-10 flex gap-1">
+      <div className="absolute bottom-1 right-1 z-10 flex gap-0.5">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-6 w-6 text-muted-foreground hover:text-primary"
+                className="h-4 w-4 text-muted-foreground hover:text-primary"
               >
-                <Maximize2 className="h-3.5 w-3.5" />
+                <Maximize2 className="h-2.5 w-2.5" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">

@@ -27,11 +27,21 @@ export default function ResourceUsageAreaChart({ data, xAxisDataKey = 'month', y
       <CardContent className="h-[300px]">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={data} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+            <defs>
+              <linearGradient id="gradArea1" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="var(--color-primary, var(--primary))" stopOpacity={0.35} />
+                <stop offset="100%" stopColor="var(--color-primary, var(--primary))" stopOpacity={0.08} />
+              </linearGradient>
+              <linearGradient id="gradArea2" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="var(--color-primary, var(--primary))" stopOpacity={0.25} />
+                <stop offset="100%" stopColor="var(--color-primary, var(--primary))" stopOpacity={0.05} />
+              </linearGradient>
+            </defs>
             <XAxis dataKey={xAxisDataKey} stroke="#6b7280" />
             <YAxis stroke="#6b7280" />
             <Tooltip />
-            <Area type="monotone" dataKey={yAxisDataKey1} stroke="#8884d8" fill="#c6dae7" />
-            <Area type="monotone" dataKey={yAxisDataKey2} stroke="#82ca9d" fill="#b7e4c7" />
+            <Area type="monotone" dataKey={yAxisDataKey1} stroke="var(--color-primary, var(--primary))" fill="url(#gradArea1)" strokeWidth={2} />
+            <Area type="monotone" dataKey={yAxisDataKey2} stroke="var(--color-primary, var(--primary))" strokeOpacity={0.6} fill="url(#gradArea2)" strokeWidth={2} />
           </AreaChart>
         </ResponsiveContainer>
       </CardContent>

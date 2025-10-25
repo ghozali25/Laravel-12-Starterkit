@@ -39,7 +39,8 @@ export default function UserRolesPieChart({ data, title, iconName }: UserRolesPi
               ))}
             </Pie>
             <Tooltip />
-            <Legend />
+            <Legend wrapperStyle={{ fontSize: 10 }} />
+
           </PieChart>
         </ResponsiveContainer>
       </CardContent>

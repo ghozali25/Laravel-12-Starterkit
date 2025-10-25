@@ -30,7 +30,7 @@ export default function MonthlyTrendsChart({ data, xAxisDataKey = 'name', yAxisD
             <XAxis dataKey={xAxisDataKey} stroke="#6b7280" />
             <YAxis stroke="#6b7280" />
             <Tooltip />
-            <Legend />
+            <Legend wrapperStyle={{ fontSize: 10 }} />
             <Line type="monotone" dataKey={yAxisDataKey1} stroke="#22c55e" strokeWidth={2} />
             <Line type="monotone" dataKey={yAxisDataKey2} stroke="#f43f5e" strokeWidth={2} />
           </LineChart>

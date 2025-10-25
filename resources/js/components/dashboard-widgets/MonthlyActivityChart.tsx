@@ -27,12 +27,22 @@ export default function MonthlyActivityChart({ data, xAxisDataKey = 'name', yAxi
       <CardContent className="h-[300px]">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={data} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+            <defs>
+              <linearGradient id="gradPrimaryBar" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="var(--color-primary, var(--primary))" stopOpacity={0.95} />
+                <stop offset="100%" stopColor="var(--color-primary, var(--primary))" stopOpacity={0.4} />
+              </linearGradient>
+              <linearGradient id="gradSecondaryBar" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="var(--color-primary, var(--primary))" stopOpacity={0.6} />
+                <stop offset="100%" stopColor="var(--color-primary, var(--primary))" stopOpacity={0.25} />
+              </linearGradient>
+            </defs>
             <XAxis dataKey={xAxisDataKey} stroke="#6b7280" />
             <YAxis stroke="#6b7280" />
             <Tooltip />
-            <Legend />
-            <Bar dataKey={yAxisDataKey1} fill="#3b82f6" radius={[4, 4, 0, 0]} />
-            <Bar dataKey={yAxisDataKey2} fill="#8b5cf6" radius={[4, 4, 0, 0]} />
+            <Legend wrapperStyle={{ fontSize: 10 }} />
+            <Bar dataKey={yAxisDataKey1} fill="url(#gradPrimaryBar)" stroke="var(--color-primary, var(--primary))" radius={[4, 4, 0, 0]} />
+            <Bar dataKey={yAxisDataKey2} fill="url(#gradSecondaryBar)" stroke="var(--color-primary, var(--primary))" radius={[4, 4, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </CardContent>

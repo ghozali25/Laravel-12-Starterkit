@@ -46,12 +46,20 @@ export default function DailyActivityChart({
               <XAxis dataKey={xAxisDataKey} stroke="#6b7280" tickCount={data?.length ?? 31} />
               <YAxis stroke="#6b7280" />
               <Tooltip />
-              <Legend />
+              <Legend wrapperStyle={{ fontSize: 10 }} />
               {series.map((s) =>
                 s.type === 'bar' ? (
                   <Bar key={s.key} dataKey={s.key} fill={s.color ?? '#3b82f6'} radius={[4, 4, 0, 0]} />
                 ) : (
-                  <Line key={s.key} type="monotone" dataKey={s.key} stroke={s.color ?? '#10b981'} dot={false} strokeWidth={2} />
+                  <Line
+                    key={s.key}
+                    type="monotone"
+                    dataKey={s.key}
+                    stroke="var(--color-primary, var(--primary))"
+                    strokeOpacity={s.key === 'Users' ? 0.9 : s.key === 'Assets' ? 0.6 : 0.5}
+                    dot={false}
+                    strokeWidth={2}
+                  />
                 ),
               )}
             </BarChart>
@@ -61,9 +69,17 @@ export default function DailyActivityChart({
               <XAxis dataKey={xAxisDataKey} stroke="#6b7280" tickCount={data?.length ?? 31} />
               <YAxis stroke="#6b7280" />
               <Tooltip />
-              <Legend />
+              <Legend wrapperStyle={{ fontSize: 10 }} />
               {series.map((s) => (
-                <Line key={s.key} type="monotone" dataKey={s.key} stroke={s.color ?? '#10b981'} dot={false} strokeWidth={2} />
+                <Line
+                  key={s.key}
+                  type="monotone"
+                  dataKey={s.key}
+                  stroke="var(--color-primary, var(--primary))"
+                  strokeOpacity={s.key === 'Users' ? 0.9 : s.key === 'Assets' ? 0.6 : 0.5}
+                  dot={false}
+                  strokeWidth={2}
+                />
               ))}
             </LineChart>
           )}
