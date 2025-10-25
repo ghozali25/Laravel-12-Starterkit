@@ -197,18 +197,18 @@ const widgetComponents: WidgetComponentsMap = {
   },
   MonthlyActivityChart: {
     component: MonthlyActivityChart,
-    label: 'Monthly Activity Chart',
+    label: 'Employees (Monthly Total)',
     getInitialProps: (t, data) => ({
       data: data?.monthlyData ?? [],
       xAxisDataKey: 'name',
       yAxisDataKey1: 'Users',
-      yAxisDataKey2: 'Backups',
+      yAxisDataKey2: '',
       iconName: 'BarChart',
     }),
     configurableProps: [
       { key: 'xAxisDataKey', label: 'X-Axis Data Key', type: 'select', dataOptions: ['name'] }, // 'name' is the month
-      { key: 'yAxisDataKey1', label: 'Y-Axis Data Key 1', type: 'select', dataOptions: ['Users', 'Backups', 'Assets'] },
-      { key: 'yAxisDataKey2', label: 'Y-Axis Data Key 2', type: 'select', dataOptions: ['Users', 'Backups', 'Assets'] },
+      { key: 'yAxisDataKey1', label: 'Y-Axis Data Key 1', type: 'select', dataOptions: ['Users', 'UsersGrowth', 'Assets'] },
+      { key: 'yAxisDataKey2', label: 'Y-Axis Data Key 2', type: 'select', dataOptions: ['', 'Users', 'Assets'] },
     ],
     defaultColSpan: 3, // Adjusted for 6-column layout
     icon: <BarChart className="h-5 w-5" />,
