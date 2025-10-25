@@ -46,6 +46,15 @@ class User extends Authenticatable implements HasMedia
     ];
 
     /**
+     * Append computed attributes when serializing to arrays/JSON.
+     *
+     * @var array<int, string>
+     */
+    protected $appends = [
+        'avatar_url',
+    ];
+
+    /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>
@@ -61,6 +70,22 @@ class User extends Authenticatable implements HasMedia
     public function mediaFolders()
     {
         return $this->hasMany(MediaFolder::class);
+    }
+
+    /**
+     * Register media collections.
+     */
+    public function registerMediaCollections(): void
+    {
+        $this->addMediaCollection('avatars')->singleFile();
+    }
+
+    /**
+     * Accessor for avatar_url.
+     */
+    public function getAvatarUrlAttribute(): ?string
+    {
+        return $this->getFirstMediaUrl('avatars') ?: null;
     }
 
     /**
