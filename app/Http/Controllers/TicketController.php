@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Ticket;
 use App\Models\TicketComment;
 use App\Models\User;
+use App\Notifications\TicketCommentAdded;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
@@ -175,13 +176,20 @@ class TicketController extends Controller
             'is_internal' => 'boolean',
         ]);
 
-        $ticket->comments()->create([
+        $comment = $ticket->comments()->create([
             'user_id' => Auth::id(),
             'comment' => $validated['comment'],
             'is_internal' => $validated['is_internal'] ?? false,
         ]);
 
-        return redirect()->back()->with('success', 'Komentar berhasil ditambahkan.');
+        // Notify all users about the new comment
+        $comment->load('user');
+        $users = User::all();
+        foreach ($users as $user) {
+            $user->notify(new TicketCommentAdded($ticket, $comment));
+        }
+
+        return redirect()->back()->with('success', 'Komentar berhasil ditambahkan dan notifikasi telah dikirim.');
     }
 
     /**

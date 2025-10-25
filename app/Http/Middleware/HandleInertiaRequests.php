@@ -7,6 +7,7 @@ use Illuminate\Foundation\Inspiring;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 use Illuminate\Support\Facades\Lang; // Import Lang facade
+use Illuminate\Support\Arr;
 
 class HandleInertiaRequests extends Middleware
 {
@@ -38,6 +39,21 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => $request->user(),
             ],
+            'notifications' => function () use ($request) {
+                $user = $request->user();
+                if (!$user) return ['unread_count' => 0, 'items' => []];
+                $unreadCount = $user->unreadNotifications()->count();
+                $items = $user->notifications()->latest()->limit(10)->get()->map(function ($n) {
+                    return [
+                        'id' => $n->id,
+                        'type' => class_basename($n->type),
+                        'data' => $n->data,
+                        'read_at' => $n->read_at,
+                        'created_at' => $n->created_at?->toDateTimeString(),
+                    ];
+                });
+                return ['unread_count' => $unreadCount, 'items' => $items];
+            },
             'flash' => [
                 'success' => session('success'),
                 'error' => session('error'),

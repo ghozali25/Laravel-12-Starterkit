@@ -21,6 +21,11 @@ class CheckMenuPermission
         // Ambil route yang sedang diakses, contoh: "/permissions"
         $currentRoute = $request->route()->uri();
 
+        // Izinkan semua pengguna terautentikasi mengakses dashboard tanpa permission khusus
+        if ($request->routeIs('dashboard') || trim($currentRoute, '\\/') === 'dashboard') {
+            return $next($request);
+        }
+
         // Ambil menu berdasarkan route
         $menu = Menu::where('route', '/' . ltrim($currentRoute, '/'))->first();
 

@@ -4,6 +4,7 @@ import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import { type SharedData } from '@/types';
 import { useTranslation } from '@/lib/i18n';
 import { Button } from '@/components/ui/button';
+import { ArrowRight } from 'lucide-react';
 
 export default function Welcome() {
   const { auth, setting } = usePage<SharedData>().props;
@@ -69,13 +70,7 @@ export default function Welcome() {
                 className="inline-flex items-center justify-center px-8 py-3 rounded-lg bg-[var(--primary)] text-white font-medium hover:bg-[var(--primary)]/90 transition-all transform hover:-translate-y-0.5 shadow-md hover:shadow-lg"
               >
                 {t('Go to Dashboard')}
-                <svg xmlns="http://www.w3.org/2000/svg" className="ml-2 h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                  <path
-                    fillRule="evenodd"
-                    d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 10 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z"
-                    clipRule="evenodd"
-                  />
-                </svg>
+                <ArrowRight className="ml-2 h-5 w-5" />
               </Link>
             ) : (
               <div className="flex flex-col sm:flex-row justify-center lg:justify-start items-center gap-4">
