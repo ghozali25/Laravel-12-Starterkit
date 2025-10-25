@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Input } from '@/components/ui/input';
+import { UploadButton } from '@/components/ui/upload-button';
 import { type BreadcrumbItem, type Asset, type AssetCategory, type User } from '@/types';
 import { Plus, Edit, Trash2, FileSearch, FileDown, FileUp, FileSpreadsheet, FileType, Printer, FileQuestion } from 'lucide-react';
 import {
@@ -362,7 +363,11 @@ export default function AssetIndex({ assets, categories, employees, filters }: P
             >
               <FileQuestion className="h-4 w-4" /> {t('Download Import Template')}
             </Button>
-            <Input type="file" accept=".xlsx,.xls,.csv" onChange={handleImportFileChange} />
+            <UploadButton
+              accept=".xlsx,.xls,.csv"
+              label={t('Upload')}
+              onFileSelected={(file) => setImportFile(file)}
+            />
             {importFile && (
               <p className="text-sm text-muted-foreground">
                 {t('Selected file')}: {importFile.name}

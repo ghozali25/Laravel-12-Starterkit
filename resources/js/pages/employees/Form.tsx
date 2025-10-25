@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useForm, Link } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { UploadButton } from '@/components/ui/upload-button';
 import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/app-layout';
 import { Head } from '@inertiajs/react';
@@ -71,15 +72,11 @@ export default function EmployeeForm({ employee, roles, currentRoles, potentialM
     remove_avatar: false as boolean, // Flag to tell backend to remove avatar
   });
 
-  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0] || null;
+  const handleAvatarSelected = (file: File | null) => {
     setData('avatar', file);
-    setData('remove_avatar', false); // Reset remove flag if new file is selected
-    if (file) {
-      setAvatarPreview(URL.createObjectURL(file));
-    } else {
-      setAvatarPreview(null);
-    }
+    setData('remove_avatar', false);
+    if (file) setAvatarPreview(URL.createObjectURL(file));
+    else setAvatarPreview(null);
   };
 
   const handleRemoveAvatar = () => {
@@ -151,13 +148,13 @@ export default function EmployeeForm({ employee, roles, currentRoles, potentialM
             <form onSubmit={handleSubmit} className="space-y-8">
               <div className="space-y-4">
                 {/* Avatar Upload */}
-                <div className="space-y-1">
-                  <Label htmlFor="avatar">{t('Employee Photo (Max 2MB)')}</Label>
-                  <Input
-                    id="avatar"
-                    type="file"
+                <div className="space-y-3">
+                  <Label className="block" htmlFor="avatar">{t('Employee Photo (Max 2MB)')}</Label>
+                  <UploadButton
                     accept="image/*"
-                    onChange={handleAvatarChange}
+                    label={t('Upload')}
+                    placeholder="No file chosen"
+                    onFileSelected={handleAvatarSelected}
                   />
                   {avatarPreview && (
                     <div className="relative mt-2 w-24 h-24 rounded-full overflow-hidden group">

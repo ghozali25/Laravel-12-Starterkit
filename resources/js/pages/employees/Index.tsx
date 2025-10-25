@@ -22,6 +22,7 @@ import 'dayjs/locale/id';
 import 'dayjs/locale/en';
 import { useTranslation } from '@/lib/i18n';
 import { Input } from '@/components/ui/input';
+import { UploadButton } from '@/components/ui/upload-button';
 import { Plus, Edit, Trash2, FileDown, FileUp, FileSearch, FileSpreadsheet, FileType, Printer, FileQuestion, KeyRound, Mail } from 'lucide-react';
 import {
   DropdownMenu,
@@ -420,7 +421,11 @@ export default function EmployeeIndex({ employees, filters, potentialManagers, d
             >
               <FileQuestion className="h-4 w-4" /> {t('Download Import Template')}
             </Button>
-            <Input type="file" accept=".xlsx,.xls,.csv" onChange={handleImportFileChange} />
+            <UploadButton
+              accept=".xlsx,.xls,.csv"
+              label={t('Upload')}
+              onFileSelected={(file) => setImportFile(file)}
+            />
             {importFile && (
               <p className="text-sm text-muted-foreground">
                 {t('Selected file')}: {importFile.name}

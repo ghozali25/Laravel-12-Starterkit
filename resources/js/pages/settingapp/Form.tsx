@@ -4,6 +4,7 @@ import AppLayout from '@/layouts/app-layout';
 import { Head } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { UploadButton } from '@/components/ui/upload-button';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -134,14 +135,13 @@ export default function SettingForm({ setting }: Props) {
               </div>
 
               {/* Logo Upload */}
-              <div className="space-y-1">
-                <Label htmlFor="logo">{t('Logo (Max 2MB)')}</Label>
-                <Input
-                  id="logo"
-                  type="file"
+              <div className="space-y-3">
+                <Label className="block" htmlFor="logo">{t('Logo (Max 2MB)')}</Label>
+                <UploadButton
                   accept="image/*"
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                    const file = e.target.files?.[0] || null;
+                  label={t('Upload')}
+                  className="mt-1"
+                  onFileSelected={(file) => {
                     setData('logo', file);
                     if (file) logoPreview.current = URL.createObjectURL(file);
                   }}
@@ -152,16 +152,15 @@ export default function SettingForm({ setting }: Props) {
               </div>
 
               {/* Favicon Upload */}
-              <div className="space-y-1">
-                <Label htmlFor="favicon">{t('Favicon (Max 1MB)')}</Label>
-                <Input
-                  id="favicon"
-                  type="file"
+              <div className="space-y-3">
+                <Label className="block" htmlFor="favicon">{t('Favicon (Max 1MB)')}</Label>
+                <UploadButton
                   accept="image/*"
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                    const file = e.target.files?.[0] || null;
+                  label={t('Upload')}
+                  className="mt-1"
+                  onFileSelected={(file) => {
                     setData('favicon', file);
-                    if (file) faviconPreview.current = URL.createObjectURL(file);
+                    if (file) faviconPreview.current = file ? URL.createObjectURL(file) : null;
                   }}
                 />
                 {faviconPreview.current && (
@@ -170,14 +169,13 @@ export default function SettingForm({ setting }: Props) {
               </div>
 
               {/* Background Image Upload */}
-              <div className="space-y-1">
-                <Label htmlFor="background_image">{t('Background Image (Max 2MB)')}</Label>
-                <Input
-                  id="background_image"
-                  type="file"
+              <div className="space-y-3">
+                <Label className="block" htmlFor="background_image">{t('Background Image (Max 2MB)')}</Label>
+                <UploadButton
                   accept="image/*"
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                    const file = e.target.files?.[0] || null;
+                  label={t('Upload')}
+                  className="mt-1"
+                  onFileSelected={(file) => {
                     setData('background_image', file);
                     setData('remove_background_image', false);
                     if (file) setBackgroundImagePreview(URL.createObjectURL(file));

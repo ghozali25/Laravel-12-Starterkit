@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Password;
 use Inertia\Inertia;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class UserController extends Controller
 {
@@ -144,5 +145,47 @@ class UserController extends Controller
         }
 
         return redirect()->back()->with('error', __($status));
+    }
+
+    /**
+     * Bulk replace avatars for all users using one uploaded image.
+     */
+    public function bulkAvatar(Request $request)
+    {
+        if (!Auth::user()->hasRole(['admin', 'it_support'])) {
+            abort(403, 'Anda tidak memiliki izin untuk mengganti foto profil massal.');
+        }
+
+        $validated = $request->validate([
+            'avatar' => ['required', 'file', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+        ]);
+
+        $file = $request->file('avatar');
+        // Store temporarily to reuse for all users
+        $tmpPath = $file->storeAs('tmp', uniqid('bulk-avatar-') . '.' . $file->getClientOriginalExtension());
+        $absolute = Storage::path($tmpPath);
+
+        try {
+            // Apply to all users
+            User::chunk(200, function ($chunk) use ($absolute, $file) {
+                foreach ($chunk as $user) {
+                    // Clear existing avatar and set the new one
+                    if (method_exists($user, 'clearMediaCollection')) {
+                        $user->clearMediaCollection('avatars');
+                        $user->addMedia($absolute)
+                            ->usingFileName($file->getClientOriginalName())
+                            ->preservingOriginal()
+                            ->toMediaCollection('avatars');
+                    }
+                }
+            });
+        } finally {
+            // Cleanup temp file
+            if (Storage::exists($tmpPath)) {
+                Storage::delete($tmpPath);
+            }
+        }
+
+        return redirect()->back()->with('success', 'Foto profil semua user berhasil diganti.');
     }
 }
