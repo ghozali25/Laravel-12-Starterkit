@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Password;
 use Inertia\Inertia;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Auth;
@@ -129,5 +130,19 @@ class UserController extends Controller
         ]);
 
         return redirect()->back()->with('success', 'Password berhasil direset. Password sementara: ' . $temporaryPassword);
+    }
+
+    public function sendResetLink(User $user)
+    {
+        if (!Auth::user()->hasRole('admin')) {
+            abort(403, 'Anda tidak memiliki izin untuk mengirim email reset password.');
+        }
+        $status = Password::sendResetLink(['email' => $user->email]);
+
+        if ($status === Password::RESET_LINK_SENT) {
+            return redirect()->back()->with('success', __($status));
+        }
+
+        return redirect()->back()->with('error', __($status));
     }
 }

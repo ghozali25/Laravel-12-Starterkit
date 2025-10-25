@@ -22,7 +22,7 @@ import 'dayjs/locale/id';
 import 'dayjs/locale/en';
 import { useTranslation } from '@/lib/i18n';
 import { Input } from '@/components/ui/input';
-import { Plus, Edit, Trash2, FileDown, FileUp, FileSearch, FileSpreadsheet, FileType, Printer, FileQuestion } from 'lucide-react';
+import { Plus, Edit, Trash2, FileDown, FileUp, FileSearch, FileSpreadsheet, FileType, Printer, FileQuestion, KeyRound, Mail } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -201,38 +201,40 @@ export default function EmployeeIndex({ employees, filters, potentialManagers, d
             <p className="text-muted-foreground">{t('Manage employee data and their roles within the system.')}</p>
           </div>
           <div className="flex flex-wrap gap-2">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="gap-2">
-                  <FileDown className="h-4 w-4" />
-                  {t('Export')}
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => window.open(route('employees.export', 'xlsx'), '_blank')}>
-                  <FileSpreadsheet className="mr-2 h-4 w-4" /> {t('Export to Excel')}
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => window.open(route('employees.export', 'csv'), '_blank')}>
-                  <FileType className="mr-2 h-4 w-4" /> {t('Export to CSV')}
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => window.open(route('employees.export', 'pdf'), '_blank')}>
-                  <Printer className="mr-2 h-4 w-4" /> {t('Export to PDF')}
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-
-            <Button variant="outline" onClick={() => setIsImportDialogOpen(true)} className="gap-2">
-              <FileUp className="h-4 w-4" />
-              {t('Import')}
-            </Button>
-
             {isAdmin && (
-              <Link href="/employees/create">
-                <Button className="w-full md:w-auto" size="sm">
-                  <Plus className="mr-2 h-4 w-4" />
-                  {t('Add Employee')}
+              <>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" className="gap-2">
+                      <FileDown className="h-4 w-4" />
+                      {t('Export')}
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={() => window.open(route('employees.export', 'xlsx'), '_blank')}>
+                      <FileSpreadsheet className="mr-2 h-4 w-4" /> {t('Export to Excel')}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => window.open(route('employees.export', 'csv'), '_blank')}>
+                      <FileType className="mr-2 h-4 w-4" /> {t('Export to CSV')}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => window.open(route('employees.export', 'pdf'), '_blank')}>
+                      <Printer className="mr-2 h-4 w-4" /> {t('Export to PDF')}
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+
+                <Button variant="outline" onClick={() => setIsImportDialogOpen(true)} className="gap-2">
+                  <FileUp className="h-4 w-4" />
+                  {t('Import')}
                 </Button>
-              </Link>
+
+                <Link href="/employees/create">
+                  <Button className="w-full md:w-auto" size="sm">
+                    <Plus className="mr-2 h-4 w-4" />
+                    {t('Add Employee')}
+                  </Button>
+                </Link>
+              </>
             )}
           </div>
         </div>

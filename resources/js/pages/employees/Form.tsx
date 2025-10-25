@@ -11,7 +11,8 @@ import { BreadcrumbItem, type Division } from '@/types';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Textarea } from '@/components/ui/textarea';
 import { useTranslation } from '@/lib/i18n';
-import { Save, ArrowLeft, XCircle } from 'lucide-react'; // Import XCircle
+import { Save, ArrowLeft, XCircle, KeyRound, Mail } from 'lucide-react'; // Import icons
+import { router, usePage } from '@inertiajs/react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface Role {
@@ -49,6 +50,8 @@ interface Props {
 export default function EmployeeForm({ employee, roles, currentRoles, potentialManagers, divisions, avatar_url }: Props) {
   const { t } = useTranslation();
   const isEdit = !!employee;
+  const page = usePage();
+  const isAdmin = Boolean((page.props as any)?.auth?.is_admin);
 
   const [avatarPreview, setAvatarPreview] = useState<string | null>(avatar_url || null);
   const [removeAvatar, setRemoveAvatar] = useState(false);
@@ -112,6 +115,34 @@ export default function EmployeeForm({ employee, roles, currentRoles, potentialM
             <p className="text-sm text-muted-foreground">
               {isEdit ? t('Update employee data and roles') : t('Enter employee data and set roles')}
             </p>
+            {isEdit && isAdmin && (
+              <div className="mt-3 flex flex-wrap gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    if (!employee?.id) return;
+                    router.put(route('users.reset-password', employee.id), {}, {
+                      preserveScroll: true,
+                    });
+                  }}
+                >
+                  <KeyRound className="h-4 w-4 mr-1" /> {t('Reset Password')}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    if (!employee?.id) return;
+                    router.post(route('users.send-reset-link', employee.id), {}, {
+                      preserveScroll: true,
+                    });
+                  }}
+                >
+                  <Mail className="h-4 w-4 mr-1" /> {t('Send Reset Link')}
+                </Button>
+              </div>
+            )}
           </CardHeader>
 
           <Separator />
