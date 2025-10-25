@@ -184,6 +184,9 @@ class AssetController extends Controller
 
     public function export(Request $request, $format)
     {
+        if (!Auth::user()->hasRole(['admin', 'it_support'])) {
+            abort(403, 'Anda tidak memiliki izin untuk mengekspor data aset.');
+        }
         $assets = Asset::with(['category', 'user'])->get();
 
         if ($format === 'xlsx') {
@@ -200,6 +203,9 @@ class AssetController extends Controller
 
     public function import(Request $request)
     {
+        if (!Auth::user()->hasRole(['admin', 'it_support'])) {
+            abort(403, 'Anda tidak memiliki izin untuk mengimpor data aset.');
+        }
         $request->validate([
             'file' => 'required|file|mimes:xlsx,xls,csv',
         ]);

@@ -455,5 +455,10 @@
     "Yes, Delete": "Ya, Hapus",
     "Yes, Reset": "Ya, Reset",
     "Yes, save it": "Ya, simpan",
-    "Your email address is unverified.": "Alamat email Anda belum diverifikasi."
+    "Your email address is unverified.": "Alamat email Anda belum diverifikasi.",
+    "Reports": "Laporan",
+    "Employees Report": "Laporan Karyawan",
+    "Assets Report": "Laporan Aset",
+    "Tickets Report": "Laporan Tiket",
+    "All data": "Semua data"
 }

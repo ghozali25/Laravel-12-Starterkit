@@ -86,7 +86,7 @@ class EmployeeController extends Controller
 
     public function create()
     {
-        if (!Auth::user()->hasRole('admin')) {
+        if (!Auth::user()->hasRole(['admin', 'it_support'])) {
             abort(403, 'Anda tidak memiliki izin untuk membuat employee.');
         }
         $roles = Role::where('name', '!=', 'admin')->get();
@@ -104,7 +104,7 @@ class EmployeeController extends Controller
 
     public function store(Request $request)
     {
-        if (!Auth::user()->hasRole('admin')) {
+        if (!Auth::user()->hasRole(['admin', 'it_support'])) {
             abort(403, 'Anda tidak memiliki izin untuk membuat employee.');
         }
         $validated = $request->validate([
@@ -145,7 +145,7 @@ class EmployeeController extends Controller
 
     public function edit(User $employee)
     {
-        if (!Auth::user()->hasRole('admin')) {
+        if (!Auth::user()->hasRole(['admin', 'it_support'])) {
             abort(403, 'Anda tidak memiliki izin untuk mengedit employee.');
         }
         $roles = Role::where('name', '!=', 'admin')->get();
@@ -169,7 +169,7 @@ class EmployeeController extends Controller
 
     public function update(Request $request, User $employee)
     {
-        if (!Auth::user()->hasRole('admin')) {
+        if (!Auth::user()->hasRole(['admin', 'it_support'])) {
             abort(403, 'Anda tidak memiliki izin untuk memperbarui employee.');
         }
         $validated = $request->validate([
@@ -216,7 +216,7 @@ class EmployeeController extends Controller
 
     public function destroy(User $employee)
     {
-        if (!Auth::user()->hasRole('admin')) {
+        if (!Auth::user()->hasRole(['admin', 'it_support'])) {
             abort(403, 'Anda tidak memiliki izin untuk menghapus employee.');
         }
         $employee->delete();
@@ -225,7 +225,7 @@ class EmployeeController extends Controller
 
     public function export(Request $request, $format)
     {
-        if (!Auth::user()->hasRole('admin')) {
+        if (!Auth::user()->hasRole(['admin', 'it_support'])) {
             abort(403, 'Anda tidak memiliki izin untuk mengekspor data karyawan.');
         }
         $employees = User::with(['roles', 'division'])
