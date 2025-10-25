@@ -43,8 +43,8 @@ export default function Welcome() {
     window.addEventListener('resize', setSize);
 
     const isMobile = window.innerWidth < 640;
-    const count = isMobile ? 48 : 80;
-    const speed = isMobile ? 0.7 : 1.0;
+    const count = isMobile ? 100 : 180;
+    const speed = isMobile ? 1.0 : 2.0;
     const color = primaryColor || '#9ca3af';
     const particleOpacity = 0.38;
     const linkOpacity = 0.28;

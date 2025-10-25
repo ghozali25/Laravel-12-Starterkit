@@ -49,14 +49,107 @@ export default function AuthLayout({ children, title, description }: AuthLayoutP
         };
     }, [primaryColor, primaryForeground]);
 
+    // Particles (local canvas) background
+    useEffect(() => {
+        const canvas = document.getElementById('auth-particles-canvas') as HTMLCanvasElement | null;
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+        let rafId = 0;
+        let running = true;
+        const DPR = Math.min(window.devicePixelRatio || 1, 2);
+        const setSize = () => {
+            const rect = canvas.parentElement?.getBoundingClientRect();
+            const w = rect ? rect.width : window.innerWidth;
+            const h = rect ? rect.height : window.innerHeight;
+            canvas.width = Math.floor(w * DPR);
+            canvas.height = Math.floor(h * DPR);
+            canvas.style.width = w + 'px';
+            canvas.style.height = h + 'px';
+            ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+        };
+        setSize();
+        window.addEventListener('resize', setSize);
+
+        const isMobile = window.innerWidth < 640;
+        const count = isMobile ? 100 : 180;
+        const speed = isMobile ? 1.0 : 2.0;
+        const color = primaryColor || '#9ca3af';
+        const particleOpacity = 0.38;
+        const linkOpacity = 0.28;
+        const linkDist = 170;
+
+        const hexToRgba = (hex: string, a: number) => {
+            let h = hex.replace('#', '');
+            if (h.length === 3) h = h.split('').map((c) => c + c).join('');
+            const num = parseInt(h, 16);
+            const r = (num >> 16) & 255;
+            const g = (num >> 8) & 255;
+            const b = num & 255;
+            return `rgba(${r},${g},${b},${a})`;
+        };
+
+        type P = { x: number; y: number; vx: number; vy: number };
+        const particles: P[] = Array.from({ length: count }, () => ({
+            x: Math.random() * (canvas.width / DPR),
+            y: Math.random() * (canvas.height / DPR),
+            vx: (Math.random() * 2 - 1) * speed,
+            vy: (Math.random() * 2 - 1) * speed,
+        }));
+
+        const draw = () => {
+            if (!running) return;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = hexToRgba(color, particleOpacity);
+            for (const p of particles) {
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, 2.2, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            ctx.strokeStyle = hexToRgba(color, linkOpacity);
+            ctx.lineWidth = 1.2;
+            for (let i = 0; i < particles.length; i++) {
+                for (let j = i + 1; j < particles.length; j++) {
+                    const dx = particles[i].x - particles[j].x;
+                    const dy = particles[i].y - particles[j].y;
+                    const d = Math.hypot(dx, dy);
+                    if (d < linkDist) {
+                        ctx.globalAlpha = 1 - d / linkDist;
+                        ctx.beginPath();
+                        ctx.moveTo(particles[i].x, particles[i].y);
+                        ctx.lineTo(particles[j].x, particles[j].y);
+                        ctx.stroke();
+                        ctx.globalAlpha = 1;
+                    }
+                }
+            }
+            for (const p of particles) {
+                p.x += p.vx * 0.5;
+                p.y += p.vy * 0.5;
+                if (p.x < 0 || p.x > canvas.width / DPR) p.vx *= -1;
+                if (p.y < 0 || p.y > canvas.height / DPR) p.vy *= -1;
+            }
+            rafId = requestAnimationFrame(draw);
+        };
+        rafId = requestAnimationFrame(draw);
+        return () => {
+            running = false;
+            cancelAnimationFrame(rafId);
+            window.removeEventListener('resize', setSize);
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        };
+    }, [primaryColor]);
+
     return (
         <div
             className={cn(
-                "flex min-h-svh flex-col items-center justify-center p-6 md:p-10 bg-cover bg-center bg-fixed",
+                "relative flex min-h-svh flex-col items-center justify-center p-6 md:p-10 bg-cover bg-center bg-fixed",
                 !backgroundImage && "bg-white dark:bg-gray-900" // Default background putih jika tidak ada gambar
             )}
             style={backgroundImage ? { backgroundImage: `url(${backgroundImage})` } : {}}
         >
+            {/* Particles Background */}
+            <canvas id="auth-particles-canvas" className="pointer-events-none absolute inset-0 z-0" />
             <div className="w-full max-w-md rounded-xl bg-white/50 shadow-xl backdrop-blur-xl dark:bg-gray-800/50 dark:shadow-none z-10">
                 <div className="p-8 sm:p-10">
                     <div className="flex flex-col gap-8">
