@@ -28,11 +28,16 @@ export default function DailyTicketStatusStacked({ data, title, iconName }: Dail
     </div>
   );
 
-  // Filter out future dates (only show up to today)
   const todayStr = typeof window !== 'undefined' ? new Date().toISOString().slice(0, 10) : undefined;
   const filteredData = Array.isArray(data)
     ? (todayStr ? data.filter((d) => d.date <= todayStr) : data)
     : [];
+
+  const barEntries = [
+    { key: 'open', color: '#327ae6ff' },
+    { key: 'in_progress', color: '#fbbe4eff' },
+    { key: 'resolved', color: '#34d399' },
+  ];
 
   return (
     <Card className="bg-white dark:bg-gray-800 shadow-md rounded-lg overflow-hidden h-full">
@@ -42,19 +47,24 @@ export default function DailyTicketStatusStacked({ data, title, iconName }: Dail
           {title ?? t('Daily Ticket Status (This Month)')}
         </CardTitle>
       </CardHeader>
-      <CardContent className="h-[300px]">
+      <CardContent className="h-[260px] sm:h-[300px] min-w-[320px] sm:min-w-0">
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={filteredData} margin={{ top: 16, right: 24, left: 8, bottom: 8 }}>
+          <BarChart data={filteredData} margin={{ top: 12, right: 16, left: 8, bottom: 8 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-            <XAxis dataKey="day" stroke="#6b7280" />
-            <YAxis stroke="#6b7280" />
+            <XAxis dataKey="day" stroke="#6b7280" tick={{ fontSize: 10 }} interval="preserveEnd" />
+            <YAxis stroke="#6b7280" tick={{ fontSize: 10 }} />
             <Tooltip />
             <Legend content={<LegendContent />} align="center" verticalAlign="top" />
-            <Bar dataKey="open" stackId="tickets" fill={"color-mix(in srgb, var(--color-primary, var(--primary)) 95%, white 5%)"} legendType="circle" radius={[4,4,0,0]} />
-            <Bar dataKey="in_progress" stackId="tickets" fill={"color-mix(in srgb, var(--color-primary, var(--primary)) 75%, white 25%)"} legendType="circle" radius={[4,4,0,0]} />
-            <Bar dataKey="resolved" stackId="tickets" fill={"color-mix(in srgb, var(--color-primary, var(--primary)) 55%, white 45%)"} legendType="circle" radius={[4,4,0,0]} />
-            <Bar dataKey="closed" stackId="tickets" fill={"color-mix(in srgb, var(--color-primary, var(--primary)) 40%, white 60%)"} legendType="circle" radius={[4,4,0,0]} />
-            <Bar dataKey="cancelled" stackId="tickets" fill={"color-mix(in srgb, var(--color-primary, var(--primary)) 25%, white 75%)"} legendType="circle" radius={[4,4,0,0]} />
+            {barEntries.map((entry) => (
+              <Bar
+                key={entry.key}
+                dataKey={entry.key}
+                stackId="tickets"
+                fill={entry.color}
+                legendType="circle"
+                radius={[4, 4, 0, 0]}
+              />
+            ))}
           </BarChart>
         </ResponsiveContainer>
       </CardContent>

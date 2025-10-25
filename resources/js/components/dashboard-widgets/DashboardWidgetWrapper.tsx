@@ -52,7 +52,7 @@ export default function DashboardWidgetWrapper({ id, children, onRemove, colSpan
           <Button
             variant="ghost"
             size="icon"
-            className="h-5 w-5 text-muted-foreground hover:text-destructive"
+            className="h-7 w-7 sm:h-5 sm:w-5 text-muted-foreground hover:text-destructive"
             onClick={() => onRemove(id)}
           >
             <X className="h-3 w-3" />
@@ -63,7 +63,7 @@ export default function DashboardWidgetWrapper({ id, children, onRemove, colSpan
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-5 w-5 text-muted-foreground hover:text-primary"
+                className="h-7 w-7 sm:h-5 sm:w-5 text-muted-foreground hover:text-primary"
               >
                 <Maximize2 className="h-3 w-3" />
               </Button>
@@ -81,7 +81,7 @@ export default function DashboardWidgetWrapper({ id, children, onRemove, colSpan
           <Button
             variant="ghost"
             size="icon"
-            className="h-5 w-5 text-muted-foreground hover:text-primary cursor-grab"
+            className="h-7 w-7 sm:h-5 sm:w-5 text-muted-foreground hover:text-primary cursor-grab"
             {...listeners}
             {...attributes}
           >
@@ -89,7 +89,7 @@ export default function DashboardWidgetWrapper({ id, children, onRemove, colSpan
           </Button>
       </div>
 
-      <div className="group">
+      <div className="group p-3 sm:p-4 overflow-x-auto">
         {children}
       </div>
     </div>

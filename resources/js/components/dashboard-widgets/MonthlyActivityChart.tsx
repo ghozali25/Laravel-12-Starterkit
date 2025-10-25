@@ -44,6 +44,12 @@ export default function MonthlyActivityChart({ data, xAxisDataKey = 'name', yAxi
     </div>
   );
 
+  const shortMonth = (label: any) => {
+    const str = String(label ?? '');
+    const [mon] = str.split(' ');
+    return mon?.slice(0, 3) || str;
+  };
+
   return (
     <Card className="bg-white dark:bg-gray-800 shadow-md rounded-lg overflow-hidden h-full">
       <CardHeader className="px-4 py-3 flex flex-row items-center justify-between space-y-0 pb-2">
@@ -62,11 +68,11 @@ export default function MonthlyActivityChart({ data, xAxisDataKey = 'name', yAxi
           </div>
         )}
       </CardHeader>
-      <CardContent className="h-[300px]">
+      <CardContent className="h-[260px] sm:h-[300px] min-w-[320px] sm:min-w-0">
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={processedData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-            <XAxis dataKey={xAxisDataKey} stroke="#6b7280" />
-            <YAxis stroke="#6b7280" />
+          <BarChart data={processedData} margin={{ top: 12, right: 16, left: 8, bottom: 8 }}>
+            <XAxis dataKey={xAxisDataKey} stroke="#6b7280" tick={{ fontSize: 10 }} interval="preserveEnd" tickFormatter={shortMonth} />
+            <YAxis stroke="#6b7280" tick={{ fontSize: 10 }} />
             <Tooltip />
             <Legend content={<LegendContent />} align="center" verticalAlign="top" />
             <Bar
@@ -75,7 +81,7 @@ export default function MonthlyActivityChart({ data, xAxisDataKey = 'name', yAxi
               fill="var(--color-primary, var(--primary))"
               legendType="circle"
               radius={[4, 4, 0, 0]}
-              label={{ position: 'top', fontSize: 10, fill: legendColor }}
+              label={{ position: 'top', fontSize: 9, fill: legendColor }}
             />
           </BarChart>
         </ResponsiveContainer>

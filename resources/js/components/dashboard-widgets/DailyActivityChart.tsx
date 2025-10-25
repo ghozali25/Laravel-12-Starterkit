@@ -30,6 +30,8 @@ export default function DailyActivityChart({
   // Choose composite chart: bars for first series if type=bar then overlay lines
   const hasBar = series.some((s) => s.type === 'bar');
 
+  const legendStyle = { fontSize: 10 } as const;
+
   return (
     <Card className="bg-white dark:bg-gray-800 shadow-md rounded-lg overflow-hidden h-full">
       <CardHeader className="px-4 py-3 flex flex-row items-center justify-between space-y-0 pb-2">
@@ -38,15 +40,15 @@ export default function DailyActivityChart({
           {title ?? t('Daily Activity (This Month)')}
         </CardTitle>
       </CardHeader>
-      <CardContent className="h-[300px]">
+      <CardContent className="h-[260px] sm:h-[300px] min-w-[320px] sm:min-w-0">
         <ResponsiveContainer width="100%" height="100%">
           {hasBar ? (
-            <BarChart data={data} margin={{ top: 16, right: 24, left: 8, bottom: 8 }}>
+            <BarChart data={data} margin={{ top: 12, right: 16, left: 8, bottom: 8 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-              <XAxis dataKey={xAxisDataKey} stroke="#6b7280" tickCount={data?.length ?? 31} />
-              <YAxis stroke="#6b7280" />
+              <XAxis dataKey={xAxisDataKey} stroke="#6b7280" tick={{ fontSize: 10 }} interval="preserveEnd" />
+              <YAxis stroke="#6b7280" tick={{ fontSize: 10 }} />
               <Tooltip />
-              <Legend wrapperStyle={{ fontSize: 10 }} />
+              <Legend wrapperStyle={legendStyle} />
               {series.map((s) =>
                 s.type === 'bar' ? (
                   <Bar key={s.key} dataKey={s.key} fill={s.color ?? '#3b82f6'} radius={[4, 4, 0, 0]} />
@@ -64,12 +66,12 @@ export default function DailyActivityChart({
               )}
             </BarChart>
           ) : (
-            <LineChart data={data} margin={{ top: 16, right: 24, left: 8, bottom: 8 }}>
+            <LineChart data={data} margin={{ top: 12, right: 16, left: 8, bottom: 8 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-              <XAxis dataKey={xAxisDataKey} stroke="#6b7280" tickCount={data?.length ?? 31} />
-              <YAxis stroke="#6b7280" />
+              <XAxis dataKey={xAxisDataKey} stroke="#6b7280" tick={{ fontSize: 10 }} interval="preserveEnd" />
+              <YAxis stroke="#6b7280" tick={{ fontSize: 10 }} />
               <Tooltip />
-              <Legend wrapperStyle={{ fontSize: 10 }} />
+              <Legend wrapperStyle={legendStyle} />
               {series.map((s) => (
                 <Line
                   key={s.key}
