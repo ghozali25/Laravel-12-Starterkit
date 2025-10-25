@@ -7,9 +7,9 @@ use App\Http\Requests\Settings\ProfileUpdateRequest;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Inertia\Response;
+use Illuminate\Support\Facades\Auth;
 
 class ProfileController extends Controller
 {
@@ -45,6 +45,10 @@ class ProfileController extends Controller
      */
     public function destroy(Request $request): RedirectResponse
     {
+        if (!Auth::user() || !Auth::user()->hasRole('admin')) {
+            abort(403, 'Hanya admin yang dapat menghapus akun.');
+        }
+
         $request->validate([
             'password' => ['required', 'current_password'],
         ]);

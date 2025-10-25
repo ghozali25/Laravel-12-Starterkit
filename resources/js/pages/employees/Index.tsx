@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
+
 import AppLayout from '@/layouts/app-layout';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -90,6 +91,9 @@ interface Props {
 
 export default function EmployeeIndex({ employees, filters, potentialManagers, divisions }: Props) {
   const { t, locale } = useTranslation();
+  const page = usePage();
+  const isAdmin = Boolean((page.props as any)?.auth?.is_admin);
+
   const [search, setSearch] = useState(filters.search || '');
   const [selectedManagerFilter, setSelectedManagerFilter] = useState(filters.manager_id || 'all');
   const [selectedDivisionFilter, setSelectedDivisionFilter] = useState(filters.division_id || 'all');
@@ -222,12 +226,14 @@ export default function EmployeeIndex({ employees, filters, potentialManagers, d
               {t('Import')}
             </Button>
 
-            <Link href="/employees/create">
-              <Button className="w-full md:w-auto" size="sm">
-                <Plus className="mr-2 h-4 w-4" />
-                {t('Add Employee')}
-              </Button>
-            </Link>
+            {isAdmin && (
+              <Link href="/employees/create">
+                <Button className="w-full md:w-auto" size="sm">
+                  <Plus className="mr-2 h-4 w-4" />
+                  {t('Add Employee')}
+                </Button>
+              </Link>
+            )}
           </div>
         </div>
 
@@ -330,37 +336,39 @@ export default function EmployeeIndex({ employees, filters, potentialManagers, d
                       )}
                     </TableCell>
                     <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
-                        <Link href={`/employees/${employee.id}/edit`}>
-                          <Button size="sm" variant="outline">
-                            <Edit className="h-4 w-4 mr-1" /> {t('Edit')}
-                          </Button>
-                        </Link>
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <Button size="sm" variant="destructive">
-                              <Trash2 className="h-4 w-4 mr-1" /> {t('Delete')}
+                      {isAdmin && (
+                        <div className="flex justify-end gap-2">
+                          <Link href={`/employees/${employee.id}/edit`}>
+                            <Button size="sm" variant="outline">
+                              <Edit className="h-4 w-4 mr-1" /> {t('Edit')}
                             </Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>{t('Delete Employee?')}</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                {t('Employee')} <strong>{employee.name}</strong> {t('will be permanently deleted.')}
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>{t('Cancel')}</AlertDialogCancel>
-                              <AlertDialogAction
-                                onClick={() => handleDelete(employee.id)}
-                                disabled={false}
-                              >
-                                {t('Yes, Delete')}
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
-                      </div>
+                          </Link>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button size="sm" variant="destructive">
+                                <Trash2 className="h-4 w-4 mr-1" /> {t('Delete')}
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>{t('Delete Employee?')}</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  {t('Employee')} <strong>{employee.name}</strong> {t('will be permanently deleted.')}
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>{t('Cancel')}</AlertDialogCancel>
+                                <AlertDialogAction
+                                  onClick={() => handleDelete(employee.id)}
+                                  disabled={false}
+                                >
+                                  {t('Yes, Delete')}
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </div>
+                      )}
                     </TableCell>
                   </TableRow>
                 ))

@@ -16,6 +16,7 @@ use App\Imports\AssetsImport;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Maatwebsite\Excel\Validators\ValidationException;
 use Maatwebsite\Excel\Validators\Failure;
+use Illuminate\Support\Facades\Auth;
 
 class AssetController extends Controller
 {
@@ -76,6 +77,9 @@ class AssetController extends Controller
 
     public function create()
     {
+        if (!Auth::user()->hasRole('admin')) {
+            abort(403, 'Anda tidak memiliki izin untuk membuat aset.');
+        }
         $categories = AssetCategory::with('brands')->get(); // Eager load brands
         $employees = User::whereHas('roles', function ($q) {
             $q->where('name', '!=', 'admin');
@@ -91,6 +95,9 @@ class AssetController extends Controller
 
     public function store(Request $request)
     {
+        if (!Auth::user()->hasRole('admin')) {
+            abort(403, 'Anda tidak memiliki izin untuk membuat aset.');
+        }
         $validated = $request->validate([
             'asset_category_id' => 'required|exists:asset_categories,id',
             'user_id' => 'nullable|exists:users,id',
@@ -116,6 +123,9 @@ class AssetController extends Controller
 
     public function edit(Asset $asset)
     {
+        if (!Auth::user()->hasRole('admin')) {
+            abort(403, 'Anda tidak memiliki izin untuk mengedit aset.');
+        }
         $asset->load('category', 'user');
         $categories = AssetCategory::with('brands')->get(); // Eager load brands
         $employees = User::whereHas('roles', function ($q) {
@@ -133,6 +143,9 @@ class AssetController extends Controller
 
     public function update(Request $request, Asset $asset)
     {
+        if (!Auth::user()->hasRole('admin')) {
+            abort(403, 'Anda tidak memiliki izin untuk memperbarui aset.');
+        }
         $validated = $request->validate([
             'asset_category_id' => 'required|exists:asset_categories,id',
             'user_id' => 'nullable|exists:users,id',
@@ -162,6 +175,9 @@ class AssetController extends Controller
 
     public function destroy(Asset $asset)
     {
+        if (!Auth::user()->hasRole('admin')) {
+            abort(403, 'Anda tidak memiliki izin untuk menghapus aset.');
+        }
         $asset->delete();
         return redirect()->route('assets.index')->with('success', 'Aset berhasil dihapus.');
     }

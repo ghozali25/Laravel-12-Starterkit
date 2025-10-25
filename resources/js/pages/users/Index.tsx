@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import AppLayout from '@/layouts/app-layout';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -59,6 +59,8 @@ interface Props {
 
 export default function UserIndex({ users, filters }: Props) {
   const { t, locale } = useTranslation(); // Use the translation hook and get locale
+  const page = usePage();
+  const isAdmin = Boolean((page.props as any)?.auth?.is_admin);
   const [search, setSearch] = useState(filters.search || '');
 
   useEffect(() => {
@@ -111,9 +113,11 @@ export default function UserIndex({ users, filters }: Props) {
             <h1 className="text-2xl font-bold tracking-tight">{t('User Management')}</h1>
             <p className="text-muted-foreground">{t('Manage user data and their roles within the system.')}</p>
           </div>
-          <Link href="/users/create">
-            <Button className="w-full md:w-auto" size="sm">{t('+ Add User')}</Button>
-          </Link>
+          {isAdmin && (
+            <Link href="/users/create">
+              <Button className="w-full md:w-auto" size="sm">{t('+ Add User')}</Button>
+            </Link>
+          )}
         </div>
 
         {/* Search Input */}
@@ -169,63 +173,65 @@ export default function UserIndex({ users, filters }: Props) {
                       {dayjs(user.created_at).fromNow()}
                     </TableCell>
                     <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
-                        <Link href={`/users/${user.id}/edit`}>
-                          <Button size="sm" variant="outline">
-                            <Edit className="h-4 w-4 mr-1" /> {t('Edit')}
-                          </Button>
-                        </Link>
-
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <Button size="sm" variant="secondary">{t('Reset')}</Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>{t('Reset Password?')}</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                {t('Password for')} <strong>{user.name}</strong> {t('will be reset to:')}
-                                <br />
-                                <code className="bg-muted rounded px-2 py-1 text-sm">ResetPasswordNya</code>
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>{t('Cancel')}</AlertDialogCancel>
-                              <AlertDialogAction
-                                onClick={() => handleResetPassword(user.id)}
-                                disabled={false}
-                              >
-                                {t('Yes, Reset')}
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
-
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <Button size="sm" variant="destructive">
-                              <Trash2 className="h-4 w-4 mr-1" /> {t('Delete')}
+                      {isAdmin && (
+                        <div className="flex justify-end gap-2">
+                          <Link href={`/users/${user.id}/edit`}>
+                            <Button size="sm" variant="outline">
+                              <Edit className="h-4 w-4 mr-1" /> {t('Edit')}
                             </Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>{t('Delete User?')}</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                {t('User')} <strong>{user.name}</strong> {t('will be permanently deleted.')}
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>{t('Cancel')}</AlertDialogCancel>
-                              <AlertDialogAction
-                                onClick={() => handleDelete(user.id)}
-                                disabled={false}
-                              >
-                                {t('Yes, Delete')}
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
-                      </div>
+                          </Link>
+
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button size="sm" variant="secondary">{t('Reset')}</Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>{t('Reset Password?')}</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  {t('Password for')} <strong>{user.name}</strong> {t('will be reset to:')}
+                                  <br />
+                                  <code className="bg-muted rounded px-2 py-1 text-sm">ResetPasswordNya</code>
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>{t('Cancel')}</AlertDialogCancel>
+                                <AlertDialogAction
+                                  onClick={() => handleResetPassword(user.id)}
+                                  disabled={false}
+                                >
+                                  {t('Yes, Reset')}
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button size="sm" variant="destructive">
+                                <Trash2 className="h-4 w-4 mr-1" /> {t('Delete')}
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>{t('Delete User?')}</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  {t('User')} <strong>{user.name}</strong> {t('will be permanently deleted.')}
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>{t('Cancel')}</AlertDialogCancel>
+                                <AlertDialogAction
+                                  onClick={() => handleDelete(user.id)}
+                                  disabled={false}
+                                >
+                                  {t('Yes, Delete')}
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </div>
+                      )}
                     </TableCell>
                   </TableRow>
                 ))

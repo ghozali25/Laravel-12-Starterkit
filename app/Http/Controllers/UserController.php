@@ -8,6 +8,7 @@ use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Hash;
 use Inertia\Inertia;
 use Spatie\Permission\Models\Role;
+use Illuminate\Support\Facades\Auth;
 
 class UserController extends Controller
 {
@@ -32,6 +33,9 @@ class UserController extends Controller
 
     public function create()
     {
+        if (!Auth::user()->hasRole('admin')) {
+            abort(403, 'Anda tidak memiliki izin untuk membuat user.');
+        }
         $roles = Role::all();
 
         return Inertia::render('users/Form', [
@@ -41,6 +45,9 @@ class UserController extends Controller
 
     public function store(Request $request)
     {
+        if (!Auth::user()->hasRole('admin')) {
+            abort(403, 'Anda tidak memiliki izin untuk membuat user.');
+        }
         $validated = $request->validate([
             'name'     => ['required', 'string', 'max:255'],
             'email'    => ['required', 'email', 'max:255', 'unique:users,email'],
@@ -62,6 +69,9 @@ class UserController extends Controller
 
     public function edit(User $user)
     {
+        if (!Auth::user()->hasRole('admin')) {
+            abort(403, 'Anda tidak memiliki izin untuk mengedit user.');
+        }
         $roles = Role::all();
 
         return Inertia::render('users/Form', [
@@ -73,6 +83,9 @@ class UserController extends Controller
 
     public function update(Request $request, User $user)
     {
+        if (!Auth::user()->hasRole('admin')) {
+            abort(403, 'Anda tidak memiliki izin untuk memperbarui user.');
+        }
         $validated = $request->validate([
             'name'     => ['required', 'string', 'max:255'],
             'email'    => ['required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user->id)],
@@ -96,6 +109,9 @@ class UserController extends Controller
 
     public function destroy(User $user)
     {
+        if (!Auth::user()->hasRole('admin')) {
+            abort(403, 'Anda tidak memiliki izin untuk menghapus user.');
+        }
         $user->delete();
 
         return redirect()->route('users.index')->with('success', 'User berhasil dihapus.');
@@ -103,10 +119,15 @@ class UserController extends Controller
 
     public function resetPassword(User $user)
     {
+        if (!Auth::user()->hasRole('admin')) {
+            abort(403, 'Anda tidak memiliki izin untuk mereset password user.');
+        }
+        // Generate a strong temporary password and show it once to admin
+        $temporaryPassword = base64_encode(random_bytes(9)); // ~12 chars
         $user->update([
-            'password' => Hash::make('ResetPasswordNya'),
+            'password' => Hash::make($temporaryPassword),
         ]);
 
-        return redirect()->back()->with('success', 'Password berhasil direset ke default.');
+        return redirect()->back()->with('success', 'Password berhasil direset. Password sementara: ' . $temporaryPassword);
     }
 }

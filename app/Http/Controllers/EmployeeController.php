@@ -16,6 +16,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use App\Exports\EmployeeImportTemplateExport;
 use Maatwebsite\Excel\Validators\ValidationException;
 use Maatwebsite\Excel\Validators\Failure;
+use Illuminate\Support\Facades\Auth;
 
 class EmployeeController extends Controller
 {
@@ -85,6 +86,9 @@ class EmployeeController extends Controller
 
     public function create()
     {
+        if (!Auth::user()->hasRole('admin')) {
+            abort(403, 'Anda tidak memiliki izin untuk membuat employee.');
+        }
         $roles = Role::where('name', '!=', 'admin')->get();
         $potentialManagers = User::whereHas('roles', function ($q) {
             $q->whereIn('name', ['manager', 'leader']);
@@ -100,6 +104,9 @@ class EmployeeController extends Controller
 
     public function store(Request $request)
     {
+        if (!Auth::user()->hasRole('admin')) {
+            abort(403, 'Anda tidak memiliki izin untuk membuat employee.');
+        }
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', 'unique:users,email'],
@@ -138,6 +145,9 @@ class EmployeeController extends Controller
 
     public function edit(User $employee)
     {
+        if (!Auth::user()->hasRole('admin')) {
+            abort(403, 'Anda tidak memiliki izin untuk mengedit employee.');
+        }
         $roles = Role::where('name', '!=', 'admin')->get();
         $employee->load('roles');
         $potentialManagers = User::whereHas('roles', function ($q) {
@@ -159,6 +169,9 @@ class EmployeeController extends Controller
 
     public function update(Request $request, User $employee)
     {
+        if (!Auth::user()->hasRole('admin')) {
+            abort(403, 'Anda tidak memiliki izin untuk memperbarui employee.');
+        }
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($employee->id)],
@@ -203,6 +216,9 @@ class EmployeeController extends Controller
 
     public function destroy(User $employee)
     {
+        if (!Auth::user()->hasRole('admin')) {
+            abort(403, 'Anda tidak memiliki izin untuk menghapus employee.');
+        }
         $employee->delete();
         return redirect()->route('employees.index')->with('success', 'Employee berhasil dihapus.');
     }

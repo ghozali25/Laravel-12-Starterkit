@@ -1,5 +1,6 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { Head, router, Link } from '@inertiajs/react';
+import { Head, router, Link, usePage } from '@inertiajs/react';
+
 import AppLayout from '@/layouts/app-layout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -61,6 +62,9 @@ interface Props {
 
 export default function AssetIndex({ assets, categories, employees, filters }: Props) {
   const { t, locale } = useTranslation();
+  const page = usePage();
+  const isAdmin = Boolean((page.props as any)?.auth?.is_admin);
+
   const [search, setSearch] = useState(filters.search || '');
   const [selectedCategoryFilter, setSelectedCategoryFilter] = useState(filters.category_id || 'all');
   const [selectedUserFilter, setSelectedUserFilter] = useState(filters.user_id || 'all');
@@ -274,37 +278,39 @@ export default function AssetIndex({ assets, categories, employees, filters }: P
                         <TableCell>{t(asset.status)}</TableCell>
                         <TableCell>{asset.last_used_at || '-'}</TableCell>
                         <TableCell className="text-right">
-                          <div className="flex justify-end gap-2">
-                            <Link href={`/assets/${asset.id}/edit`}>
-                              <Button size="sm" variant="outline">
-                                <Edit className="h-4 w-4 mr-1" /> {t('Edit')}
-                              </Button>
-                            </Link>
-                            <AlertDialog>
-                              <AlertDialogTrigger asChild>
-                                <Button size="sm" variant="destructive">
-                                  <Trash2 className="h-4 w-4 mr-1" /> {t('Delete')}
+                          {isAdmin && (
+                            <div className="flex justify-end gap-2">
+                              <Link href={`/assets/${asset.id}/edit`}>
+                                <Button size="sm" variant="outline">
+                                  <Edit className="h-4 w-4 mr-1" /> {t('Edit')}
                                 </Button>
-                              </AlertDialogTrigger>
-                              <AlertDialogContent>
-                                <AlertDialogHeader>
-                                  <AlertDialogTitle>{t('Delete Asset?')}</AlertDialogTitle>
-                                  <AlertDialogDescription>
-                                    {t('Asset')} <strong>{asset.serial_number || asset.model}</strong> {t('will be permanently deleted.')}
-                                  </AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <AlertDialogFooter>
-                                  <AlertDialogCancel>{t('Cancel')}</AlertDialogCancel>
-                                  <AlertDialogAction
-                                    onClick={() => handleDelete(asset.id)}
-                                    disabled={false}
-                                  >
-                                    {t('Yes, Delete')}
-                                  </AlertDialogAction>
-                                </AlertDialogFooter>
-                              </AlertDialogContent>
-                            </AlertDialog>
-                          </div>
+                              </Link>
+                              <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                  <Button size="sm" variant="destructive">
+                                    <Trash2 className="h-4 w-4 mr-1" /> {t('Delete')}
+                                  </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                  <AlertDialogHeader>
+                                    <AlertDialogTitle>{t('Delete Asset?')}</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                      {t('Asset')} <strong>{asset.serial_number || asset.model}</strong> {t('will be permanently deleted.')}
+                                    </AlertDialogDescription>
+                                  </AlertDialogHeader>
+                                  <AlertDialogFooter>
+                                    <AlertDialogCancel>{t('Cancel')}</AlertDialogCancel>
+                                    <AlertDialogAction
+                                      onClick={() => handleDelete(asset.id)}
+                                      disabled={false}
+                                    >
+                                      {t('Yes, Delete')}
+                                    </AlertDialogAction>
+                                  </AlertDialogFooter>
+                                </AlertDialogContent>
+                              </AlertDialog>
+                            </div>
+                          )}
                         </TableCell>
                       </TableRow>
                     ))
