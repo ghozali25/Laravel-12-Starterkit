@@ -96,6 +96,80 @@ class DashboardController extends Controller
             ];
         })->values();
 
+        // Daily Data for current month (Users, Backups, Assets, Tickets)
+        $startOfMonth = Carbon::now()->startOfMonth();
+        $endOfMonth = Carbon::now()->endOfMonth();
+
+        // Build date keys for current month
+        $dateKeys = collect();
+        for ($date = $startOfMonth->copy(); $date->lte($endOfMonth); $date->addDay()) {
+            $dateKeys->push($date->format('Y-m-d'));
+        }
+
+        $usersDaily = User::select(DB::raw('DATE(created_at) as d'), DB::raw('count(*) as c'))
+            ->whereBetween('created_at', [$startOfMonth, $endOfMonth])
+            ->groupBy('d')->pluck('c', 'd');
+
+        $assetsDaily = Asset::select(DB::raw('DATE(created_at) as d'), DB::raw('count(*) as c'))
+            ->whereBetween('created_at', [$startOfMonth, $endOfMonth])
+            ->groupBy('d')->pluck('c', 'd');
+
+        $ticketsDaily = Ticket::select(DB::raw('DATE(created_at) as d'), DB::raw('count(*) as c'))
+            ->whereBetween('created_at', [$startOfMonth, $endOfMonth])
+            ->groupBy('d')->pluck('c', 'd');
+
+        $backupsDaily = collect();
+        if (File::exists($realBackupPath)) {
+            foreach (File::files($realBackupPath) as $file) {
+                $d = Carbon::createFromTimestamp($file->getMTime())->format('Y-m-d');
+                if ($d >= $startOfMonth->format('Y-m-d') && $d <= $endOfMonth->format('Y-m-d')) {
+                    $backupsDaily[$d] = ($backupsDaily[$d] ?? 0) + 1;
+                }
+            }
+        }
+
+        $dailyData = $dateKeys->map(function ($d) use ($usersDaily, $assetsDaily, $ticketsDaily, $backupsDaily) {
+            $dayNum = (int) substr($d, -2);
+            return [
+                'date' => $d,
+                'day' => $dayNum,
+                'Users' => (int) ($usersDaily[$d] ?? 0),
+                'Assets' => (int) ($assetsDaily[$d] ?? 0),
+                'Tickets' => (int) ($ticketsDaily[$d] ?? 0),
+                'Backups' => (int) ($backupsDaily[$d] ?? 0),
+            ];
+        })->values();
+
+        // Daily Ticket Status stacked data for current month
+        $ticketStatusDailyRaw = Ticket::select(
+                DB::raw('DATE(created_at) as d'),
+                'status',
+                DB::raw('count(*) as c')
+            )
+            ->whereBetween('created_at', [$startOfMonth, $endOfMonth])
+            ->groupBy('d', 'status')
+            ->get();
+
+        $ticketStatusByDate = [];
+        foreach ($ticketStatusDailyRaw as $row) {
+            $dateKey = $row->d;
+            $status = $row->status;
+            $ticketStatusByDate[$dateKey][$status] = (int) $row->c;
+        }
+
+        $dailyTicketStatusData = $dateKeys->map(function ($d) use ($ticketStatusByDate) {
+            $dayNum = (int) substr($d, -2);
+            $statuses = $ticketStatusByDate[$d] ?? [];
+            return [
+                'date' => $d,
+                'day' => $dayNum,
+                'open' => (int) ($statuses['open'] ?? 0),
+                'in_progress' => (int) ($statuses['in_progress'] ?? 0),
+                'resolved' => (int) ($statuses['resolved'] ?? 0),
+                'closed' => (int) ($statuses['closed'] ?? 0),
+                'cancelled' => (int) ($statuses['cancelled'] ?? 0),
+            ];
+        })->values();
 
         // User Role Distribution
         $userRoleDistribution = Role::withCount('users')
@@ -225,6 +299,8 @@ class DashboardController extends Controller
             'urgentTickets' => $urgentTickets, // New
             'highPriorityTickets' => $highPriorityTickets, // New
             'monthlyData' => $monthlyData,
+            'dailyData' => $dailyData,
+            'dailyTicketStatusData' => $dailyTicketStatusData,
             'userRoleDistribution' => $userRoleDistribution,
             'assetCategoryDistribution' => $assetCategoryDistribution, // New
             'assetStatusDistribution' => $assetStatusDistribution, // New

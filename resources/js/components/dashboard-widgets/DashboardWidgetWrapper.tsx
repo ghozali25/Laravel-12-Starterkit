@@ -48,15 +48,15 @@ export default function DashboardWidgetWrapper({ id, children, onRemove, colSpan
         isDragging && "ring-2 ring-primary ring-offset-2"
       )}
     >
-      <div className="absolute bottom-2 right-2 z-10 flex gap-1">
+      <div className="absolute bottom-1.5 right-1.5 z-10 flex gap-1">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-7 w-7 text-muted-foreground hover:text-primary"
+                className="h-6 w-6 text-muted-foreground hover:text-primary"
               >
-                <Maximize2 className="h-4 w-4" />
+                <Maximize2 className="h-3.5 w-3.5" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
@@ -72,20 +72,20 @@ export default function DashboardWidgetWrapper({ id, children, onRemove, colSpan
           <Button
             variant="ghost"
             size="icon"
-            className="h-7 w-7 text-muted-foreground hover:text-destructive"
+            className="h-6 w-6 text-muted-foreground hover:text-destructive"
             onClick={() => onRemove(id)}
           >
-            <X className="h-4 w-4" />
+            <X className="h-3.5 w-3.5" />
           </Button>
 
           <Button
             variant="ghost"
             size="icon"
-            className="h-7 w-7 text-muted-foreground hover:text-primary cursor-grab"
+            className="h-6 w-6 text-muted-foreground hover:text-primary cursor-grab"
             {...listeners}
             {...attributes}
           >
-            <GripVertical className="h-4 w-4" />
+            <GripVertical className="h-3.5 w-3.5" />
           </Button>
       </div>
 

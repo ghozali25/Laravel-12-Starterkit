@@ -23,6 +23,8 @@ import { iconMapper } from '@/lib/iconMapper'; // Import iconMapper
 
 // Widget Components and their Props interfaces
 import MonthlyActivityChart, { MonthlyActivityChartProps } from '@/components/dashboard-widgets/MonthlyActivityChart';
+import DailyActivityChart from '@/components/dashboard-widgets/DailyActivityChart';
+import DailyTicketStatusStacked from '@/components/dashboard-widgets/DailyTicketStatusStacked';
 import MonthlyTrendsChart, { MonthlyTrendsChartProps } from '@/components/dashboard-widgets/MonthlyTrendsChart';
 import UserRolesPieChart, { UserRolesPieChartProps } from '@/components/dashboard-widgets/UserRolesPieChart';
 import ResourceUsageAreaChart, { ResourceUsageAreaChartProps } from '@/components/dashboard-widgets/ResourceUsageAreaChart';
@@ -76,6 +78,8 @@ interface DashboardData {
   ticketStatusDistribution: { name: string; value: number; color: string }[]; // New
   ticketPriorityDistribution: { name: string; value: number; color: string }[]; // New
   ticketCategoryDistribution: { name: string; value: number; color: string }[]; // New
+  dailyData?: Array<{ date: string; day: number; Users: number; Assets: number; Tickets: number; Backups: number }>;
+  dailyTicketStatusData?: Array<{ date: string; day: number; open: number; in_progress: number; resolved: number; closed: number; cancelled: number }>;
 }
 
 // Dummy data for PerformanceMetricsRadialChart (as it's harder to get real-time system metrics)
@@ -92,6 +96,34 @@ const widgetComponents: WidgetComponentsMap = {
     getInitialProps: (t, data) => ({ label: t('Users'), value: data?.totalUsers ?? 0, iconName: 'Users' }),
     defaultColSpan: 1,
     icon: <Users className="h-5 w-5" />,
+  },
+  DailyTicketStatusStacked: {
+    component: DailyTicketStatusStacked,
+    label: 'Daily Ticket Status (This Month)',
+    getInitialProps: (t, data) => ({
+      data: data?.dailyTicketStatusData ?? [],
+      iconName: 'Headphones',
+      title: t('Daily Ticket Status (This Month)'),
+    }),
+    defaultColSpan: 3,
+    icon: <Headphones className="h-5 w-5" />,
+  },
+  DailyActivityChart: {
+    component: DailyActivityChart,
+    label: 'Daily Activity (This Month)',
+    getInitialProps: (t, data) => ({
+      data: data?.dailyData ?? [],
+      iconName: 'Activity',
+      title: t('Daily Activity (This Month)'),
+      series: [
+        { key: 'Tickets', type: 'bar', color: '#3b82f6' },
+        { key: 'Users', type: 'line', color: '#22c55e' },
+        { key: 'Assets', type: 'line', color: '#a78bfa' },
+        { key: 'Backups', type: 'line', color: '#f59e0b' },
+      ],
+    }),
+    defaultColSpan: 3,
+    icon: <Activity className="h-5 w-5" />,
   },
   SummaryCardBackups: {
     component: SummaryCard,
@@ -276,46 +308,66 @@ type DashboardWidget = {
   colSpan: number;
 };
 
-interface DashboardProps extends DashboardData { // Extend with DashboardData
+interface DashboardProps extends DashboardData {
   initialWidgets: DashboardWidget[];
 }
 
-export default function Dashboard(props: DashboardProps) { // Receive props directly
-  const { initialWidgets, totalUsers, totalBackups, totalActivityLogs, monthlyData, userRoleDistribution, totalDivisions, totalAssetCategories, totalAssets, assetCategoryDistribution, assetStatusDistribution, totalTickets, openTickets, inProgressTickets, resolvedTickets, urgentTickets, highPriorityTickets, ticketStatusDistribution, ticketPriorityDistribution, ticketCategoryDistribution } = props;
+export default function Dashboard(props: DashboardProps) {
+  const {
+    initialWidgets,
+    totalUsers,
+    totalBackups,
+    totalActivityLogs,
+    monthlyData,
+    userRoleDistribution,
+    totalDivisions,
+    totalAssetCategories,
+    totalAssets,
+    assetCategoryDistribution,
+    assetStatusDistribution,
+    totalTickets,
+    openTickets,
+    inProgressTickets,
+    resolvedTickets,
+    urgentTickets,
+    highPriorityTickets,
+    ticketStatusDistribution,
+    ticketPriorityDistribution,
+    ticketCategoryDistribution,
+    dailyData,
+    dailyTicketStatusData,
+  } = props;
+
   const { t, locale } = useTranslation();
   const [widgets, setWidgets] = useState<DashboardWidget[]>([]);
   const [isAddWidgetDialogOpen, setIsAddWidgetDialogOpen] = useState(false);
   const [selectedWidgetTypeToAdd, setSelectedWidgetTypeToAdd] = useState<keyof WidgetComponentsMap | null>(null);
   const [newWidgetProps, setNewWidgetProps] = useState<Record<string, any>>({});
 
-  // Log all incoming props for debugging
-  console.log('Dashboard Props:', props);
-
   // Combine all dashboard data into a single object for easier passing to getInitialProps
   const dashboardData: DashboardData = {
     totalUsers: totalUsers ?? 0,
     totalBackups: totalBackups ?? 0,
     totalActivityLogs: totalActivityLogs ?? 0,
-    totalDivisions: totalDivisions ?? 0, // New
-    totalAssetCategories: totalAssetCategories ?? 0, // New
-    totalAssets: totalAssets ?? 0, // New
-    totalTickets: totalTickets ?? 0, // New
-    openTickets: openTickets ?? 0, // New
-    inProgressTickets: inProgressTickets ?? 0, // New
-    resolvedTickets: resolvedTickets ?? 0, // New
-    urgentTickets: urgentTickets ?? 0, // New
-    highPriorityTickets: highPriorityTickets ?? 0, // New
+    totalDivisions: totalDivisions ?? 0,
+    totalAssetCategories: totalAssetCategories ?? 0,
+    totalAssets: totalAssets ?? 0,
+    totalTickets: totalTickets ?? 0,
+    openTickets: openTickets ?? 0,
+    inProgressTickets: inProgressTickets ?? 0,
+    resolvedTickets: resolvedTickets ?? 0,
+    urgentTickets: urgentTickets ?? 0,
+    highPriorityTickets: highPriorityTickets ?? 0,
     monthlyData: monthlyData ?? [],
     userRoleDistribution: userRoleDistribution ?? [],
-    assetCategoryDistribution: assetCategoryDistribution ?? [], // New
-    assetStatusDistribution: assetStatusDistribution ?? [], // New
-    ticketStatusDistribution: ticketStatusDistribution ?? [], // New
-    ticketPriorityDistribution: ticketPriorityDistribution ?? [], // New
-    ticketCategoryDistribution: ticketCategoryDistribution ?? [], // New
+    assetCategoryDistribution: assetCategoryDistribution ?? [],
+    assetStatusDistribution: assetStatusDistribution ?? [],
+    ticketStatusDistribution: ticketStatusDistribution ?? [],
+    ticketPriorityDistribution: ticketPriorityDistribution ?? [],
+    ticketCategoryDistribution: ticketCategoryDistribution ?? [],
+    dailyData: dailyData ?? [],
+    dailyTicketStatusData: dailyTicketStatusData ?? [],
   };
-
-  // Log the constructed dashboardData
-  console.log('Constructed Dashboard Data:', dashboardData);
 
   // Initialize widgets from backend or default if empty
   useEffect(() => {
@@ -347,7 +399,9 @@ export default function Dashboard(props: DashboardProps) { // Receive props dire
         { id: 'summary-in-progress-tickets', type: 'SummaryCardInProgressTickets', props: widgetComponents.SummaryCardInProgressTickets.getInitialProps(t, dashboardData), colSpan: 1 },
         { id: 'summary-resolved-tickets', type: 'SummaryCardResolvedTickets', props: widgetComponents.SummaryCardResolvedTickets.getInitialProps(t, dashboardData), colSpan: 1 },
         { id: 'summary-urgent-tickets', type: 'SummaryCardUrgentTickets', props: widgetComponents.SummaryCardUrgentTickets.getInitialProps(t, dashboardData), colSpan: 1 },
+        { id: 'daily-activity', type: 'DailyActivityChart', props: widgetComponents.DailyActivityChart.getInitialProps(t, dashboardData), colSpan: 3 },
         { id: 'monthly-activity', type: 'MonthlyActivityChart', props: widgetComponents.MonthlyActivityChart.getInitialProps(t, dashboardData), colSpan: 3 },
+        { id: 'daily-ticket-status', type: 'DailyTicketStatusStacked', props: widgetComponents.DailyTicketStatusStacked.getInitialProps(t, dashboardData), colSpan: 3 },
         { id: 'user-roles', type: 'UserRolesPieChart', props: widgetComponents.UserRolesPieChart.getInitialProps(t, dashboardData), colSpan: 2 },
         { id: 'ticket-status-distribution', type: 'TicketStatusDistributionPieChart', props: widgetComponents.TicketStatusDistributionPieChart.getInitialProps(t, dashboardData), colSpan: 2 },
         { id: 'ticket-priority-distribution', type: 'TicketPriorityDistributionPieChart', props: widgetComponents.TicketPriorityDistributionPieChart.getInitialProps(t, dashboardData), colSpan: 2 },
