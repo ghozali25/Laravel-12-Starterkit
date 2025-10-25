@@ -40,5 +40,10 @@ class DatabaseSeeder extends Seeder
         $this->call([
             AssetSeeder::class,
         ]);
+
+        // Panggil TicketSeeder setelah user sudah ada
+        $this->call([
+            TicketSeeder::class,
+        ]);
     }
 }

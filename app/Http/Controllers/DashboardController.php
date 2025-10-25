@@ -9,6 +9,8 @@ use App\Models\User;
 use App\Models\Asset; // Import Asset model
 use App\Models\AssetCategory; // Import AssetCategory model
 use App\Models\Division; // Import Division model
+use App\Models\Ticket; // Import Ticket model
+use App\Models\TicketComment; // Import TicketComment model
 use Spatie\Activitylog\Models\Activity;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\File;
@@ -36,6 +38,14 @@ class DashboardController extends Controller
         $totalDivisions = Division::count(); // New: Total Divisions
         $totalAssetCategories = AssetCategory::count(); // New: Total Asset Categories
         $totalAssets = Asset::count(); // New: Total Assets
+        
+        // --- Ticket Data ---
+        $totalTickets = Ticket::count();
+        $openTickets = Ticket::where('status', 'open')->count();
+        $inProgressTickets = Ticket::where('status', 'in_progress')->count();
+        $resolvedTickets = Ticket::where('status', 'resolved')->count();
+        $urgentTickets = Ticket::where('priority', 'urgent')->count();
+        $highPriorityTickets = Ticket::where('priority', 'high')->count();
 
         // Total Backups (similar logic to BackupController)
         $realBackupPath = storage_path('app/' . $this->backupPath);
@@ -93,10 +103,10 @@ class DashboardController extends Controller
             ->map(function ($role) {
                 $colors = [
                     'admin' => '#fbbf24', // yellow-400
-                    'user' => '#a78bfa',  // purple-400
+                    'staff' => '#f87171',   // red-400
                     'manager' => '#60a5fa', // blue-400
                     'leader' => '#34d399',  // emerald-400
-                    'staff' => '#f87171',   // red-400
+                    'it_support' => '#a78bfa',  // purple-400
                 ];
                 return [
                     'name' => $role->name,
@@ -142,6 +152,63 @@ class DashboardController extends Controller
                 ];
             })->toArray();
 
+        // Ticket Status Distribution (Pie Chart)
+        $ticketStatusDistribution = Ticket::select('status', DB::raw('count(*) as count'))
+            ->groupBy('status')
+            ->get()
+            ->map(function ($status) {
+                $colors = [
+                    'open' => '#ef4444',     // red-500
+                    'in_progress' => '#f97316', // orange-500
+                    'resolved' => '#22c55e',   // green-500
+                    'closed' => '#6b7280',     // gray-500
+                    'cancelled' => '#9ca3af',  // gray-400
+                ];
+                return [
+                    'name' => ucfirst(str_replace('_', ' ', $status->status)),
+                    'value' => $status->count,
+                    'color' => $colors[$status->status] ?? '#cccccc',
+                ];
+            })->toArray();
+
+        // Ticket Priority Distribution (Pie Chart)
+        $ticketPriorityDistribution = Ticket::select('priority', DB::raw('count(*) as count'))
+            ->groupBy('priority')
+            ->get()
+            ->map(function ($priority) {
+                $colors = [
+                    'low' => '#22c55e',      // green-500
+                    'medium' => '#3b82f6',   // blue-500
+                    'high' => '#f97316',     // orange-500
+                    'urgent' => '#ef4444',   // red-500
+                ];
+                return [
+                    'name' => ucfirst($priority->priority),
+                    'value' => $priority->count,
+                    'color' => $colors[$priority->priority] ?? '#cccccc',
+                ];
+            })->toArray();
+
+        // Ticket Category Distribution (Pie Chart)
+        $ticketCategoryDistribution = Ticket::select('category', DB::raw('count(*) as count'))
+            ->groupBy('category')
+            ->get()
+            ->map(function ($category) {
+                $colors = [
+                    'hardware' => '#ef4444',   // red-500
+                    'software' => '#3b82f6',   // blue-500
+                    'network' => '#22c55e',    // green-500
+                    'email' => '#f97316',      // orange-500
+                    'access' => '#8b5cf6',     // violet-500
+                    'other' => '#6b7280',      // gray-500
+                ];
+                return [
+                    'name' => ucfirst($category->category),
+                    'value' => $category->count,
+                    'color' => $colors[$category->category] ?? '#cccccc',
+                ];
+            })->toArray();
+
 
         return Inertia::render('dashboard', [
             'initialWidgets' => $dashboardConfig ? $dashboardConfig->widgets_data : [],
@@ -151,10 +218,19 @@ class DashboardController extends Controller
             'totalDivisions' => $totalDivisions, // New
             'totalAssetCategories' => $totalAssetCategories, // New
             'totalAssets' => $totalAssets, // New
+            'totalTickets' => $totalTickets, // New
+            'openTickets' => $openTickets, // New
+            'inProgressTickets' => $inProgressTickets, // New
+            'resolvedTickets' => $resolvedTickets, // New
+            'urgentTickets' => $urgentTickets, // New
+            'highPriorityTickets' => $highPriorityTickets, // New
             'monthlyData' => $monthlyData,
             'userRoleDistribution' => $userRoleDistribution,
             'assetCategoryDistribution' => $assetCategoryDistribution, // New
             'assetStatusDistribution' => $assetStatusDistribution, // New
+            'ticketStatusDistribution' => $ticketStatusDistribution, // New
+            'ticketPriorityDistribution' => $ticketPriorityDistribution, // New
+            'ticketCategoryDistribution' => $ticketCategoryDistribution, // New
         ]);
     }
 

@@ -33,12 +33,22 @@ class MenuSeeder extends Seeder
             'permission_name' => 'employee-view', // Pastikan permission ini ada
         ]);
 
+        // IT Support Tickets (Menu tingkat atas)
+        Menu::create([
+            'title' => 'IT Support',
+            'icon' => 'Headphones',
+            'route' => '/tickets',
+            'parent_id' => null,
+            'order' => 3, // Urutan setelah Employees
+            'permission_name' => 'ticket-view',
+        ]);
+
         // Access Management (Parent Menu) - Urutan disesuaikan
         $accessMenu = Menu::create([
             'title' => 'Access',
             'icon' => 'ShieldCheck',
             'route' => null,
-            'order' => 3, // Urutan setelah Employees
+            'order' => 4, // Urutan setelah IT Support
             'permission_name' => 'access-view',
         ]);
 
@@ -81,7 +91,7 @@ class MenuSeeder extends Seeder
             'title' => 'Assets',
             'icon' => 'Package', // Using Package icon for assets
             'route' => null,
-            'order' => 4, // Urutan setelah Access
+            'order' => 5, // Urutan setelah Access
             'permission_name' => 'asset-view', // Placeholder permission for main asset menu
         ]);
 
@@ -116,7 +126,7 @@ class MenuSeeder extends Seeder
             'title' => 'Settings',
             'icon' => 'Settings',
             'route' => null,
-            'order' => 5, // Urutan setelah Assets
+            'order' => 6, // Urutan setelah Assets
             'permission_name' => 'settings-view',
         ]);
 
@@ -151,7 +161,7 @@ class MenuSeeder extends Seeder
             'title' => 'Utilities',
             'icon' => 'Tool',
             'route' => null,
-            'order' => 6, // Urutan setelah Settings
+            'order' => 7, // Urutan setelah Settings
             'permission_name' => 'utilities-view',
         ]);
 

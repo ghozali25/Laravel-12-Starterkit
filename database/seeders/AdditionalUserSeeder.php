@@ -16,24 +16,24 @@ class AdditionalUserSeeder extends Seeder
     public function run(): void
     {
         // Pastikan roles sudah ada
-        $userRole = Role::firstOrCreate(['name' => 'user']);
+        $staffRole = Role::firstOrCreate(['name' => 'staff']); // Changed from 'user' to 'staff'
         $managerRole = Role::firstOrCreate(['name' => 'manager']);
         $leaderRole = Role::firstOrCreate(['name' => 'leader']);
 
         // Ambil semua divisi yang ada
         $divisions = Division::all();
 
-        // Create 10 regular users
+        // Create 10 regular staff
         for ($i = 1; $i <= 10; $i++) {
-            $user = User::firstOrCreate(
-                ['email' => 'user' . $i . '@bach-project.com'],
+            $staff = User::firstOrCreate(
+                ['email' => 'staff' . $i . '@bach-project.com'], // Changed from 'user' to 'staff'
                 [
-                    'name' => 'User ' . $i,
+                    'name' => 'Staff ' . $i, // Changed from 'User' to 'Staff'
                     'password' => Hash::make('password'),
                     'division_id' => $divisions->random()->id, // Assign random division
                 ]
             );
-            $user->assignRole($userRole);
+            $staff->assignRole($staffRole); // Changed from $user to $staff
         }
 
         // Create 3 managers

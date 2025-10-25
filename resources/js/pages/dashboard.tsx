@@ -6,7 +6,7 @@ import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, us
 import { arrayMove, SortableContext, rectSortingStrategy } from '@dnd-kit/sortable';
 import { useTranslation } from '@/lib/i18n';
 import { Button } from '@/components/ui/button';
-import { Plus, Users, HardDrive, Activity, LineChart, BarChart, PieChart, Radar, Building2, Tags, Package, Gauge, TrendingUp, ShieldCheck } from 'lucide-react'; // Added Gauge, TrendingUp, ShieldCheck
+import { Plus, Users, HardDrive, Activity, LineChart, BarChart, PieChart, Radar, Building2, Tags, Package, Gauge, TrendingUp, ShieldCheck, Headphones, AlertTriangle, CheckCircle, Clock, AlertCircle } from 'lucide-react'; // Added ticket icons
 import {
   Dialog,
   DialogContent,
@@ -63,10 +63,19 @@ interface DashboardData {
   totalDivisions: number; // New
   totalAssetCategories: number; // New
   totalAssets: number; // New
+  totalTickets: number; // New
+  openTickets: number; // New
+  inProgressTickets: number; // New
+  resolvedTickets: number; // New
+  urgentTickets: number; // New
+  highPriorityTickets: number; // New
   monthlyData: { name: string; Users: number; Backups: number; Assets: number }[]; // Updated
   userRoleDistribution: { name: string; value: number; color: string }[];
   assetCategoryDistribution: { name: string; value: number; color: string }[]; // New
   assetStatusDistribution: { name: string; value: number; color: string }[]; // New
+  ticketStatusDistribution: { name: string; value: number; color: string }[]; // New
+  ticketPriorityDistribution: { name: string; value: number; color: string }[]; // New
+  ticketCategoryDistribution: { name: string; value: number; color: string }[]; // New
 }
 
 // Dummy data for PerformanceMetricsRadialChart (as it's harder to get real-time system metrics)
@@ -118,6 +127,41 @@ const widgetComponents: WidgetComponentsMap = {
     getInitialProps: (t, data) => ({ label: t('Total Assets'), value: data?.totalAssets ?? 0, iconName: 'Package' }),
     defaultColSpan: 1,
     icon: <Package className="h-5 w-5" />,
+  },
+  SummaryCardTotalTickets: { // New Summary Card for Tickets
+    component: SummaryCard,
+    label: 'Summary Card (Total Tickets)',
+    getInitialProps: (t, data) => ({ label: t('Total Tickets'), value: data?.totalTickets ?? 0, iconName: 'Headphones' }),
+    defaultColSpan: 1,
+    icon: <Headphones className="h-5 w-5" />,
+  },
+  SummaryCardOpenTickets: { // New Summary Card for Open Tickets
+    component: SummaryCard,
+    label: 'Summary Card (Open Tickets)',
+    getInitialProps: (t, data) => ({ label: t('Open Tickets'), value: data?.openTickets ?? 0, iconName: 'AlertCircle' }),
+    defaultColSpan: 1,
+    icon: <AlertCircle className="h-5 w-5" />,
+  },
+  SummaryCardInProgressTickets: { // New Summary Card for In Progress Tickets
+    component: SummaryCard,
+    label: 'Summary Card (In Progress Tickets)',
+    getInitialProps: (t, data) => ({ label: t('In Progress'), value: data?.inProgressTickets ?? 0, iconName: 'Clock' }),
+    defaultColSpan: 1,
+    icon: <Clock className="h-5 w-5" />,
+  },
+  SummaryCardResolvedTickets: { // New Summary Card for Resolved Tickets
+    component: SummaryCard,
+    label: 'Summary Card (Resolved Tickets)',
+    getInitialProps: (t, data) => ({ label: t('Resolved'), value: data?.resolvedTickets ?? 0, iconName: 'CheckCircle' }),
+    defaultColSpan: 1,
+    icon: <CheckCircle className="h-5 w-5" />,
+  },
+  SummaryCardUrgentTickets: { // New Summary Card for Urgent Tickets
+    component: SummaryCard,
+    label: 'Summary Card (Urgent Tickets)',
+    getInitialProps: (t, data) => ({ label: t('Urgent Tickets'), value: data?.urgentTickets ?? 0, iconName: 'AlertTriangle' }),
+    defaultColSpan: 1,
+    icon: <AlertTriangle className="h-5 w-5" />,
   },
   MonthlyActivityChart: {
     component: MonthlyActivityChart,
@@ -176,6 +220,27 @@ const widgetComponents: WidgetComponentsMap = {
     defaultColSpan: 2, // Adjusted for 6-column layout
     icon: <PieChart className="h-5 w-5" />,
   },
+  TicketStatusDistributionPieChart: { // New Pie Chart for Ticket Status
+    component: UserRolesPieChart, // Reusing UserRolesPieChart
+    label: 'Ticket Status Distribution',
+    getInitialProps: (t, data) => ({ data: data?.ticketStatusDistribution ?? [], title: t('Ticket Status Distribution'), iconName: 'Headphones' }),
+    defaultColSpan: 2,
+    icon: <PieChart className="h-5 w-5" />,
+  },
+  TicketPriorityDistributionPieChart: { // New Pie Chart for Ticket Priority
+    component: UserRolesPieChart, // Reusing UserRolesPieChart
+    label: 'Ticket Priority Distribution',
+    getInitialProps: (t, data) => ({ data: data?.ticketPriorityDistribution ?? [], title: t('Ticket Priority Distribution'), iconName: 'AlertTriangle' }),
+    defaultColSpan: 2,
+    icon: <PieChart className="h-5 w-5" />,
+  },
+  TicketCategoryDistributionPieChart: { // New Pie Chart for Ticket Category
+    component: UserRolesPieChart, // Reusing UserRolesPieChart
+    label: 'Ticket Category Distribution',
+    getInitialProps: (t, data) => ({ data: data?.ticketCategoryDistribution ?? [], title: t('Ticket Category Distribution'), iconName: 'Tags' }),
+    defaultColSpan: 2,
+    icon: <PieChart className="h-5 w-5" />,
+  },
   ResourceUsageAreaChart: {
     component: ResourceUsageAreaChart,
     label: 'Resource Usage Area Chart',
@@ -216,7 +281,7 @@ interface DashboardProps extends DashboardData { // Extend with DashboardData
 }
 
 export default function Dashboard(props: DashboardProps) { // Receive props directly
-  const { initialWidgets, totalUsers, totalBackups, totalActivityLogs, monthlyData, userRoleDistribution, totalDivisions, totalAssetCategories, totalAssets, assetCategoryDistribution, assetStatusDistribution } = props;
+  const { initialWidgets, totalUsers, totalBackups, totalActivityLogs, monthlyData, userRoleDistribution, totalDivisions, totalAssetCategories, totalAssets, assetCategoryDistribution, assetStatusDistribution, totalTickets, openTickets, inProgressTickets, resolvedTickets, urgentTickets, highPriorityTickets, ticketStatusDistribution, ticketPriorityDistribution, ticketCategoryDistribution } = props;
   const { t, locale } = useTranslation();
   const [widgets, setWidgets] = useState<DashboardWidget[]>([]);
   const [isAddWidgetDialogOpen, setIsAddWidgetDialogOpen] = useState(false);
@@ -234,10 +299,19 @@ export default function Dashboard(props: DashboardProps) { // Receive props dire
     totalDivisions: totalDivisions ?? 0, // New
     totalAssetCategories: totalAssetCategories ?? 0, // New
     totalAssets: totalAssets ?? 0, // New
+    totalTickets: totalTickets ?? 0, // New
+    openTickets: openTickets ?? 0, // New
+    inProgressTickets: inProgressTickets ?? 0, // New
+    resolvedTickets: resolvedTickets ?? 0, // New
+    urgentTickets: urgentTickets ?? 0, // New
+    highPriorityTickets: highPriorityTickets ?? 0, // New
     monthlyData: monthlyData ?? [],
     userRoleDistribution: userRoleDistribution ?? [],
     assetCategoryDistribution: assetCategoryDistribution ?? [], // New
     assetStatusDistribution: assetStatusDistribution ?? [], // New
+    ticketStatusDistribution: ticketStatusDistribution ?? [], // New
+    ticketPriorityDistribution: ticketPriorityDistribution ?? [], // New
+    ticketCategoryDistribution: ticketCategoryDistribution ?? [], // New
   };
 
   // Log the constructed dashboardData
@@ -268,15 +342,23 @@ export default function Dashboard(props: DashboardProps) { // Receive props dire
         { id: 'summary-divisions', type: 'SummaryCardDivisions', props: widgetComponents.SummaryCardDivisions.getInitialProps(t, dashboardData), colSpan: 1 },
         { id: 'summary-asset-categories', type: 'SummaryCardAssetCategories', props: widgetComponents.SummaryCardAssetCategories.getInitialProps(t, dashboardData), colSpan: 1 },
         { id: 'summary-total-assets', type: 'SummaryCardTotalAssets', props: widgetComponents.SummaryCardTotalAssets.getInitialProps(t, dashboardData), colSpan: 1 },
+        { id: 'summary-total-tickets', type: 'SummaryCardTotalTickets', props: widgetComponents.SummaryCardTotalTickets.getInitialProps(t, dashboardData), colSpan: 1 },
+        { id: 'summary-open-tickets', type: 'SummaryCardOpenTickets', props: widgetComponents.SummaryCardOpenTickets.getInitialProps(t, dashboardData), colSpan: 1 },
+        { id: 'summary-in-progress-tickets', type: 'SummaryCardInProgressTickets', props: widgetComponents.SummaryCardInProgressTickets.getInitialProps(t, dashboardData), colSpan: 1 },
+        { id: 'summary-resolved-tickets', type: 'SummaryCardResolvedTickets', props: widgetComponents.SummaryCardResolvedTickets.getInitialProps(t, dashboardData), colSpan: 1 },
+        { id: 'summary-urgent-tickets', type: 'SummaryCardUrgentTickets', props: widgetComponents.SummaryCardUrgentTickets.getInitialProps(t, dashboardData), colSpan: 1 },
         { id: 'monthly-activity', type: 'MonthlyActivityChart', props: widgetComponents.MonthlyActivityChart.getInitialProps(t, dashboardData), colSpan: 3 },
         { id: 'user-roles', type: 'UserRolesPieChart', props: widgetComponents.UserRolesPieChart.getInitialProps(t, dashboardData), colSpan: 2 },
-        { id: 'asset-category-distribution', type: 'AssetCategoryDistributionPieChart', props: widgetComponents.AssetCategoryDistributionPieChart.getInitialProps(t, dashboardData), colSpan: 2 },
-        { id: 'asset-status-distribution', type: 'AssetStatusDistributionPieChart', props: widgetComponents.AssetStatusDistributionPieChart.getInitialProps(t, dashboardData), colSpan: 2 },
+        { id: 'ticket-status-distribution', type: 'TicketStatusDistributionPieChart', props: widgetComponents.TicketStatusDistributionPieChart.getInitialProps(t, dashboardData), colSpan: 2 },
+        { id: 'ticket-priority-distribution', type: 'TicketPriorityDistributionPieChart', props: widgetComponents.TicketPriorityDistributionPieChart.getInitialProps(t, dashboardData), colSpan: 2 },
+        { id: 'ticket-category-distribution', type: 'TicketCategoryDistributionPieChart', props: widgetComponents.TicketCategoryDistributionPieChart.getInitialProps(t, dashboardData), colSpan: 2 },
       ]);
     }
   }, [initialWidgets, t,
     totalUsers, totalBackups, totalActivityLogs, monthlyData, userRoleDistribution, // Add data dependencies
-    totalDivisions, totalAssetCategories, totalAssets, assetCategoryDistribution, assetStatusDistribution // New data dependencies
+    totalDivisions, totalAssetCategories, totalAssets, assetCategoryDistribution, assetStatusDistribution, // New data dependencies
+    totalTickets, openTickets, inProgressTickets, resolvedTickets, urgentTickets, highPriorityTickets, // Ticket data dependencies
+    ticketStatusDistribution, ticketPriorityDistribution, ticketCategoryDistribution // Ticket chart dependencies
   ]);
 
   // Save layout to backend

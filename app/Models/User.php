@@ -85,4 +85,28 @@ class User extends Authenticatable implements HasMedia
     {
         return $this->belongsTo(Division::class);
     }
+
+    /**
+     * Get the tickets created by the user.
+     */
+    public function tickets(): HasMany
+    {
+        return $this->hasMany(Ticket::class);
+    }
+
+    /**
+     * Get the tickets assigned to the user.
+     */
+    public function assignedTickets(): HasMany
+    {
+        return $this->hasMany(Ticket::class, 'assigned_to');
+    }
+
+    /**
+     * Get the ticket comments made by the user.
+     */
+    public function ticketComments(): HasMany
+    {
+        return $this->hasMany(TicketComment::class);
+    }
 }

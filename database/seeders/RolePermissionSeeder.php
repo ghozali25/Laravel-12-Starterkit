@@ -10,12 +10,12 @@ class RolePermissionSeeder extends Seeder
 {
     public function run(): void
     {
-        // Buat role admin dan user jika belum ada
+        // Buat role admin dan staff jika belum ada
         $admin = Role::firstOrCreate(['name' => 'admin']);
-        $user = Role::firstOrCreate(['name' => 'user']);
+        $staff = Role::firstOrCreate(['name' => 'staff']);     // Changed from 'user' to 'staff'
         $manager = Role::firstOrCreate(['name' => 'manager']); // New role
         $leader = Role::firstOrCreate(['name' => 'leader']);   // New role
-        $staff = Role::firstOrCreate(['name' => 'staff']);     // New role
+        $itSupport = Role::firstOrCreate(['name' => 'it_support']); // New role for IT support
 
         // Daftar permission berdasarkan menu structure
         $permissions = [
@@ -37,6 +37,14 @@ class RolePermissionSeeder extends Seeder
                 'employee-import',
                 'employee-assign-manager', // New permission for assigning managers
                 'employee-assign-division', // New permission for assigning divisions
+            ],
+            'IT Support' => [ // New group for IT support tickets
+                'ticket-view',
+                'ticket-create',
+                'ticket-edit',
+                'ticket-delete',
+                'ticket-assign',
+                'ticket-comment',
             ],
             'Divisions' => [ // New group for divisions
                 'division-view',
@@ -130,6 +138,22 @@ class RolePermissionSeeder extends Seeder
                         if (!$manager->hasPermissionTo($permission)) $manager->givePermissionTo($permission);
                     }
                     // Only admin can create, edit, delete brands by default
+                }
+                // Assign ticket permissions
+                if (str_starts_with($name, 'ticket-')) {
+                    if ($name === 'ticket-view' || $name === 'ticket-create' || $name === 'ticket-comment') {
+                        // All staff can view, create tickets and comment
+                        if (!$staff->hasPermissionTo($permission)) $staff->givePermissionTo($permission);
+                        if (!$manager->hasPermissionTo($permission)) $manager->givePermissionTo($permission);
+                        if (!$leader->hasPermissionTo($permission)) $leader->givePermissionTo($permission);
+                        if (!$itSupport->hasPermissionTo($permission)) $itSupport->givePermissionTo($permission);
+                    } elseif ($name === 'ticket-edit' || $name === 'ticket-assign') {
+                        // IT support and admin can edit and assign tickets
+                        if (!$itSupport->hasPermissionTo($permission)) $itSupport->givePermissionTo($permission);
+                    } elseif ($name === 'ticket-delete') {
+                        // Only admin can delete tickets
+                        // Admin already has all permissions
+                    }
                 }
             }
         }

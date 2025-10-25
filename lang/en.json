@@ -329,5 +329,13 @@
     "Edit brand details": "Edit brand details",
     "Create a new brand": "Create a new brand",
     "Associated Brands": "Associated Brands",
-    "No brands available. Please add brands first.": "No brands available. Please add brands first."
+    "No brands available. Please add brands first.": "No brands available. Please add brands first.",
+    "Total Tickets": "Total Tickets",
+    "Open Tickets": "Open Tickets",
+    "In Progress": "In Progress",
+    "Resolved": "Resolved",
+    "Urgent Tickets": "Urgent Tickets",
+    "Ticket Status Distribution": "Ticket Status Distribution",
+    "Ticket Priority Distribution": "Ticket Priority Distribution",
+    "Ticket Category Distribution": "Ticket Category Distribution"
 }

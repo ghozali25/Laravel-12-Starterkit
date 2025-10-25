@@ -329,5 +329,13 @@
     "Edit brand details": "Edit detail merek",
     "Create a new brand": "Buat merek baru",
     "Associated Brands": "Merek Terkait",
-    "No brands available. Please add brands first.": "Tidak ada merek tersedia. Harap tambahkan merek terlebih dahulu."
+    "No brands available. Please add brands first.": "Tidak ada merek tersedia. Harap tambahkan merek terlebih dahulu.",
+    "Total Tickets": "Total Tiket",
+    "Open Tickets": "Tiket Terbuka",
+    "In Progress": "Sedang Diproses",
+    "Resolved": "Terselesaikan",
+    "Urgent Tickets": "Tiket Mendesak",
+    "Ticket Status Distribution": "Distribusi Status Tiket",
+    "Ticket Priority Distribution": "Distribusi Prioritas Tiket",
+    "Ticket Category Distribution": "Distribusi Kategori Tiket"
 }

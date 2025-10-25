@@ -18,6 +18,7 @@ use App\Http\Controllers\DivisionController;
 use App\Http\Controllers\AssetCategoryController;
 use App\Http\Controllers\AssetController;
 use App\Http\Controllers\BrandController; // Import BrandController
+use App\Http\Controllers\TicketController; // Import TicketController
 
 Route::get('/', function () {
     return Inertia::render('welcome');
@@ -71,6 +72,11 @@ Route::middleware(['auth', 'menu.permission'])->group(function () {
 
     // Brand Management Routes
     Route::resource('brands', BrandController::class); // New: Brand Management Routes
+
+    // Ticket Management Routes
+    Route::resource('tickets', TicketController::class);
+    Route::post('tickets/{ticket}/comments', [TicketController::class, 'addComment'])->name('tickets.comments');
+    Route::post('tickets/{ticket}/assign', [TicketController::class, 'assign'])->name('tickets.assign');
 });
 
 require __DIR__ . '/settings.php';
