@@ -30,7 +30,6 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
-import { toast } from 'sonner';
 import {
   Table,
   TableBody,
@@ -109,6 +108,13 @@ export default function EmployeeIndex({ employees, filters, potentialManagers, d
     dayjs.locale(locale);
   }, [locale]);
 
+  const notify = (type: 'success' | 'error' | 'info' | 'warning', message: string) => {
+    const S: any = (window as any).Swal;
+    if (!S) return;
+    const toast = S.mixin({ toast: true, position: 'top-end', showConfirmButton: false, timer: 2500, timerProgressBar: true });
+    toast.fire({ icon: type, title: message });
+  };
+
   const breadcrumbs: BreadcrumbItem[] = [
     {
       title: t('Employee Management'),
@@ -119,8 +125,8 @@ export default function EmployeeIndex({ employees, filters, potentialManagers, d
   const handleDelete = (id: number) => {
     router.delete(`/employees/${id}`, {
       preserveScroll: true,
-      onSuccess: () => toast.success(t('Employee deleted successfully.')),
-      onError: () => toast.error(t('Failed to delete employee.')),
+      onSuccess: () => notify('success', t('Employee deleted successfully.')),
+      onError: () => notify('error', t('Failed to delete employee.')),
     });
   };
 
@@ -161,7 +167,7 @@ export default function EmployeeIndex({ employees, filters, potentialManagers, d
 
   const handleImportSubmit = () => {
     if (!importFile) {
-      toast.error(t('Please select a file to import.'));
+      notify('error', t('Please select a file to import.'));
       return;
     }
 
@@ -172,13 +178,13 @@ export default function EmployeeIndex({ employees, filters, potentialManagers, d
     router.post('/employees/import', formData, {
       forceFormData: true,
       onSuccess: () => {
-        toast.success(t('Employees imported successfully.'));
+        notify('success', t('Employees imported successfully.'));
         setIsImportDialogOpen(false);
         setImportFile(null);
         router.reload({ only: ['employees'] });
       },
       onError: (errors) => {
-        toast.error(t('Failed to import employees.'));
+        notify('error', t('Failed to import employees.'));
         console.error(errors);
       },
       onFinish: () => setImportProcessing(false),

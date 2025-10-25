@@ -5,8 +5,6 @@ import { AppShell } from '@/components/app-shell';
 import { AppSidebar } from '@/components/app-sidebar';
 import { AppSidebarHeader } from '@/components/app-sidebar-header';
 import { type BreadcrumbItem } from '@/types';
-import { Toaster } from '@/components/ui/sonner';
-import { toast } from 'sonner';
 import { useTranslation } from '@/lib/i18n'; // Import useTranslation
 
 interface Props {
@@ -36,8 +34,21 @@ export default function AppSidebarLayout({
   };
 
   useEffect(() => {
-    if (flash.success) toast.success(flash.success);
-    if (flash.error) toast.error(flash.error);
+    const SwalRef: any = (window as any).Swal;
+    if (!SwalRef) return;
+    const toast = SwalRef.mixin({
+      toast: true,
+      position: 'top-end',
+      showConfirmButton: false,
+      timer: 2500,
+      timerProgressBar: true,
+    });
+    if (flash.success) {
+      toast.fire({ icon: 'success', title: flash.success });
+    }
+    if (flash.error) {
+      toast.fire({ icon: 'error', title: flash.error });
+    }
   }, [flash]);
 
   const primaryColor = setting?.warna || '#0ea5e9';
@@ -91,8 +102,6 @@ export default function AppSidebarLayout({
           </AppContent>
         </AppShell>
       </div>
-
-      <Toaster />
     </>
   );
 }

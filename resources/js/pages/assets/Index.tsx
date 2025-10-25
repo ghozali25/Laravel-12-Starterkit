@@ -19,7 +19,6 @@ import {
   AlertDialogCancel,
   AlertDialogAction,
 } from '@/components/ui/alert-dialog';
-import { toast } from 'sonner';
 import {
   Table,
   TableBody,
@@ -76,6 +75,13 @@ export default function AssetIndex({ assets, categories, employees, filters }: P
     dayjs.locale(locale);
   }, [locale]);
 
+  const notify = (type: 'success' | 'error' | 'info' | 'warning', message: string) => {
+    const S: any = (window as any).Swal;
+    if (!S) return;
+    const toast = S.mixin({ toast: true, position: 'top-end', showConfirmButton: false, timer: 2500, timerProgressBar: true });
+    toast.fire({ icon: type, title: message });
+  };
+
   const breadcrumbs: BreadcrumbItem[] = [
     {
       title: t('Assets List'),
@@ -85,8 +91,8 @@ export default function AssetIndex({ assets, categories, employees, filters }: P
 
   const handleDelete = (id: number) => {
     router.delete(`/assets/${id}`, {
-      onSuccess: () => toast.success(t('Asset deleted successfully.')),
-      onError: () => toast.error(t('Failed to delete asset.')),
+      onSuccess: () => notify('success', t('Asset deleted successfully.')),
+      onError: () => notify('error', t('Failed to delete asset.')),
       preserveScroll: true,
     });
   };
@@ -128,7 +134,7 @@ export default function AssetIndex({ assets, categories, employees, filters }: P
 
   const handleImportSubmit = () => {
     if (!importFile) {
-      toast.error(t('Please select a file to import.'));
+      notify('error', t('Please select a file to import.'));
       return;
     }
 
@@ -139,13 +145,13 @@ export default function AssetIndex({ assets, categories, employees, filters }: P
     router.post('/assets/import', formData, {
       forceFormData: true,
       onSuccess: () => {
-        toast.success(t('Assets imported successfully.'));
+        notify('success', t('Assets imported successfully.'));
         setIsImportDialogOpen(false);
         setImportFile(null);
         router.reload({ only: ['assets'] });
       },
       onError: (errors) => {
-        toast.error(t('Failed to import assets.'));
+        notify('error', t('Failed to import assets.'));
         console.error(errors);
       },
       onFinish: () => setImportProcessing(false),

@@ -47,7 +47,7 @@ export default function TicketEdit({ ticket, users }: Props) {
     priority: ticket.priority,
     category: ticket.category,
     status: ticket.status,
-    assigned_to: ticket.assigned_to || '',
+    assigned_to: ticket.assigned_to ? ticket.assigned_to.toString() : 'unassigned',
     resolution: ticket.resolution || '',
   });
 
@@ -66,8 +66,20 @@ export default function TicketEdit({ ticket, users }: Props) {
     },
   ];
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const SwalRef: any = (window as any).Swal;
+    if (SwalRef) {
+      const result = await SwalRef.fire({
+        title: t('Save changes?'),
+        text: t('This will update the ticket information.'),
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: t('Yes, save it'),
+        cancelButtonText: t('Cancel'),
+      });
+      if (!result.isConfirmed) return;
+    }
     put(`/tickets/${ticket.id}`);
   };
 
@@ -230,8 +242,8 @@ export default function TicketEdit({ ticket, users }: Props) {
                 <div className="space-y-2">
                   <Label htmlFor="assigned_to">{t('Assigned To')}</Label>
                   <Select
-                    value={data.assigned_to?.toString() || 'unassigned'}
-                    onValueChange={(value) => setData('assigned_to', value === 'unassigned' ? null : parseInt(value))}
+                    value={data.assigned_to || 'unassigned'}
+                    onValueChange={(value) => setData('assigned_to', value)}
                   >
                     <SelectTrigger className={errors.assigned_to ? 'border-red-500' : ''}>
                       <SelectValue placeholder={t('Select assignee')} />

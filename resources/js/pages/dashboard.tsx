@@ -16,10 +16,16 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
-import { toast } from 'sonner';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { iconMapper } from '@/lib/iconMapper'; // Import iconMapper
+
+const notify = (type: 'success' | 'error' | 'info' | 'warning', message: string) => {
+  const S: any = (window as any).Swal;
+  if (!S) return;
+  const toast = S.mixin({ toast: true, position: 'top-end', showConfirmButton: false, timer: 2500, timerProgressBar: true });
+  toast.fire({ icon: type, title: message });
+};
 
 // Widget Components and their Props interfaces
 import MonthlyActivityChart, { MonthlyActivityChartProps } from '@/components/dashboard-widgets/MonthlyActivityChart';
@@ -450,7 +456,7 @@ export default function Dashboard(props: DashboardProps) {
       saveLayout(newWidgets);
       return newWidgets;
     });
-    toast.success(t('Widget removed successfully!'));
+    notify('success', t('Widget removed successfully!'));
   };
 
   const handleColSpanChange = (id: UniqueIdentifier, newColSpan: number) => {
@@ -461,7 +467,7 @@ export default function Dashboard(props: DashboardProps) {
       saveLayout(newWidgets);
       return newWidgets;
     });
-    toast.success(t('Widget size updated!'));
+    notify('success', t('Widget size updated!'));
   };
 
   const handleAddWidget = () => {
@@ -490,7 +496,7 @@ export default function Dashboard(props: DashboardProps) {
     setIsAddWidgetDialogOpen(false);
     setSelectedWidgetTypeToAdd(null);
     setNewWidgetProps({});
-    toast.success(t('Widget added successfully!'));
+    notify('success', t('Widget added successfully!'));
   };
 
   const renderWidgetComponent = (widget: DashboardWidget) => {

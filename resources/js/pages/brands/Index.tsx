@@ -18,7 +18,6 @@ import {
   AlertDialogCancel,
   AlertDialogAction,
 } from '@/components/ui/alert-dialog';
-import { toast } from 'sonner';
 import {
   Table,
   TableBody,
@@ -46,6 +45,13 @@ export default function BrandIndex({ brands, filters }: Props) {
   const { t } = useTranslation();
   const [search, setSearch] = useState(filters.search || '');
 
+  const notify = (type: 'success' | 'error' | 'info' | 'warning', message: string) => {
+    const S: any = (window as any).Swal;
+    if (!S) return;
+    const toast = S.mixin({ toast: true, position: 'top-end', showConfirmButton: false, timer: 2500, timerProgressBar: true });
+    toast.fire({ icon: type, title: message });
+  };
+
   const breadcrumbs: BreadcrumbItem[] = [
     {
       title: t('Brand Management'),
@@ -55,12 +61,12 @@ export default function BrandIndex({ brands, filters }: Props) {
 
   const handleDelete = (id: number) => {
     router.delete(`/brands/${id}`, {
-      onSuccess: () => toast.success(t('Brand deleted successfully.')),
+      onSuccess: () => notify('success', t('Brand deleted successfully.')),
       onError: (errors) => {
         if (errors.error) {
-          toast.error(errors.error);
+          notify('error', errors.error);
         } else {
-          toast.error(t('Failed to delete brand.'));
+          notify('error', t('Failed to delete brand.'));
         }
       },
       preserveScroll: true,
