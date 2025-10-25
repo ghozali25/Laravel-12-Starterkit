@@ -8,9 +8,10 @@ import { useTranslation } from '@/lib/i18n'; // Import useTranslation
 
 interface UserMenuContentProps {
     user: User;
+    onAvatarClick?: () => void;
 }
 
-export function UserMenuContent({ user }: UserMenuContentProps) {
+export function UserMenuContent({ user, onAvatarClick }: UserMenuContentProps) {
     const { t } = useTranslation(); // Use the translation hook
     const cleanup = useMobileNavigation();
 
@@ -18,7 +19,7 @@ export function UserMenuContent({ user }: UserMenuContentProps) {
         <>
             <DropdownMenuLabel className="p-0 font-normal">
                 <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-                    <UserInfo user={user} showEmail={true} />
+                    <UserInfo user={user} showEmail={true} onAvatarClick={onAvatarClick} />
                 </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />

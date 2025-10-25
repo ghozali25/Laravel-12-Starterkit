@@ -6,11 +6,14 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { type SharedData } from '@/types';
 import { usePage } from '@inertiajs/react';
 import { ChevronsUpDown } from 'lucide-react';
+import ImagePreviewDialog from '@/components/ImagePreviewDialog';
+import { useState } from 'react';
 
 export function NavUser() {
     const { auth } = usePage<SharedData>().props;
     const { state } = useSidebar();
     const isMobile = useIsMobile();
+    const [previewOpen, setPreviewOpen] = useState(false);
 
     return (
         <SidebarMenu>
@@ -18,7 +21,7 @@ export function NavUser() {
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <SidebarMenuButton size="lg" className="text-sidebar-accent-foreground data-[state=open]:bg-sidebar-accent group">
-                            <UserInfo user={auth.user} />
+                            <UserInfo user={auth.user} onAvatarClick={() => setPreviewOpen(true)} />
                             <ChevronsUpDown className="ml-auto size-4" />
                         </SidebarMenuButton>
                     </DropdownMenuTrigger>
@@ -27,9 +30,10 @@ export function NavUser() {
                         align="end"
                         side={isMobile ? 'bottom' : state === 'collapsed' ? 'left' : 'bottom'}
                     >
-                        <UserMenuContent user={auth.user} />
+                        <UserMenuContent user={auth.user} onAvatarClick={() => setPreviewOpen(true)} />
                     </DropdownMenuContent>
                 </DropdownMenu>
+                <ImagePreviewDialog src={auth.user?.avatar_url ?? null} alt={auth.user?.name ?? 'avatar'} open={previewOpen} onOpenChange={setPreviewOpen} />
             </SidebarMenuItem>
         </SidebarMenu>
     );
