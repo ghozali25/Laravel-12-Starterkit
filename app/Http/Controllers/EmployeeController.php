@@ -195,7 +195,7 @@ class EmployeeController extends Controller
             'personal_email' => $validated['personal_email'],
             'phone_number' => $validated['phone_number'],
             'address' => $validated['address'],
-            'password' => $validated['password']
+            'password' => $request->filled('password')
                 ? Hash::make($validated['password'])
                 : $employee->password,
             'manager_id' => $validated['manager_id'] ?? null,

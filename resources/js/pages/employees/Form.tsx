@@ -87,11 +87,29 @@ export default function EmployeeForm({ employee, roles, currentRoles, potentialM
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const submitData = { ...data, remove_avatar: removeAvatar }; // Include remove_avatar flag
-    if (isEdit) {
-      put(`/employees/${employee?.id}`, submitData as any); // Cast to any to allow File type
+    // Build FormData to support avatar upload
+    const form = new FormData();
+    form.append('name', data.name);
+    form.append('email', data.email);
+    form.append('nik', data.nik ?? '');
+    form.append('personal_email', data.personal_email ?? '');
+    form.append('phone_number', data.phone_number ?? '');
+    form.append('address', data.address ?? '');
+    if (data.password) form.append('password', data.password);
+    if (data.manager_id !== null && data.manager_id !== undefined) form.append('manager_id', String(data.manager_id));
+    if (data.division_id !== null && data.division_id !== undefined) form.append('division_id', String(data.division_id));
+    // roles[]
+    (data.roles || []).forEach((r) => form.append('roles[]', r));
+    // avatar
+    if (data.avatar) form.append('avatar', data.avatar);
+    // remove avatar flag
+    form.append('remove_avatar', removeAvatar ? '1' : '0');
+
+    if (isEdit && employee?.id) {
+      form.append('_method', 'put');
+      router.post(`/employees/${employee.id}`, form, { forceFormData: true, preserveScroll: true });
     } else {
-      post('/employees', submitData as any); // Cast to any to allow File type
+      router.post('/employees', form, { forceFormData: true, preserveScroll: true });
     }
   };
 
