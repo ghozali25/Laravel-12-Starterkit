@@ -40,15 +40,15 @@ export default function DailyActivityChart({
           {title ?? t('Daily Activity (This Month)')}
         </CardTitle>
       </CardHeader>
-      <CardContent className="h-[260px] sm:h-[300px] min-w-0">
+      <CardContent className="h-[240px] sm:h-[280px] md:h-[320px] min-w-0">
         <ResponsiveContainer width="100%" height="100%">
           {hasBar ? (
-            <BarChart data={data} margin={{ top: 12, right: 16, left: 8, bottom: 8 }}>
+            <BarChart data={data} margin={{ top: 12, right: 4, left: 0, bottom: 8 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-              <XAxis dataKey={xAxisDataKey} stroke="#6b7280" tick={{ fontSize: 10 }} interval="preserveEnd" />
-              <YAxis stroke="#6b7280" tick={{ fontSize: 10 }} />
+              <XAxis dataKey={xAxisDataKey} stroke="#6b7280" tick={{ fontSize: 9 }} interval="preserveEnd" />
+              <YAxis stroke="#6b7280" tick={{ fontSize: 9 }} width={30} />
               <Tooltip />
-              <Legend wrapperStyle={legendStyle} />
+              <Legend wrapperStyle={{ ...legendStyle, fontSize: '10px' }} />
               {series.map((s) =>
                 s.type === 'bar' ? (
                   <Bar key={s.key} dataKey={s.key} fill={s.color ?? '#3b82f6'} radius={[4, 4, 0, 0]} />
@@ -66,12 +66,12 @@ export default function DailyActivityChart({
               )}
             </BarChart>
           ) : (
-            <LineChart data={data} margin={{ top: 12, right: 16, left: 8, bottom: 8 }}>
+            <LineChart data={data} margin={{ top: 12, right: 4, left: 0, bottom: 8 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-              <XAxis dataKey={xAxisDataKey} stroke="#6b7280" tick={{ fontSize: 10 }} interval="preserveEnd" />
-              <YAxis stroke="#6b7280" tick={{ fontSize: 10 }} />
+              <XAxis dataKey={xAxisDataKey} stroke="#6b7280" tick={{ fontSize: 9 }} interval="preserveEnd" />
+              <YAxis stroke="#6b7280" tick={{ fontSize: 9 }} width={30} />
               <Tooltip />
-              <Legend wrapperStyle={legendStyle} />
+              <Legend wrapperStyle={{ ...legendStyle, fontSize: '10px' }} />
               {series.map((s) => (
                 <Line
                   key={s.key}

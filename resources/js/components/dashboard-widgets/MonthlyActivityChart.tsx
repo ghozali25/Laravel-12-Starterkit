@@ -68,13 +68,13 @@ export default function MonthlyActivityChart({ data, xAxisDataKey = 'name', yAxi
           </div>
         )}
       </CardHeader>
-      <CardContent className="h-[260px] sm:h-[300px] min-w-0">
+      <CardContent className="h-[240px] sm:h-[280px] md:h-[320px] min-w-0">
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={processedData} margin={{ top: 12, right: 16, left: 8, bottom: 8 }}>
-            <XAxis dataKey={xAxisDataKey} stroke="#6b7280" tick={{ fontSize: 10 }} interval="preserveEnd" tickFormatter={shortMonth} />
-            <YAxis stroke="#6b7280" tick={{ fontSize: 10 }} />
+          <BarChart data={processedData} margin={{ top: 12, right: 4, left: 0, bottom: 8 }}>
+            <XAxis dataKey={xAxisDataKey} stroke="#6b7280" tick={{ fontSize: 9 }} interval="preserveEnd" tickFormatter={shortMonth} />
+            <YAxis stroke="#6b7280" tick={{ fontSize: 9 }} width={30} />
             <Tooltip />
-            <Legend content={<LegendContent />} align="center" verticalAlign="top" />
+            <Legend content={<LegendContent />} align="center" verticalAlign="top" wrapperStyle={{ fontSize: '10px' }} />
             <Bar
               dataKey={mode === 'growth' ? 'UsersGrowth' : 'Users'}
               name={mode === 'growth' ? t('Employees Growth') : t('Employees')}

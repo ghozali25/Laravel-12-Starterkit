@@ -24,9 +24,9 @@ export default function ResourceUsageAreaChart({ data, xAxisDataKey = 'month', y
           {t('Resource Usage')}
         </CardTitle>
       </CardHeader>
-      <CardContent className="h-[300px]">
+      <CardContent className="h-[240px] sm:h-[280px] md:h-[320px] min-w-0">
         <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={data} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+          <AreaChart data={data} margin={{ top: 12, right: 4, left: 0, bottom: 8 }}>
             <defs>
               <linearGradient id="gradArea1" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stopColor="var(--color-primary, var(--primary))" stopOpacity={0.35} />

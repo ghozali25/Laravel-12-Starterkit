@@ -39,13 +39,13 @@ export default function MonthlyTrendsChart({ data, xAxisDataKey = 'name', yAxisD
           {t('Monthly Trends')}
         </CardTitle>
       </CardHeader>
-      <CardContent className="h-[240px] sm:h-[300px]">
+      <CardContent className="h-[240px] sm:h-[280px] md:h-[320px] min-w-0">
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={data} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-            <XAxis dataKey={xAxisDataKey} stroke="#6b7280" />
-            <YAxis stroke="#6b7280" />
+          <LineChart data={data} margin={{ top: 12, right: 4, left: 0, bottom: 8 }}>
+            <XAxis dataKey={xAxisDataKey} stroke="#6b7280" tick={{ fontSize: 9 }} />
+            <YAxis stroke="#6b7280" tick={{ fontSize: 9 }} width={30} />
             <Tooltip />
-            <Legend content={<LegendContent />} align="center" verticalAlign="top" />
+            <Legend wrapperStyle={{ fontSize: '10px' }} content={<LegendContent />} align="center" verticalAlign="top" />
             <Line type="monotone" dataKey={yAxisDataKey1} stroke="var(--color-primary, var(--primary))" strokeWidth={2} />
             <Line type="monotone" dataKey={yAxisDataKey2} stroke="var(--color-primary, var(--primary))" strokeOpacity={0.6} strokeWidth={2} />
           </LineChart>

@@ -36,7 +36,11 @@ export default function DashboardWidgetWrapper({ id, children, onRemove, colSpan
     opacity: isDragging ? 0.8 : 1,
   };
 
-  const colSpanClass = `col-span-1 lg:col-span-${colSpan}`;
+  // Mobile: summary cards (colSpan=1) take 1 col, charts (colSpan>1) take full width
+  // Desktop: use actual colSpan
+  const colSpanClass = colSpan === 1 
+    ? `col-span-1 lg:col-span-1`
+    : `col-span-2 sm:col-span-2 md:col-span-${Math.min(colSpan, 3)} lg:col-span-${colSpan}`;
 
   return (
     <div

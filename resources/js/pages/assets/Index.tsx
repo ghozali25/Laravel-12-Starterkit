@@ -257,15 +257,15 @@ export default function AssetIndex({ assets, categories, employees, filters }: P
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="w-16">{t('No')}</TableHead>
-                    <TableHead>{t('Category')}</TableHead>
-                    <TableHead>{t('Serial Number')}</TableHead>
-                    <TableHead>{t('Brand')}</TableHead>
-                    <TableHead>{t('Model')}</TableHead>
-                    <TableHead>{t('Assigned To')}</TableHead>
-                    <TableHead>{t('Status')}</TableHead>
-                    <TableHead>{t('Last Used')}</TableHead>
-                    <TableHead className="text-right">{t('Actions')}</TableHead>
+                    <TableHead className="w-16 text-center">{t('No')}</TableHead>
+                    <TableHead className="text-center">{t('Category')}</TableHead>
+                    <TableHead className="text-center">{t('Serial Number')}</TableHead>
+                    <TableHead className="text-center">{t('Brand')}</TableHead>
+                    <TableHead className="text-center">{t('Model')}</TableHead>
+                    <TableHead className="text-center">{t('Assigned To')}</TableHead>
+                    <TableHead className="text-center">{t('Status')}</TableHead>
+                    <TableHead className="text-center">{t('Last Used')}</TableHead>
+                    <TableHead className="text-center">{t('Actions')}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -278,19 +278,19 @@ export default function AssetIndex({ assets, categories, employees, filters }: P
                   ) : (
                     assets.data.map((asset, index) => (
                       <TableRow key={asset.id}>
-                        <TableCell className="font-medium text-muted-foreground">
+                        <TableCell className="font-medium text-muted-foreground text-center">
                           {(assets.current_page - 1) * 10 + index + 1}
                         </TableCell>
-                        <TableCell className="font-medium">{asset.category?.name || '-'}</TableCell>
-                        <TableCell>{asset.serial_number || '-'}</TableCell>
-                        <TableCell>{asset.brand || '-'}</TableCell>
-                        <TableCell>{asset.model || '-'}</TableCell>
-                        <TableCell>{asset.user?.name || '-'}</TableCell>
-                        <TableCell>{t(asset.status)}</TableCell>
-                        <TableCell>{asset.last_used_at || '-'}</TableCell>
-                        <TableCell className="text-right">
+                        <TableCell className="font-medium text-center">{asset.category?.name || '-'}</TableCell>
+                        <TableCell className="text-center">{asset.serial_number || '-'}</TableCell>
+                        <TableCell className="text-center">{asset.brand || '-'}</TableCell>
+                        <TableCell className="text-center">{asset.model || '-'}</TableCell>
+                        <TableCell className="text-center">{asset.user?.name || '-'}</TableCell>
+                        <TableCell className="text-center">{t(asset.status)}</TableCell>
+                        <TableCell className="text-center">{asset.last_used_at || '-'}</TableCell>
+                        <TableCell className="text-center">
                           {isAdmin && (
-                            <div className="flex justify-end gap-2">
+                            <div className="flex justify-center gap-2">
                               <Link href={`/assets/${asset.id}/edit`}>
                                 <Button size="sm" variant="outline">
                                   <Edit className="h-4 w-4 mr-1" /> {t('Edit')}

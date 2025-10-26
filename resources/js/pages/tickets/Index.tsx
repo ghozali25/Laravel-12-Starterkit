@@ -278,16 +278,16 @@ export default function TicketIndex({ tickets, filters }: Props) {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-16">{t('No')}</TableHead>
-                <TableHead>{t('Ticket #')}</TableHead>
-                <TableHead>{t('Title')}</TableHead>
-                <TableHead>{t('Priority')}</TableHead>
-                <TableHead>{t('Status')}</TableHead>
-                <TableHead>{t('Category')}</TableHead>
-                <TableHead>{t('Created By')}</TableHead>
-                <TableHead>{t('Assigned To')}</TableHead>
-                <TableHead>{t('Created')}</TableHead>
-                <TableHead className="text-right">{t('Actions')}</TableHead>
+                <TableHead className="w-16 text-center">{t('No')}</TableHead>
+                <TableHead className="text-center">{t('Ticket #')}</TableHead>
+                <TableHead className="text-center">{t('Title')}</TableHead>
+                <TableHead className="text-center">{t('Priority')}</TableHead>
+                <TableHead className="text-center">{t('Status')}</TableHead>
+                <TableHead className="text-center">{t('Category')}</TableHead>
+                <TableHead className="text-center">{t('Created By')}</TableHead>
+                <TableHead className="text-center">{t('Assigned To')}</TableHead>
+                <TableHead className="text-center">{t('Created')}</TableHead>
+                <TableHead className="text-center">{t('Actions')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -300,29 +300,33 @@ export default function TicketIndex({ tickets, filters }: Props) {
               ) : (
                 tickets.data.map((ticket, index) => (
                   <TableRow key={ticket.id}>
-                    <TableCell className="font-medium text-muted-foreground">
+                    <TableCell className="font-medium text-muted-foreground text-center">
                       {(tickets.current_page - 1) * 10 + index + 1}
                     </TableCell>
-                    <TableCell className="font-medium">{ticket.ticket_number}</TableCell>
-                    <TableCell className="max-w-[200px] truncate">{ticket.title}</TableCell>
-                    <TableCell>
-                      <Badge variant={getPriorityColor(ticket.priority)}>
-                        {getPriorityLabel(ticket.priority)}
-                      </Badge>
+                    <TableCell className="font-medium text-center">{ticket.ticket_number}</TableCell>
+                    <TableCell className="max-w-[200px] truncate text-center">{ticket.title}</TableCell>
+                    <TableCell className="text-center">
+                      <div className="flex justify-center">
+                        <Badge variant={getPriorityColor(ticket.priority)}>
+                          {getPriorityLabel(ticket.priority)}
+                        </Badge>
+                      </div>
                     </TableCell>
-                    <TableCell>
-                      <Badge variant={getStatusColor(ticket.status)}>
-                        {getStatusLabel(ticket.status)}
-                      </Badge>
+                    <TableCell className="text-center">
+                      <div className="flex justify-center">
+                        <Badge variant={getStatusColor(ticket.status)}>
+                          {getStatusLabel(ticket.status)}
+                        </Badge>
+                      </div>
                     </TableCell>
-                    <TableCell>{getCategoryLabel(ticket.category)}</TableCell>
-                    <TableCell>{ticket.user.name}</TableCell>
-                    <TableCell>{ticket.assigned_user?.name || '-'}</TableCell>
-                    <TableCell className="text-sm text-muted-foreground italic">
+                    <TableCell className="text-center">{getCategoryLabel(ticket.category)}</TableCell>
+                    <TableCell className="text-center">{ticket.user.name}</TableCell>
+                    <TableCell className="text-center">{ticket.assigned_user?.name || '-'}</TableCell>
+                    <TableCell className="text-sm text-muted-foreground italic text-center">
                       {dayjs(ticket.created_at).fromNow()}
                     </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
+                    <TableCell className="text-center">
+                      <div className="flex justify-center gap-2">
                         <Link href={`/tickets/${ticket.id}`}>
                           <Button size="sm" variant="outline">
                             <Eye className="h-4 w-4 mr-1" />

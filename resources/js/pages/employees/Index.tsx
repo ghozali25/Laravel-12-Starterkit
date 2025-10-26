@@ -294,18 +294,18 @@ export default function EmployeeIndex({ employees, filters, potentialManagers, d
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-16">{t('No')}</TableHead>
-                <TableHead>{t('Photo')}</TableHead> {/* New TableHead for Photo */}
-                <TableHead>{t('NIK')}</TableHead>
-                <TableHead>{t('Name')}</TableHead>
-                <TableHead>{t('Company Email')}</TableHead>
-                <TableHead>{t('Personal Email')}</TableHead>
-                <TableHead>{t('Phone Number')}</TableHead>
-                <TableHead>{t('Address')}</TableHead>
-                <TableHead>{t('Reports To')}</TableHead>
-                <TableHead>{t('Division')}</TableHead>
-                <TableHead>{t('Roles')}</TableHead>
-                <TableHead className="text-right">{t('Actions')}</TableHead>
+                <TableHead className="w-16 text-center">{t('No')}</TableHead>
+                <TableHead className="text-center">{t('Photo')}</TableHead> {/* New TableHead for Photo */}
+                <TableHead className="text-center">{t('NIK')}</TableHead>
+                <TableHead className="text-center">{t('Name')}</TableHead>
+                <TableHead className="text-center">{t('Company Email')}</TableHead>
+                <TableHead className="text-center">{t('Personal Email')}</TableHead>
+                <TableHead className="text-center">{t('Phone Number')}</TableHead>
+                <TableHead className="text-center">{t('Address')}</TableHead>
+                <TableHead className="text-center">{t('Reports To')}</TableHead>
+                <TableHead className="text-center">{t('Division')}</TableHead>
+                <TableHead className="text-center">{t('Roles')}</TableHead>
+                <TableHead className="text-center">{t('Actions')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -318,26 +318,28 @@ export default function EmployeeIndex({ employees, filters, potentialManagers, d
               ) : (
                 employees.data.map((employee, index) => (
                   <TableRow key={employee.id}>
-                    <TableCell className="font-medium text-muted-foreground">
+                    <TableCell className="font-medium text-muted-foreground text-center">
                       {(employees.current_page - 1) * 10 + index + 1}
                     </TableCell>
-                    <TableCell>
-                      <Avatar className="h-8 w-8 cursor-pointer" onClick={() => openImagePreview(employee.avatar_url ?? null, employee.name)}>
-                        <AvatarImage src={employee.avatar_url || undefined} alt={employee.name} />
-                        <AvatarFallback>{getInitials(employee.name)}</AvatarFallback>
-                      </Avatar>
+                    <TableCell className="text-center">
+                      <div className="flex justify-center">
+                        <Avatar className="h-8 w-8 cursor-pointer" onClick={() => openImagePreview(employee.avatar_url ?? null, employee.name)}>
+                          <AvatarImage src={employee.avatar_url || undefined} alt={employee.name} />
+                          <AvatarFallback>{getInitials(employee.name)}</AvatarFallback>
+                        </Avatar>
+                      </div>
                     </TableCell>
-                    <TableCell className="font-medium">{employee.nik || '-'}</TableCell>
-                    <TableCell>{employee.name}</TableCell>
-                    <TableCell>{employee.email}</TableCell>
-                    <TableCell>{employee.personal_email || '-'}</TableCell>
-                    <TableCell>{employee.phone_number || '-'}</TableCell>
-                    <TableCell>{employee.address || '-'}</TableCell>
-                    <TableCell>{employee.manager?.name || '-'}</TableCell>
-                    <TableCell>{employee.division?.name || '-'}</TableCell>
-                    <TableCell>
+                    <TableCell className="font-medium text-center">{employee.nik || '-'}</TableCell>
+                    <TableCell className="text-center">{employee.name}</TableCell>
+                    <TableCell className="text-center">{employee.email}</TableCell>
+                    <TableCell className="text-center">{employee.personal_email || '-'}</TableCell>
+                    <TableCell className="text-center">{employee.phone_number || '-'}</TableCell>
+                    <TableCell className="text-center">{employee.address || '-'}</TableCell>
+                    <TableCell className="text-center">{employee.manager?.name || '-'}</TableCell>
+                    <TableCell className="text-center">{employee.division?.name || '-'}</TableCell>
+                    <TableCell className="text-center">
                       {employee.roles.length > 0 ? (
-                        <div className="flex flex-wrap gap-1">
+                        <div className="flex flex-wrap gap-1 justify-center">
                           {employee.roles.map((role) => (
                             <Badge key={role.id} variant="secondary" className="text-xs font-normal">
                               {role.name}
@@ -348,9 +350,9 @@ export default function EmployeeIndex({ employees, filters, potentialManagers, d
                         '-'
                       )}
                     </TableCell>
-                    <TableCell className="text-right">
+                    <TableCell className="text-center">
                       {isAdmin && (
-                        <div className="flex justify-end gap-2">
+                        <div className="flex justify-center gap-2">
                           <Link href={`/employees/${employee.id}/edit`}>
                             <Button size="sm" variant="outline">
                               <Edit className="h-4 w-4 mr-1" /> {t('Edit')}

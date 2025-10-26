@@ -165,12 +165,12 @@ export default function UserIndex({ users, filters }: Props) {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-16">{t('No')}</TableHead>
-                <TableHead>{t('Name')}</TableHead>
-                <TableHead>{t('Email address')}</TableHead>
-                <TableHead>{t('Roles')}</TableHead>
-                <TableHead>{t('Registered')}</TableHead>
-                <TableHead className="text-right">{t('Actions')}</TableHead>
+                <TableHead className="w-16 text-center">{t('No')}</TableHead>
+                <TableHead className="text-center">{t('Name')}</TableHead>
+                <TableHead className="text-center">{t('Email address')}</TableHead>
+                <TableHead className="text-center">{t('Roles')}</TableHead>
+                <TableHead className="text-center">{t('Registered')}</TableHead>
+                <TableHead className="text-center">{t('Actions')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -183,14 +183,14 @@ export default function UserIndex({ users, filters }: Props) {
               ) : (
                 users.data.map((user, index) => (
                   <TableRow key={user.id}>
-                    <TableCell className="font-medium text-muted-foreground">
+                    <TableCell className="font-medium text-muted-foreground text-center">
                       {(users.current_page - 1) * 10 + index + 1}
                     </TableCell>
-                    <TableCell className="font-medium">{user.name}</TableCell>
-                    <TableCell>{user.email}</TableCell>
-                    <TableCell>
+                    <TableCell className="font-medium text-center">{user.name}</TableCell>
+                    <TableCell className="text-center">{user.email}</TableCell>
+                    <TableCell className="text-center">
                       {user.roles.length > 0 ? (
-                        <div className="flex flex-wrap gap-1">
+                        <div className="flex flex-wrap gap-1 justify-center">
                           {user.roles.map((role) => (
                             <Badge key={role.id} variant="secondary" className="text-xs font-normal">
                               {role.name}
@@ -201,12 +201,12 @@ export default function UserIndex({ users, filters }: Props) {
                         '-'
                       )}
                     </TableCell>
-                    <TableCell className="text-sm text-muted-foreground italic">
+                    <TableCell className="text-sm text-muted-foreground italic text-center">
                       {dayjs(user.created_at).fromNow()}
                     </TableCell>
-                    <TableCell className="text-right">
+                    <TableCell className="text-center">
                       {isAdmin && (
-                        <div className="flex justify-end gap-2">
+                        <div className="flex justify-center gap-2">
                           <Link href={`/users/${user.id}/edit`}>
                             <Button size="sm" variant="outline">
                               <Edit className="h-4 w-4 mr-1" /> {t('Edit')}
