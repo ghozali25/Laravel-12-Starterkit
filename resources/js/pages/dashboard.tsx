@@ -66,6 +66,7 @@ type WidgetComponentsMap = {
 // --- New: DashboardData interface to hold all fetched data ---
 interface DashboardData {
   totalUsers: number;
+  totalEmployees: number; // Employees (non-admin)
   totalBackups: number;
   totalActivityLogs: number;
   totalDivisions: number; // New
@@ -98,8 +99,8 @@ const dummyRadialData = [
 const widgetComponents: WidgetComponentsMap = {
   SummaryCardUsers: {
     component: SummaryCard,
-    label: 'Summary Card (Users)',
-    getInitialProps: (t, data) => ({ label: t('Users'), value: data?.totalUsers ?? 0, iconName: 'Users' }),
+    label: 'Summary Card (Employees)',
+    getInitialProps: (t, data) => ({ label: t('Employees'), value: data?.totalEmployees ?? 0, iconName: 'Users' }),
     defaultColSpan: 1,
     icon: <Users className="h-5 w-5" />,
   },
@@ -123,7 +124,7 @@ const widgetComponents: WidgetComponentsMap = {
       title: t('Daily Activity (This Month)'),
       series: [
         { key: 'Tickets', type: 'bar', color: '#3b82f6' },
-        { key: 'Users', type: 'line', color: '#22c55e' },
+        { key: 'Users', type: 'line', color: '#22c55e' }, // Users = Employees (non-admin)
         { key: 'Assets', type: 'line', color: '#a78bfa' },
         { key: 'Backups', type: 'line', color: '#f59e0b' },
       ],
@@ -322,6 +323,7 @@ export default function Dashboard(props: DashboardProps) {
   const {
     initialWidgets,
     totalUsers,
+    totalEmployees,
     totalBackups,
     totalActivityLogs,
     monthlyData,
@@ -353,6 +355,7 @@ export default function Dashboard(props: DashboardProps) {
   // Combine all dashboard data into a single object for easier passing to getInitialProps
   const dashboardData: DashboardData = {
     totalUsers: totalUsers ?? 0,
+    totalEmployees: totalEmployees ?? 0,
     totalBackups: totalBackups ?? 0,
     totalActivityLogs: totalActivityLogs ?? 0,
     totalDivisions: totalDivisions ?? 0,
@@ -415,7 +418,7 @@ export default function Dashboard(props: DashboardProps) {
       ]);
     }
   }, [initialWidgets, t,
-    totalUsers, totalBackups, totalActivityLogs, monthlyData, userRoleDistribution, // Add data dependencies
+    totalUsers, totalEmployees, totalBackups, totalActivityLogs, monthlyData, userRoleDistribution, // Add data dependencies
     totalDivisions, totalAssetCategories, totalAssets, assetCategoryDistribution, assetStatusDistribution, // New data dependencies
     totalTickets, openTickets, inProgressTickets, resolvedTickets, urgentTickets, highPriorityTickets, // Ticket data dependencies
     ticketStatusDistribution, ticketPriorityDistribution, ticketCategoryDistribution // Ticket chart dependencies

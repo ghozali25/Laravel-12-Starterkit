@@ -294,6 +294,7 @@ export default function EmployeeIndex({ employees, filters, potentialManagers, d
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead className="w-16">{t('No')}</TableHead>
                 <TableHead>{t('Photo')}</TableHead> {/* New TableHead for Photo */}
                 <TableHead>{t('NIK')}</TableHead>
                 <TableHead>{t('Name')}</TableHead>
@@ -310,13 +311,16 @@ export default function EmployeeIndex({ employees, filters, potentialManagers, d
             <TableBody>
               {employees.data.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={11} className="h-24 text-center text-muted-foreground"> {/* Update colspan */}
+                  <TableCell colSpan={12} className="h-24 text-center text-muted-foreground">
                     {t('No employee data available.')}
                   </TableCell>
                 </TableRow>
               ) : (
-                employees.data.map((employee) => (
+                employees.data.map((employee, index) => (
                   <TableRow key={employee.id}>
+                    <TableCell className="font-medium text-muted-foreground">
+                      {(employees.current_page - 1) * 10 + index + 1}
+                    </TableCell>
                     <TableCell>
                       <Avatar className="h-8 w-8 cursor-pointer" onClick={() => openImagePreview(employee.avatar_url ?? null, employee.name)}>
                         <AvatarImage src={employee.avatar_url || undefined} alt={employee.name} />
@@ -388,7 +392,17 @@ export default function EmployeeIndex({ employees, filters, potentialManagers, d
 
         {/* Pagination */}
         {employees.links.length > 1 && (
-          <div className="flex justify-center pt-6 flex-wrap gap-2">
+          <div className="flex justify-center items-center pt-6 flex-wrap gap-2">
+            {/* First Page Button */}
+            <Button
+              disabled={employees.current_page === 1}
+              variant="outline"
+              size="sm"
+              onClick={() => router.visit(employees.links[1]?.url || '', { preserveScroll: true })}
+            >
+              {t('First')}
+            </Button>
+            
             {employees.links.map((link, i) => (
               <Button
                 key={i}
@@ -400,6 +414,16 @@ export default function EmployeeIndex({ employees, filters, potentialManagers, d
                 <span dangerouslySetInnerHTML={{ __html: link.label }} />
               </Button>
             ))}
+            
+            {/* Last Page Button */}
+            <Button
+              disabled={employees.current_page === employees.last_page}
+              variant="outline"
+              size="sm"
+              onClick={() => router.visit(employees.links[employees.links.length - 2]?.url || '', { preserveScroll: true })}
+            >
+              {t('Last')}
+            </Button>
           </div>
         )}
       </div>

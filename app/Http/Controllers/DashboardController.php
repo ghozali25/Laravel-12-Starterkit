@@ -33,7 +33,10 @@ class DashboardController extends Controller
         $dashboardConfig = DashboardWidget::where('user_id', $user->id)->first();
 
         // --- Fetch Real Data ---
-        $totalUsers = User::count();
+        $totalUsers = User::count(); // All users including admin
+        $totalEmployees = User::whereHas('roles', function ($q) {
+            $q->where('name', '!=', 'admin'); // Employees only (non-admin)
+        })->count();
         $totalActivityLogs = Activity::count();
         $totalDivisions = Division::count(); // New: Total Divisions
         $totalAssetCategories = AssetCategory::count(); // New: Total Asset Categories
@@ -65,7 +68,11 @@ class DashboardController extends Controller
             $months->push($m->copy());
         }
 
-        $monthlyUsers = User::withTrashed()->select(
+        $monthlyUsers = User::withTrashed()
+            ->whereHas('roles', function ($q) {
+                $q->where('name', '!=', 'admin'); // Employees only (non-admin)
+            })
+            ->select(
                 DB::raw('DATE_FORMAT(created_at, "%b %Y") as month'),
                 DB::raw('count(*) as count')
             )
@@ -98,6 +105,9 @@ class DashboardController extends Controller
             $monthKey = $monthDate->format('M Y');
             $eom = $monthDate->copy()->endOfMonth();
             $activeUsers = User::withTrashed()
+                ->whereHas('roles', function ($q) {
+                    $q->where('name', '!=', 'admin'); // Employees only (non-admin)
+                })
                 ->where('created_at', '<=', $eom)
                 ->where(function ($q) use ($eom) {
                     $q->whereNull('deleted_at')
@@ -106,7 +116,7 @@ class DashboardController extends Controller
                 ->count();
             return [
                 'name' => $monthKey,
-                'Users' => $activeUsers,
+                'Users' => $activeUsers, // Actually employees (non-admin users)
                 'Backups' => (int) ($monthlyBackups[$monthKey] ?? 0),
                 'Assets' => (int) ($monthlyAssetsCreated[$monthKey]['count'] ?? 0),
             ];
@@ -122,7 +132,10 @@ class DashboardController extends Controller
             $dateKeys->push($date->format('Y-m-d'));
         }
 
-        $usersDaily = User::select(DB::raw('DATE(created_at) as d'), DB::raw('count(*) as c'))
+        $usersDaily = User::whereHas('roles', function ($q) {
+                $q->where('name', '!=', 'admin'); // Employees only (non-admin)
+            })
+            ->select(DB::raw('DATE(created_at) as d'), DB::raw('count(*) as c'))
             ->whereBetween('created_at', [$startOfMonth, $endOfMonth])
             ->groupBy('d')->pluck('c', 'd');
 
@@ -331,6 +344,7 @@ class DashboardController extends Controller
         return Inertia::render('dashboard', [
             'initialWidgets' => $dashboardConfig ? $dashboardConfig->widgets_data : [],
             'totalUsers' => $totalUsers,
+            'totalEmployees' => $totalEmployees, // Employees (non-admin) for consistency with Employee Management
             'totalBackups' => $totalBackups,
             'totalActivityLogs' => $totalActivityLogs,
             'totalDivisions' => $totalDivisions, // New

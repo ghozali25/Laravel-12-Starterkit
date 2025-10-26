@@ -125,12 +125,17 @@ export default function BrandIndex({ brands, filters }: Props) {
               {brands.data.length === 0 ? (
                 <p className="text-muted-foreground text-center">{t('No data available.')}</p>
               ) : (
-                brands.data.map((brand) => (
+                brands.data.map((brand, index) => (
                   <div
                     key={brand.id}
                     className="flex items-center justify-between border px-4 py-3 rounded-md bg-muted/50 hover:bg-muted/70 transition"
                   >
-                    <div className="font-medium text-sm text-foreground">{brand.name}</div>
+                    <div className="flex items-center gap-3">
+                      <span className="font-medium text-muted-foreground text-sm w-8">
+                        {(brands.current_page - 1) * 10 + index + 1}
+                      </span>
+                      <div className="font-medium text-sm text-foreground">{brand.name}</div>
+                    </div>
                     <div className="flex items-center gap-2">
                       <Link href={`/brands/${brand.id}/edit`}>
                         <Button variant="ghost" size="icon">
@@ -169,7 +174,16 @@ export default function BrandIndex({ brands, filters }: Props) {
 
             {/* Pagination */}
             {brands.links.length > 1 && (
-              <div className="flex justify-center pt-6 flex-wrap gap-2">
+              <div className="flex justify-center items-center pt-6 flex-wrap gap-2">
+                <Button
+                  disabled={brands.current_page === 1}
+                  variant="outline"
+                  size="sm"
+                  onClick={() => router.visit(brands.links[1]?.url || '', { preserveScroll: true })}
+                >
+                  {t('First')}
+                </Button>
+                
                 {brands.links.map((link, i) => (
                   <Button
                     key={i}
@@ -181,6 +195,15 @@ export default function BrandIndex({ brands, filters }: Props) {
                     <span dangerouslySetInnerHTML={{ __html: link.label }} />
                   </Button>
                 ))}
+                
+                <Button
+                  disabled={brands.current_page === brands.last_page}
+                  variant="outline"
+                  size="sm"
+                  onClick={() => router.visit(brands.links[brands.links.length - 2]?.url || '', { preserveScroll: true })}
+                >
+                  {t('Last')}
+                </Button>
               </div>
             )}
           </CardContent>

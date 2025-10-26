@@ -165,6 +165,7 @@ export default function UserIndex({ users, filters }: Props) {
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead className="w-16">{t('No')}</TableHead>
                 <TableHead>{t('Name')}</TableHead>
                 <TableHead>{t('Email address')}</TableHead>
                 <TableHead>{t('Roles')}</TableHead>
@@ -175,13 +176,16 @@ export default function UserIndex({ users, filters }: Props) {
             <TableBody>
               {users.data.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={5} className="h-24 text-center text-muted-foreground">
+                  <TableCell colSpan={6} className="h-24 text-center text-muted-foreground">
                     {t('No user data available.')}
                   </TableCell>
                 </TableRow>
               ) : (
-                users.data.map((user) => (
+                users.data.map((user, index) => (
                   <TableRow key={user.id}>
+                    <TableCell className="font-medium text-muted-foreground">
+                      {(users.current_page - 1) * 10 + index + 1}
+                    </TableCell>
                     <TableCell className="font-medium">{user.name}</TableCell>
                     <TableCell>{user.email}</TableCell>
                     <TableCell>
@@ -270,7 +274,16 @@ export default function UserIndex({ users, filters }: Props) {
 
         {/* Pagination */}
         {users.links.length > 1 && (
-          <div className="flex justify-center pt-6 flex-wrap gap-2">
+          <div className="flex justify-center items-center pt-6 flex-wrap gap-2">
+            <Button
+              disabled={users.current_page === 1}
+              variant="outline"
+              size="sm"
+              onClick={() => router.visit(users.links[1]?.url || '', { preserveScroll: true })}
+            >
+              {t('First')}
+            </Button>
+            
             {users.links.map((link, i) => (
               <Button
                 key={i}
@@ -282,6 +295,15 @@ export default function UserIndex({ users, filters }: Props) {
                 <span dangerouslySetInnerHTML={{ __html: link.label }} />
               </Button>
             ))}
+            
+            <Button
+              disabled={users.current_page === users.last_page}
+              variant="outline"
+              size="sm"
+              onClick={() => router.visit(users.links[users.links.length - 2]?.url || '', { preserveScroll: true })}
+            >
+              {t('Last')}
+            </Button>
           </div>
         )}
       </div>

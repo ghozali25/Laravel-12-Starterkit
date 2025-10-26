@@ -278,6 +278,7 @@ export default function TicketIndex({ tickets, filters }: Props) {
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead className="w-16">{t('No')}</TableHead>
                 <TableHead>{t('Ticket #')}</TableHead>
                 <TableHead>{t('Title')}</TableHead>
                 <TableHead>{t('Priority')}</TableHead>
@@ -292,13 +293,16 @@ export default function TicketIndex({ tickets, filters }: Props) {
             <TableBody>
               {tickets.data.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={9} className="h-24 text-center text-muted-foreground">
+                  <TableCell colSpan={10} className="h-24 text-center text-muted-foreground">
                     {t('No tickets found.')}
                   </TableCell>
                 </TableRow>
               ) : (
-                tickets.data.map((ticket) => (
+                tickets.data.map((ticket, index) => (
                   <TableRow key={ticket.id}>
+                    <TableCell className="font-medium text-muted-foreground">
+                      {(tickets.current_page - 1) * 10 + index + 1}
+                    </TableCell>
                     <TableCell className="font-medium">{ticket.ticket_number}</TableCell>
                     <TableCell className="max-w-[200px] truncate">{ticket.title}</TableCell>
                     <TableCell>
@@ -367,7 +371,16 @@ export default function TicketIndex({ tickets, filters }: Props) {
 
         {/* Pagination */}
         {tickets.links.length > 1 && (
-          <div className="flex justify-center pt-6 flex-wrap gap-2">
+          <div className="flex justify-center items-center pt-6 flex-wrap gap-2">
+            <Button
+              disabled={tickets.current_page === 1}
+              variant="outline"
+              size="sm"
+              onClick={() => router.visit(tickets.links[1]?.url || '', { preserveScroll: true })}
+            >
+              {t('First')}
+            </Button>
+            
             {tickets.links.map((link, i) => (
               <Button
                 key={i}
@@ -379,6 +392,15 @@ export default function TicketIndex({ tickets, filters }: Props) {
                 <span dangerouslySetInnerHTML={{ __html: link.label }} />
               </Button>
             ))}
+            
+            <Button
+              disabled={tickets.current_page === tickets.last_page}
+              variant="outline"
+              size="sm"
+              onClick={() => router.visit(tickets.links[tickets.links.length - 2]?.url || '', { preserveScroll: true })}
+            >
+              {t('Last')}
+            </Button>
           </div>
         )}
       </div>

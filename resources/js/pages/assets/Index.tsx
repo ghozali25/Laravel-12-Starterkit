@@ -257,6 +257,7 @@ export default function AssetIndex({ assets, categories, employees, filters }: P
               <Table>
                 <TableHeader>
                   <TableRow>
+                    <TableHead className="w-16">{t('No')}</TableHead>
                     <TableHead>{t('Category')}</TableHead>
                     <TableHead>{t('Serial Number')}</TableHead>
                     <TableHead>{t('Brand')}</TableHead>
@@ -270,13 +271,16 @@ export default function AssetIndex({ assets, categories, employees, filters }: P
                 <TableBody>
                   {assets.data.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={8} className="h-24 text-center text-muted-foreground">
+                      <TableCell colSpan={9} className="h-24 text-center text-muted-foreground">
                         {t('No asset data available.')}
                       </TableCell>
                     </TableRow>
                   ) : (
-                    assets.data.map((asset) => (
+                    assets.data.map((asset, index) => (
                       <TableRow key={asset.id}>
+                        <TableCell className="font-medium text-muted-foreground">
+                          {(assets.current_page - 1) * 10 + index + 1}
+                        </TableCell>
                         <TableCell className="font-medium">{asset.category?.name || '-'}</TableCell>
                         <TableCell>{asset.serial_number || '-'}</TableCell>
                         <TableCell>{asset.brand || '-'}</TableCell>
@@ -328,7 +332,16 @@ export default function AssetIndex({ assets, categories, employees, filters }: P
 
             {/* Pagination */}
             {assets.links.length > 1 && (
-              <div className="flex justify-center pt-6 flex-wrap gap-2">
+              <div className="flex justify-center items-center pt-6 flex-wrap gap-2">
+                <Button
+                  disabled={assets.current_page === 1}
+                  variant="outline"
+                  size="sm"
+                  onClick={() => router.visit(assets.links[1]?.url || '', { preserveScroll: true })}
+                >
+                  {t('First')}
+                </Button>
+                
                 {assets.links.map((link, i) => (
                   <Button
                     key={i}
@@ -340,6 +353,15 @@ export default function AssetIndex({ assets, categories, employees, filters }: P
                     <span dangerouslySetInnerHTML={{ __html: link.label }} />
                   </Button>
                 ))}
+                
+                <Button
+                  disabled={assets.current_page === assets.last_page}
+                  variant="outline"
+                  size="sm"
+                  onClick={() => router.visit(assets.links[assets.links.length - 2]?.url || '', { preserveScroll: true })}
+                >
+                  {t('Last')}
+                </Button>
               </div>
             )}
           </CardContent>

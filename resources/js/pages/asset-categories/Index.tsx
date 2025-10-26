@@ -110,12 +110,17 @@ export default function AssetCategoryIndex({ categories, filters }: Props) {
               {categories.data.length === 0 ? (
                 <p className="text-muted-foreground text-center">{t('No data available.')}</p>
               ) : (
-                categories.data.map((category) => (
+                categories.data.map((category, index) => (
                   <div
                     key={category.id}
                     className="flex items-center justify-between border px-4 py-3 rounded-md bg-muted/50 hover:bg-muted/70 transition"
                   >
-                    <div className="font-medium text-sm text-foreground">{category.name}</div>
+                    <div className="flex items-center gap-3">
+                      <span className="font-medium text-muted-foreground text-sm w-8">
+                        {(categories.current_page - 1) * 10 + index + 1}
+                      </span>
+                      <div className="font-medium text-sm text-foreground">{category.name}</div>
+                    </div>
                     <div className="flex items-center gap-2">
                       <Link href={`/asset-categories/${category.id}/edit`}>
                         <Button variant="ghost" size="icon">
@@ -154,7 +159,16 @@ export default function AssetCategoryIndex({ categories, filters }: Props) {
 
             {/* Pagination */}
             {categories.links.length > 1 && (
-              <div className="flex justify-center pt-6 flex-wrap gap-2">
+              <div className="flex justify-center items-center pt-6 flex-wrap gap-2">
+                <Button
+                  disabled={categories.current_page === 1}
+                  variant="outline"
+                  size="sm"
+                  onClick={() => router.visit(categories.links[1]?.url || '', { preserveScroll: true })}
+                >
+                  {t('First')}
+                </Button>
+                
                 {categories.links.map((link, i) => (
                   <Button
                     key={i}
@@ -166,6 +180,15 @@ export default function AssetCategoryIndex({ categories, filters }: Props) {
                     <span dangerouslySetInnerHTML={{ __html: link.label }} />
                   </Button>
                 ))}
+                
+                <Button
+                  disabled={categories.current_page === categories.last_page}
+                  variant="outline"
+                  size="sm"
+                  onClick={() => router.visit(categories.links[categories.links.length - 2]?.url || '', { preserveScroll: true })}
+                >
+                  {t('Last')}
+                </Button>
               </div>
             )}
           </CardContent>
