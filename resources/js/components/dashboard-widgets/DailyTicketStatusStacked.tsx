@@ -3,6 +3,7 @@ import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Legend, Cart
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useTranslation } from '@/lib/i18n';
 import { iconMapper } from '@/lib/iconMapper';
+import { useAppearance } from '@/hooks/use-appearance';
 
 export interface DailyTicketStatusStackedProps {
   data: Array<{ date: string; day: number; open: number; in_progress: number; resolved: number; closed: number; cancelled: number }>;
@@ -13,9 +14,11 @@ export interface DailyTicketStatusStackedProps {
 export default function DailyTicketStatusStacked({ data, title, iconName }: DailyTicketStatusStackedProps) {
   const { t } = useTranslation();
   const IconComponent = iconName ? iconMapper(iconName) : null;
-  const legendColor = (typeof window !== 'undefined' && document.documentElement.classList.contains('dark'))
-    ? '#ffffff'
-    : '#111827';
+  const { appearance } = useAppearance();
+  const isDark = appearance === 'dark';
+  const legendColor = isDark ? '#e5e7eb' : '#111827';
+  const axisColor = isDark ? '#cbd5e1' : '#6b7280';
+  const gridColor = isDark ? 'rgba(255,255,255,0.08)' : '#e5e7eb';
 
   const LegendContent = ({ payload }: { payload?: any[] }) => (
     <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center', fontSize: 10, color: legendColor }}>
@@ -40,20 +43,20 @@ export default function DailyTicketStatusStacked({ data, title, iconName }: Dail
   ];
 
   return (
-    <Card className="bg-white dark:bg-[#0b1437] shadow-sm rounded-2xl overflow-hidden h-full border border-gray-100 dark:border-[#1a2541] group hover:shadow-xl hover:border-purple-300 dark:hover:border-purple-600 transition-all duration-300">
-      <CardHeader className="px-4 py-3 flex flex-row items-center justify-between space-y-0 pb-2">
+    <Card className="bg-white dark:!bg-[#0b1437] shadow-sm rounded-2xl overflow-hidden h-full border border-gray-100 dark:!border-[#1a2541] group hover:shadow-xl hover:border-purple-300 dark:hover:border-purple-600 transition-all duration-300">
+      <CardHeader className="px-4 py-3 flex flex-row items-center justify-between space-y-0 pb-2 bg-white dark:!bg-[#0b1437]">
         <CardTitle className="text-lg font-semibold text-gray-800 dark:text-white flex items-center gap-2">
           {IconComponent && <IconComponent className="h-5 w-5 text-muted-foreground" />}
           {title ?? t('Daily Ticket Status (This Month)')}
         </CardTitle>
       </CardHeader>
-      <CardContent className="h-[240px] sm:h-[280px] md:h-[320px] min-w-0">
+      <CardContent className="h-[240px] sm:h-[280px] md:h-[320px] min-w-0 bg-white dark:!bg-[#0b1437]">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={filteredData} margin={{ top: 12, right: 4, left: 0, bottom: 8 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-            <XAxis dataKey="day" stroke="#6b7280" tick={{ fontSize: 9 }} interval="preserveEnd" />
-            <YAxis stroke="#6b7280" tick={{ fontSize: 9 }} width={30} />
-            <Tooltip />
+            <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
+            <XAxis dataKey="day" stroke={axisColor} tick={{ fontSize: 9, fill: axisColor }} interval="preserveEnd" />
+            <YAxis stroke={axisColor} tick={{ fontSize: 9, fill: axisColor }} width={30} />
+            <Tooltip contentStyle={{ backgroundColor: isDark ? '#0b1437' : '#ffffff', borderColor: isDark ? '#1a2541' : '#e5e7eb', color: legendColor }} labelStyle={{ color: legendColor }} />
             <Legend content={<LegendContent />} align="center" verticalAlign="top" wrapperStyle={{ fontSize: '10px' }} />
             {barEntries.map((entry) => (
               <Bar

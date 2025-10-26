@@ -44,7 +44,7 @@ export default function DashboardWidgetWrapper({ id, children, onRemove, colSpan
       ref={setNodeRef}
       style={style}
       className={cn(
-        "relative w-full min-w-0 rounded-lg border bg-card text-card-foreground shadow-sm overflow-hidden",
+        "relative w-full min-w-0 rounded-2xl bg-transparent text-card-foreground overflow-visible",
         colSpanClass,
         isDragging && "ring-2 ring-primary ring-offset-2"
       )}

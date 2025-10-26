@@ -1,9 +1,10 @@
 import React from 'react';
-import { Bar, BarChart, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import { Bar, BarChart, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis, CartesianGrid } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useTranslation } from '@/lib/i18n';
 import { iconMapper } from '@/lib/iconMapper'; // Import iconMapper
 import { Button } from '@/components/ui/button';
+import { useAppearance } from '@/hooks/use-appearance';
 
 export interface MonthlyActivityChartProps {
   data: { [key: string]: any }[];
@@ -29,9 +30,11 @@ export default function MonthlyActivityChart({ data, xAxisDataKey = 'name', yAxi
       })
     : data;
 
-  const legendColor = (typeof window !== 'undefined' && document.documentElement.classList.contains('dark'))
-    ? '#ffffff'
-    : '#111827';
+  const { appearance } = useAppearance();
+  const isDark = appearance === 'dark';
+  const legendColor = isDark ? '#e5e7eb' : '#111827';
+  const axisColor = isDark ? '#cbd5e1' : '#6b7280';
+  const gridColor = isDark ? 'rgba(255,255,255,0.08)' : '#e5e7eb';
 
   const LegendContent = ({ payload }: { payload?: any[] }) => (
     <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center', fontSize: 10, color: legendColor }}>
@@ -51,7 +54,7 @@ export default function MonthlyActivityChart({ data, xAxisDataKey = 'name', yAxi
   };
 
   return (
-    <Card className="bg-white dark:bg-[#0b1437] shadow-sm rounded-2xl overflow-hidden h-full border border-gray-100 dark:border-[#1a2541] group hover:shadow-xl hover:border-blue-300 dark:hover:border-blue-600 transition-all duration-300">
+    <Card className="bg-white dark:!bg-[#0b1437] shadow-sm rounded-2xl overflow-hidden h-full border border-gray-100 dark:!border-[#1a2541] group hover:shadow-xl hover:border-blue-300 dark:hover:border-blue-600 transition-all duration-300">
       <CardHeader className="px-4 py-3 flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-lg font-semibold text-gray-800 dark:text-white flex items-center gap-2">
           {IconComponent && <IconComponent className="h-5 w-5 text-muted-foreground" />}
@@ -68,12 +71,13 @@ export default function MonthlyActivityChart({ data, xAxisDataKey = 'name', yAxi
           </div>
         )}
       </CardHeader>
-      <CardContent className="h-[240px] sm:h-[280px] md:h-[320px] min-w-0">
+      <CardContent className="h-[240px] sm:h-[280px] md:h-[320px] min-w-0 bg-white dark:!bg-[#0b1437]">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={processedData} margin={{ top: 12, right: 4, left: 0, bottom: 8 }}>
-            <XAxis dataKey={xAxisDataKey} stroke="#6b7280" tick={{ fontSize: 9 }} interval="preserveEnd" tickFormatter={shortMonth} />
-            <YAxis stroke="#6b7280" tick={{ fontSize: 9 }} width={30} />
-            <Tooltip />
+            <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
+            <XAxis dataKey={xAxisDataKey} stroke={axisColor} tick={{ fontSize: 9, fill: axisColor }} interval="preserveEnd" tickFormatter={shortMonth} />
+            <YAxis stroke={axisColor} tick={{ fontSize: 9, fill: axisColor }} width={30} />
+            <Tooltip contentStyle={{ backgroundColor: isDark ? '#0b1437' : '#ffffff', borderColor: isDark ? '#1a2541' : '#e5e7eb', color: legendColor }} labelStyle={{ color: legendColor }} />
             <Legend content={<LegendContent />} align="center" verticalAlign="top" wrapperStyle={{ fontSize: '10px' }} />
             <Bar
               dataKey={mode === 'growth' ? 'UsersGrowth' : 'Users'}

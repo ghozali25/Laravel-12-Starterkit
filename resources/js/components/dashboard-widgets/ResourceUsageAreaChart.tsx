@@ -1,8 +1,9 @@
 import React from 'react';
-import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useTranslation } from '@/lib/i18n';
 import { iconMapper } from '@/lib/iconMapper'; // Import iconMapper
+import { useAppearance } from '@/hooks/use-appearance';
 
 export interface ResourceUsageAreaChartProps {
   data: { [key: string]: any }[]; // Make data more generic
@@ -15,16 +16,20 @@ export interface ResourceUsageAreaChartProps {
 export default function ResourceUsageAreaChart({ data, xAxisDataKey = 'month', yAxisDataKey1 = 'users', yAxisDataKey2 = 'backups', iconName }: ResourceUsageAreaChartProps) {
   const { t } = useTranslation();
   const IconComponent = iconName ? iconMapper(iconName) : null;
+  const { appearance } = useAppearance();
+  const isDark = appearance === 'dark';
+  const axisColor = isDark ? '#cbd5e1' : '#6b7280';
+  const gridColor = isDark ? 'rgba(255,255,255,0.08)' : '#e5e7eb';
 
   return (
-    <Card className="bg-white dark:bg-[#0b1437] shadow-sm rounded-2xl overflow-hidden h-full border border-gray-100 dark:border-[#1a2541] group hover:shadow-xl hover:border-cyan-300 dark:hover:border-cyan-600 transition-all duration-300">
+    <Card className="bg-white dark:!bg-[#0b1437] shadow-sm rounded-2xl overflow-hidden h-full border border-gray-100 dark:!border-[#1a2541] group hover:shadow-xl hover:border-cyan-300 dark:hover:border-cyan-600 transition-all duration-300">
       <CardHeader className="px-4 py-3 flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-lg font-semibold text-gray-800 dark:text-white flex items-center gap-2">
           {IconComponent && <IconComponent className="h-5 w-5 text-muted-foreground" />}
           {t('Resource Usage')}
         </CardTitle>
       </CardHeader>
-      <CardContent className="h-[240px] sm:h-[280px] md:h-[320px] min-w-0">
+      <CardContent className="h-[240px] sm:h-[280px] md:h-[320px] min-w-0 bg-white dark:!bg-[#0b1437]">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={data} margin={{ top: 12, right: 4, left: 0, bottom: 8 }}>
             <defs>
@@ -37,9 +42,10 @@ export default function ResourceUsageAreaChart({ data, xAxisDataKey = 'month', y
                 <stop offset="100%" stopColor="var(--color-primary, var(--primary))" stopOpacity={0.05} />
               </linearGradient>
             </defs>
-            <XAxis dataKey={xAxisDataKey} stroke="#6b7280" />
-            <YAxis stroke="#6b7280" />
-            <Tooltip />
+            <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
+            <XAxis dataKey={xAxisDataKey} stroke={axisColor} tick={{ fill: axisColor }} />
+            <YAxis stroke={axisColor} tick={{ fill: axisColor }} />
+            <Tooltip contentStyle={{ backgroundColor: isDark ? '#0b1437' : '#ffffff', borderColor: isDark ? '#1a2541' : '#e5e7eb' }} labelStyle={{ color: isDark ? '#e5e7eb' : '#111827' }} />
             <Area type="monotone" dataKey={yAxisDataKey1} stroke="var(--color-primary, var(--primary))" fill="url(#gradArea1)" strokeWidth={2} />
             <Area type="monotone" dataKey={yAxisDataKey2} stroke="var(--color-primary, var(--primary))" strokeOpacity={0.6} fill="url(#gradArea2)" strokeWidth={2} />
           </AreaChart>

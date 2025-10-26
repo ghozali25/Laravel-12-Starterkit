@@ -51,6 +51,14 @@
     --color-sidebar-ring: var(--sidebar-ring);
 }
 
+/* Recharts dark mode background fix */
+.dark .recharts-wrapper {
+    background-color: #0b1437 !important;
+}
+.dark .recharts-surface {
+    background-color: transparent !important;
+}
+
 /*
   The default border color has changed to `currentColor` in Tailwind CSS v4,
   so we've added these compatibility styles to make sure everything still
