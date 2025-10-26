@@ -1,31 +1,26 @@
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { iconMapper } from '@/lib/iconMapper'; // Import iconMapper
+import { iconMapper } from '@/lib/iconMapper';
 
 export interface SummaryCardProps {
   label: string;
   value: number;
-  iconName?: string; // Changed to string
+  iconName?: string;
 }
 
 export default function SummaryCard({ label, value, iconName }: SummaryCardProps) {
-  const IconComponent = iconName ? iconMapper(iconName) : null; // Get the icon component
+  const IconComponent = iconName ? iconMapper(iconName) : null;
 
   return (
-    <Card className="h-full border-0 shadow-none rounded-none bg-transparent">
-      <CardHeader 
-        className="!flex !flex-col !items-center !text-center px-3 py-2 sm:px-4 sm:py-3 !space-y-0 pb-2 !gap-1"
-      >
-        {IconComponent && <IconComponent className="h-5 w-5 text-muted-foreground shrink-0" />}
-        <CardTitle 
-          className="!text-xs sm:!text-sm font-medium text-gray-800 dark:text-white !text-center !leading-tight !w-full line-clamp-2"
-        >
-          {label}
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="px-3 py-1 sm:px-4 sm:py-2 !text-center">
-        <div className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100">{value}</div>
-      </CardContent>
-    </Card>
+    <div className="h-full w-full flex flex-col items-center justify-center text-center p-4 gap-2 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+      {IconComponent && (
+        <IconComponent className="h-6 w-6 sm:h-7 sm:w-7 text-gray-500 dark:text-gray-400 shrink-0" />
+      )}
+      <h3 className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 leading-tight max-w-full px-2 line-clamp-2">
+        {label}
+      </h3>
+      <p className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 dark:text-white">
+        {value}
+      </p>
+    </div>
   );
 }
