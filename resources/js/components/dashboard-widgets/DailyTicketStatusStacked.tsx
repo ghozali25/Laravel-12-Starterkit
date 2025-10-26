@@ -47,7 +47,7 @@ export default function DailyTicketStatusStacked({ data, title, iconName }: Dail
           {title ?? t('Daily Ticket Status (This Month)')}
         </CardTitle>
       </CardHeader>
-      <CardContent className="h-[260px] sm:h-[300px] min-w-[320px] sm:min-w-0">
+      <CardContent className="h-[260px] sm:h-[300px] min-w-0">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={filteredData} margin={{ top: 12, right: 16, left: 8, bottom: 8 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />

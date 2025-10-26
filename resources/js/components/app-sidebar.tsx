@@ -6,6 +6,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  useSidebar,
 } from '@/components/ui/sidebar';
 import { usePage, Link } from '@inertiajs/react';
 import AppLogo from './app-logo';
@@ -33,9 +34,15 @@ interface RenderMenuProps {
   toggleMenu: (id: number) => void;
 }
 
-function RenderMenu({ items, level = 0, openMenus, toggleMenu }: RenderMenuProps) {
+interface RenderMenuPropsExtended extends RenderMenuProps {
+  onExpandRequest?: (menuId: number) => void;
+}
+
+function RenderMenu({ items, level = 0, openMenus, toggleMenu, onExpandRequest }: RenderMenuPropsExtended) {
   const { url: currentUrl } = usePage();
   const { t } = useTranslation();
+  const { state, isMobile } = useSidebar();
+  const isCollapsed = state === 'collapsed' && !isMobile;
 
   if (!Array.isArray(items)) return null;
 
@@ -60,20 +67,28 @@ function RenderMenu({ items, level = 0, openMenus, toggleMenu }: RenderMenuProps
             {hasChildren ? (
               <>
                 <SidebarMenuButton
-                  onClick={() => toggleMenu(menu.id)}
+                  onClick={() => {
+                    if (isCollapsed && onExpandRequest) {
+                      // Request sidebar expand and defer submenu opening
+                      onExpandRequest(menu.id);
+                    } else {
+                      toggleMenu(menu.id);
+                    }
+                  }}
+                  tooltip={t(menu.title)}
                   className={cn(
                     `group flex items-center justify-between rounded-md cursor-pointer transition-colors ${indentClass}`,
                     activeClass,
                     level === 0 ? 'py-3 px-4 my-1' : 'py-2 px-3'
                   )}
                 >
-                  <div className="flex items-center">
-                    <Icon className="size-4 mr-3 opacity-80 group-hover:opacity-100" />
-                    <span>{t(menu.title)}</span>
+                  <div className="flex items-center w-full">
+                    <Icon className="size-4 opacity-80 group-hover:opacity-100" />
+                    <span className="ml-3 group-data-[collapsible=icon]:hidden">{t(menu.title)}</span>
                   </div>
                   <ChevronDown
                     className={cn(
-                      'size-4 opacity-50 transition-transform duration-200',
+                      'size-4 opacity-50 transition-transform duration-200 group-data-[collapsible=icon]:hidden',
                       openMenus[menu.id] ? 'rotate-180' : 'rotate-0'
                     )}
                   />
@@ -87,24 +102,25 @@ function RenderMenu({ items, level = 0, openMenus, toggleMenu }: RenderMenuProps
                   )}
                 >
                   <SidebarMenu className="ml-2 border-l border-muted pl-2">
-                    <RenderMenu items={children} level={level + 1} openMenus={openMenus} toggleMenu={toggleMenu} />
+                    <RenderMenu items={children} level={level + 1} openMenus={openMenus} toggleMenu={toggleMenu} onExpandRequest={onExpandRequest} />
                   </SidebarMenu>
                 </div>
               </>
             ) : (
               <SidebarMenuButton
                 asChild
+                tooltip={t(menu.title)}
                 className={cn(
                   `group flex items-center rounded-md transition-colors ${indentClass}`,
                   activeClass,
                   level === 0 ? 'py-3 px-4 my-1' : 'py-2 px-3'
                 )}
               >
-                <Link href={menu.route || '#'}>
-                  <Icon className="size-4 mr-3 opacity-80 group-hover:opacity-100" />
-                  <span>{t(menu.title)}</span>
+                <Link href={menu.route || '#'} className="flex items-center w-full">
+                  <Icon className="size-4 opacity-80 group-hover:opacity-100" />
+                  <span className="ml-3 group-data-[collapsible=icon]:hidden">{t(menu.title)}</span>
                   {level > 0 && (
-                    <ChevronRight className="ml-auto size-4 opacity-0 group-hover:opacity-50" />
+                    <ChevronRight className="ml-auto size-4 opacity-0 group-hover:opacity-50 group-data-[collapsible=icon]:hidden" />
                   )}
                 </Link>
               </SidebarMenuButton>
@@ -119,7 +135,9 @@ function RenderMenu({ items, level = 0, openMenus, toggleMenu }: RenderMenuProps
 export function AppSidebar() {
   const { menus = [] } = usePage().props as { menus?: MenuItem[] };
   const { t } = useTranslation();
+  const { state, setOpen } = useSidebar();
   const [openMenus, setOpenMenus] = useState<Record<number, boolean>>({});
+  const [pendingMenuId, setPendingMenuId] = useState<number | null>(null);
 
   const toggleMenu = useCallback((id: number) => {
     setOpenMenus((prev) => ({
@@ -127,6 +145,16 @@ export function AppSidebar() {
       [id]: !prev[id],
     }));
   }, []);
+
+  // Auto-open submenu after sidebar expands
+  useEffect(() => {
+    if (state === 'expanded' && pendingMenuId !== null) {
+      setTimeout(() => {
+        setOpenMenus((prev) => ({ ...prev, [pendingMenuId]: true }));
+        setPendingMenuId(null);
+      }, 100);
+    }
+  }, [state, pendingMenuId]);
 
   const footerNavItems = [
     {
@@ -156,7 +184,15 @@ export function AppSidebar() {
 
       <SidebarContent className="px-2 py-4">
         <SidebarMenu>
-          <RenderMenu items={menus} openMenus={openMenus} toggleMenu={toggleMenu} />
+          <RenderMenu 
+            items={menus} 
+            openMenus={openMenus} 
+            toggleMenu={toggleMenu}
+            onExpandRequest={(menuId) => {
+              setOpen(true);
+              setPendingMenuId(menuId);
+            }}
+          />
         </SidebarMenu>
       </SidebarContent>
 

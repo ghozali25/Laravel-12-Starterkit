@@ -3,6 +3,7 @@ import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recha
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useTranslation } from '@/lib/i18n';
 import { iconMapper } from '@/lib/iconMapper'; // Import iconMapper
+import { useIsMobile } from '@/hooks/use-mobile';
 
 export interface UserRolesPieChartProps {
   data: { name: string; value: number; color: string }[];
@@ -13,13 +14,14 @@ export interface UserRolesPieChartProps {
 export default function UserRolesPieChart({ data, title, iconName }: UserRolesPieChartProps) {
   const { t } = useTranslation();
   const IconComponent = iconName ? iconMapper(iconName) : null;
+  const isMobile = useIsMobile();
 
   const legendColor = (typeof window !== 'undefined' && document.documentElement.classList.contains('dark'))
     ? '#ffffff'
     : '#111827';
 
   const LegendContent = ({ payload }: { payload?: any[] }) => (
-    <div style={{ width: '100%', display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center', fontSize: 10, color: legendColor }}>
+    <div style={{ width: '100%', display: 'flex', gap: isMobile ? 8 : 12, flexWrap: 'wrap', justifyContent: 'center', fontSize: isMobile ? 9 : 10, color: legendColor }}>
       {(payload || []).map((entry: any, index: number) => (
         <div key={`item-${index}`} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           <span style={{ display: 'inline-block', width: 10, height: 10, background: entry.color || 'var(--primary)', borderRadius: 9999 }} />
@@ -37,7 +39,7 @@ export default function UserRolesPieChart({ data, title, iconName }: UserRolesPi
           {title || t('User Roles')}
         </CardTitle>
       </CardHeader>
-      <CardContent className="h-[300px] flex items-center justify-center">
+      <CardContent className="h-[220px] sm:h-[300px] flex items-center justify-center">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart margin={{ top: 8, right: 8, bottom: 28, left: 8 }}>
             <Pie
@@ -45,8 +47,8 @@ export default function UserRolesPieChart({ data, title, iconName }: UserRolesPi
               dataKey="value"
               nameKey="name"
               cx="50%"
-              cy="45%"
-              outerRadius="65%"
+              cy={isMobile ? '42%' : '45%'}
+              outerRadius={isMobile ? '55%' : '65%'}
               label={false}
               labelLine={false}
             >

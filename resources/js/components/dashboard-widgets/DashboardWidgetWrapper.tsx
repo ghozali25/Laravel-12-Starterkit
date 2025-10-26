@@ -36,14 +36,14 @@ export default function DashboardWidgetWrapper({ id, children, onRemove, colSpan
     opacity: isDragging ? 0.8 : 1,
   };
 
-  const colSpanClass = `lg:col-span-${colSpan}`;
+  const colSpanClass = `col-span-1 lg:col-span-${colSpan}`;
 
   return (
     <div
       ref={setNodeRef}
       style={style}
       className={cn(
-        "relative rounded-lg border bg-card text-card-foreground shadow-sm overflow-hidden",
+        "relative w-full min-w-0 rounded-lg border bg-card text-card-foreground shadow-sm overflow-hidden",
         colSpanClass,
         isDragging && "ring-2 ring-primary ring-offset-2"
       )}
@@ -89,7 +89,7 @@ export default function DashboardWidgetWrapper({ id, children, onRemove, colSpan
           </Button>
       </div>
 
-      <div className="group p-3 sm:p-4 overflow-x-auto">
+      <div className="group p-3 sm:p-4">
         {children}
       </div>
     </div>

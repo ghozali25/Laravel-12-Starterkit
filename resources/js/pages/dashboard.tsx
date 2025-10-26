@@ -611,18 +611,22 @@ export default function Dashboard(props: DashboardProps) {
 
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
           <SortableContext items={widgets.map((w) => w.id)} strategy={rectSortingStrategy}>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-6">
-              {widgets.map((widget) => (
-                <DashboardWidgetWrapper
-                  key={String(widget.id)}
-                  id={widget.id}
-                  colSpan={widget.colSpan}
-                  onRemove={handleRemoveWidget}
-                  onColSpanChange={handleColSpanChange}
-                >
-                  {renderWidgetComponent(widget)}
-                </DashboardWidgetWrapper>
-              ))}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-6 min-w-0">
+              {widgets.map((widget) => {
+                const content = renderWidgetComponent(widget);
+                if (!content) return null;
+                return (
+                  <DashboardWidgetWrapper
+                    key={String(widget.id)}
+                    id={widget.id}
+                    colSpan={widget.colSpan}
+                    onRemove={handleRemoveWidget}
+                    onColSpanChange={handleColSpanChange}
+                  >
+                    {content}
+                  </DashboardWidgetWrapper>
+                );
+              })}
             </div>
           </SortableContext>
         </DndContext>

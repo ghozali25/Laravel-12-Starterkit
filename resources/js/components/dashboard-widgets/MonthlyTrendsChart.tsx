@@ -39,7 +39,7 @@ export default function MonthlyTrendsChart({ data, xAxisDataKey = 'name', yAxisD
           {t('Monthly Trends')}
         </CardTitle>
       </CardHeader>
-      <CardContent className="h-[300px]">
+      <CardContent className="h-[240px] sm:h-[300px]">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={data} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
             <XAxis dataKey={xAxisDataKey} stroke="#6b7280" />

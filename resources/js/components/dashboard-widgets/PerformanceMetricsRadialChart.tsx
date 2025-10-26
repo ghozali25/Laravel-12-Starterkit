@@ -21,7 +21,7 @@ export default function PerformanceMetricsRadialChart({ data, iconName }: Perfor
           {t('Performance Metrics')}
         </CardTitle>
       </CardHeader>
-      <CardContent className="h-[300px]">
+      <CardContent className="h-[240px] sm:h-[300px]">
         <ResponsiveContainer width="100%" height="100%">
           <RadialBarChart
             innerRadius="30%"

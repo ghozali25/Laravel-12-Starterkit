@@ -37,7 +37,7 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
     });
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
     const [originalFile, setOriginalFile] = useState<File | null>(null);
-    const [crop, setCrop] = useState<Crop>({ unit: '%', x: 25, y: 25, width: 50, height: 50, aspect: 1 });
+    const [crop, setCrop] = useState<Crop>({ unit: '%', x: 25, y: 25, width: 50, height: 50 });
     const [pixelCrop, setPixelCrop] = useState<PixelCrop | null>(null);
     const [showCropper, setShowCropper] = useState(false);
 
