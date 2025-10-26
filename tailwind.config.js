@@ -1,6 +1,12 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   darkMode: ["class"],
+  safelist: [
+    'dark:bg-navy-800',
+    'dark:bg-navy-700',
+    'dark:border-navy-700',
+    'dark:border-navy-600',
+  ],
   content: [
     './vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php',
     './storage/framework/views/*.php',
@@ -26,6 +32,18 @@ module.exports = {
     },
     extend: {
       colors: {
+        navy: {
+          50: '#e6eaf3',
+          100: '#ccd5e7',
+          200: '#99abcf',
+          300: '#6681b7',
+          400: '#33579f',
+          500: '#002d87',
+          600: '#00246c',
+          700: '#001b51',
+          800: '#0b1437', // Main dark navy for cards
+          900: '#000d1b',
+        },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",

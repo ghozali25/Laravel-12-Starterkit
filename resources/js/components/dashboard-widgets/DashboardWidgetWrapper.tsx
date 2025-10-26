@@ -36,11 +36,8 @@ export default function DashboardWidgetWrapper({ id, children, onRemove, colSpan
     opacity: isDragging ? 0.8 : 1,
   };
 
-  // Mobile: summary cards (colSpan=1) take 1 col, charts (colSpan>1) take full width
-  // Desktop: use actual colSpan
-  const colSpanClass = colSpan === 1 
-    ? `col-span-1 lg:col-span-1`
-    : `col-span-2 sm:col-span-2 md:col-span-${Math.min(colSpan, 3)} lg:col-span-${colSpan}`;
+  // Dynamic column spans - max 6 columns in grid
+  const colSpanClass = `col-span-1 sm:col-span-${Math.min(colSpan, 2)} lg:col-span-${Math.min(colSpan, 3)} xl:col-span-${Math.min(colSpan, 6)}`;
 
   return (
     <div
@@ -93,7 +90,7 @@ export default function DashboardWidgetWrapper({ id, children, onRemove, colSpan
           </Button>
       </div>
 
-      <div className="group p-3 sm:p-4">
+      <div className="h-full">
         {children}
       </div>
     </div>

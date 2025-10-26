@@ -6,7 +6,7 @@ import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, us
 import { arrayMove, SortableContext, rectSortingStrategy } from '@dnd-kit/sortable';
 import { useTranslation } from '@/lib/i18n';
 import { Button } from '@/components/ui/button';
-import { Plus, Users, HardDrive, Activity, LineChart, BarChart, PieChart, Radar, Building2, Tags, Package, Gauge, TrendingUp, ShieldCheck, Headphones, AlertTriangle, CheckCircle, Clock, AlertCircle } from 'lucide-react'; // Added ticket icons
+import { Plus, Users, HardDrive, Activity, LineChart, BarChart, PieChart, Radar, Building2, Tags, Package, TrendingUp, ShieldCheck, Headphones, AlertTriangle, CheckCircle, Clock, AlertCircle } from 'lucide-react'; // Added ticket icons
 import {
   Dialog,
   DialogContent,
@@ -34,7 +34,6 @@ import DailyTicketStatusStacked from '@/components/dashboard-widgets/DailyTicket
 import MonthlyTrendsChart, { MonthlyTrendsChartProps } from '@/components/dashboard-widgets/MonthlyTrendsChart';
 import UserRolesPieChart, { UserRolesPieChartProps } from '@/components/dashboard-widgets/UserRolesPieChart';
 import ResourceUsageAreaChart, { ResourceUsageAreaChartProps } from '@/components/dashboard-widgets/ResourceUsageAreaChart';
-import PerformanceMetricsRadialChart, { PerformanceMetricsRadialChartProps } from '@/components/dashboard-widgets/PerformanceMetricsRadialChart';
 import SummaryCard, { SummaryCardProps }
 from '@/components/dashboard-widgets/SummaryCard';
 import DashboardWidgetWrapper from '@/components/dashboard-widgets/DashboardWidgetWrapper';
@@ -89,18 +88,30 @@ interface DashboardData {
   dailyTicketStatusData?: Array<{ date: string; day: number; open: number; in_progress: number; resolved: number; closed: number; cancelled: number }>;
 }
 
-// Dummy data for PerformanceMetricsRadialChart (as it's harder to get real-time system metrics)
-const dummyRadialData = [
-  { name: 'CPU Usage', value: 85, fill: '#8884d8' },
-  { name: 'Memory Usage', value: 70, fill: '#83a6ed' },
-  { name: 'Disk I/O', value: 60, fill: '#8dd1e1' },
-];
+// All data now comes from backend - no dummy data
+
+// Helper function to calculate growth percentage based on monthly data
+const calculateGrowth = (monthlyData: any[], key: string): number | undefined => {
+  if (!monthlyData || monthlyData.length < 2) return undefined;
+  
+  const lastMonth = monthlyData[monthlyData.length - 1]?.[key] ?? 0;
+  const prevMonth = monthlyData[monthlyData.length - 2]?.[key] ?? 0;
+  
+  if (prevMonth === 0) return lastMonth > 0 ? 100 : 0;
+  return ((lastMonth - prevMonth) / prevMonth) * 100;
+};
 
 const widgetComponents: WidgetComponentsMap = {
   SummaryCardUsers: {
     component: SummaryCard,
     label: 'Summary Card (Employees)',
-    getInitialProps: (t, data) => ({ label: t('Employees'), value: data?.totalEmployees ?? 0, iconName: 'Users' }),
+    getInitialProps: (t, data) => ({ 
+      label: t('Employees'), 
+      value: data?.totalEmployees ?? 0, 
+      iconName: 'Users',
+      growth: calculateGrowth(data?.monthlyData ?? [], 'users'),
+      showGrowth: true
+    }),
     defaultColSpan: 1,
     icon: <Users className="h-5 w-5" />,
   },
@@ -135,70 +146,93 @@ const widgetComponents: WidgetComponentsMap = {
   SummaryCardBackups: {
     component: SummaryCard,
     label: 'Summary Card (Backups)',
-    getInitialProps: (t, data) => ({ label: t('Backups'), value: data?.totalBackups ?? 0, iconName: 'HardDrive' }),
+    getInitialProps: (t, data) => ({ 
+      label: t('Backups'), 
+      value: data?.totalBackups ?? 0, 
+      iconName: 'HardDrive',
+      growth: calculateGrowth(data?.monthlyData ?? [], 'backups'),
+      showGrowth: true
+    }),
     defaultColSpan: 1,
     icon: <HardDrive className="h-5 w-5" />,
   },
   SummaryCardActivityLogs: {
     component: SummaryCard,
     label: 'Summary Card (Activity Logs)',
-    getInitialProps: (t, data) => ({ label: t('Activity Logs'), value: data?.totalActivityLogs ?? 0, iconName: 'Activity' }),
+    getInitialProps: (t, data) => ({ 
+      label: t('Activity Logs'), 
+      value: data?.totalActivityLogs ?? 0, 
+      iconName: 'Activity',
+      showGrowth: false
+    }),
     defaultColSpan: 1,
     icon: <Activity className="h-5 w-5" />,
   },
   SummaryCardDivisions: { // New Summary Card
     component: SummaryCard,
     label: 'Summary Card (Divisions)',
-    getInitialProps: (t, data) => ({ label: t('Total Divisions'), value: data?.totalDivisions ?? 0, iconName: 'Building2' }),
+    getInitialProps: (t, data) => ({ label: t('Total Divisions'), value: data?.totalDivisions ?? 0, iconName: 'Building2', showGrowth: false }),
     defaultColSpan: 1,
     icon: <Building2 className="h-5 w-5" />,
   },
   SummaryCardAssetCategories: { // New Summary Card
     component: SummaryCard,
     label: 'Summary Card (Asset Categories)',
-    getInitialProps: (t, data) => ({ label: t('Total Asset Categories'), value: data?.totalAssetCategories ?? 0, iconName: 'Tags' }),
+    getInitialProps: (t, data) => ({ label: t('Total Asset Categories'), value: data?.totalAssetCategories ?? 0, iconName: 'Tags', showGrowth: false }),
     defaultColSpan: 1,
     icon: <Tags className="h-5 w-5" />,
   },
   SummaryCardTotalAssets: { // New Summary Card
     component: SummaryCard,
     label: 'Summary Card (Total Assets)',
-    getInitialProps: (t, data) => ({ label: t('Total Assets'), value: data?.totalAssets ?? 0, iconName: 'Package' }),
+    getInitialProps: (t, data) => ({ 
+      label: t('Total Assets'), 
+      value: data?.totalAssets ?? 0, 
+      iconName: 'Package',
+      growth: calculateGrowth(data?.monthlyData ?? [], 'assets'),
+      showGrowth: true
+    }),
     defaultColSpan: 1,
     icon: <Package className="h-5 w-5" />,
   },
   SummaryCardTotalTickets: { // New Summary Card for Tickets
     component: SummaryCard,
     label: 'Summary Card (Total Tickets)',
-    getInitialProps: (t, data) => ({ label: t('Total Tickets'), value: data?.totalTickets ?? 0, iconName: 'Headphones' }),
+    getInitialProps: (t, data) => ({ 
+      label: t('Total Tickets'), 
+      value: data?.totalTickets ?? 0, 
+      iconName: 'Headphones',
+      growth: calculateGrowth(data?.monthlyData ?? [], 'tickets'),
+      showGrowth: true
+    }),
     defaultColSpan: 1,
     icon: <Headphones className="h-5 w-5" />,
   },
   SummaryCardOpenTickets: { // New Summary Card for Open Tickets
     component: SummaryCard,
     label: 'Summary Card (Open Tickets)',
-    getInitialProps: (t, data) => ({ label: t('Open Tickets'), value: data?.openTickets ?? 0, iconName: 'AlertCircle' }),
+    getInitialProps: (t, data) => ({ label: t('Open Tickets'), value: data?.openTickets ?? 0, iconName: 'AlertCircle', showGrowth: false }),
     defaultColSpan: 1,
     icon: <AlertCircle className="h-5 w-5" />,
   },
   SummaryCardInProgressTickets: { // New Summary Card for In Progress Tickets
     component: SummaryCard,
     label: 'Summary Card (In Progress Tickets)',
-    getInitialProps: (t, data) => ({ label: t('In Progress'), value: data?.inProgressTickets ?? 0, iconName: 'Clock' }),
+    getInitialProps: (t, data) => ({ label: t('In Progress'), value: data?.inProgressTickets ?? 0, iconName: 'Clock', showGrowth: false }),
     defaultColSpan: 1,
     icon: <Clock className="h-5 w-5" />,
   },
   SummaryCardResolvedTickets: { // New Summary Card for Resolved Tickets
     component: SummaryCard,
     label: 'Summary Card (Resolved Tickets)',
-    getInitialProps: (t, data) => ({ label: t('Resolved'), value: data?.resolvedTickets ?? 0, iconName: 'CheckCircle' }),
+    getInitialProps: (t, data) => ({ label: t('Resolved'), value: data?.resolvedTickets ?? 0, iconName: 'CheckCircle', showGrowth: false }),
     defaultColSpan: 1,
     icon: <CheckCircle className="h-5 w-5" />,
   },
   SummaryCardUrgentTickets: { // New Summary Card for Urgent Tickets
     component: SummaryCard,
     label: 'Summary Card (Urgent Tickets)',
-    getInitialProps: (t, data) => ({ label: t('Urgent Tickets'), value: data?.urgentTickets ?? 0, iconName: 'AlertTriangle' }),
+    getInitialProps: (t, data) => ({ label: t('Urgent Tickets'), value: data?.urgentTickets ?? 0, iconName: 'AlertTriangle', showGrowth: false }),
     defaultColSpan: 1,
     icon: <AlertTriangle className="h-5 w-5" />,
   },
@@ -298,13 +332,8 @@ const widgetComponents: WidgetComponentsMap = {
     defaultColSpan: 3, // Adjusted for 6-column layout
     icon: <Radar className="h-5 w-5" />,
   },
-  PerformanceMetricsRadialChart: {
-    component: PerformanceMetricsRadialChart,
-    label: 'Performance Metrics Radial Chart',
-    getInitialProps: (t, data) => ({ data: dummyRadialData, iconName: 'Gauge' }), // Still dummy as real-time system metrics are complex, added icon
-    defaultColSpan: 2, // Adjusted for 6-column layout
-    icon: <Gauge className="h-5 w-5" />,
-  },
+  // Removed PerformanceMetricsRadialChart - was using dummy data
+  // All widgets now use real data from backend
 };
 
 // Type for a widget instance on the dashboard using a discriminated union
@@ -522,7 +551,7 @@ export default function Dashboard(props: DashboardProps) {
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
       <Head title={t('Dashboard')} />
-      <div className="flex flex-col gap-6 p-4">
+      <div className="flex flex-col gap-6">
         <div className="flex justify-end">
           <Dialog open={isAddWidgetDialogOpen} onOpenChange={(open) => {
             setIsAddWidgetDialogOpen(open);
@@ -614,7 +643,7 @@ export default function Dashboard(props: DashboardProps) {
 
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
           <SortableContext items={widgets.map((w) => w.id)} strategy={rectSortingStrategy}>
-            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4 md:gap-6 min-w-0">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 md:gap-5 min-w-0">
               {widgets.map((widget) => {
                 const content = renderWidgetComponent(widget);
                 if (!content) return null;

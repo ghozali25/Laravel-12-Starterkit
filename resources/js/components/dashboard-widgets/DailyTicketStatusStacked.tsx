@@ -40,7 +40,7 @@ export default function DailyTicketStatusStacked({ data, title, iconName }: Dail
   ];
 
   return (
-    <Card className="bg-white dark:bg-gray-800 shadow-md rounded-lg overflow-hidden h-full">
+    <Card className="bg-white dark:bg-[#0b1437] shadow-sm rounded-2xl overflow-hidden h-full border border-gray-100 dark:border-[#1a2541] group hover:shadow-xl hover:border-purple-300 dark:hover:border-purple-600 transition-all duration-300">
       <CardHeader className="px-4 py-3 flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-lg font-semibold text-gray-800 dark:text-white flex items-center gap-2">
           {IconComponent && <IconComponent className="h-5 w-5 text-muted-foreground" />}
