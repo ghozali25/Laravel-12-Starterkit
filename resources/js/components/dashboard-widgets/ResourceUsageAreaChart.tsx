@@ -27,7 +27,7 @@ export interface ResourceUsageAreaChartProps {
   iconName?: string; // New prop for icon
 }
 
-export default function ResourceUsageAreaChart({ data, xAxisDataKey = 'month', yAxisDataKey1 = 'users', yAxisDataKey2 = 'backups', iconName }: ResourceUsageAreaChartProps) {
+export default function ResourceUsageAreaChart({ data, xAxisDataKey = 'month', yAxisDataKey1 = 'users', yAxisDataKey2 = 'backups', iconName = 'Insights' }: ResourceUsageAreaChartProps) {
   const { t } = useTranslation();
   const IconComponent = iconName ? iconMapper(iconName) : null;
   const { appearance } = useAppearance();
