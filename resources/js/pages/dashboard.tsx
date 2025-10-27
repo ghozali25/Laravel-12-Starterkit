@@ -136,8 +136,8 @@ const widgetComponents: WidgetComponentsMap = {
       series: [
         { key: 'Tickets', type: 'bar', color: '#3b82f6' },
         { key: 'Users', type: 'line', color: '#22c55e' }, // Users = Employees (non-admin)
-        { key: 'Assets', type: 'line', color: '#a78bfa' },
-        { key: 'Backups', type: 'line', color: '#f59e0b' },
+        //{ key: 'Assets', type: 'line', color: '#a78bfa' },
+        //{ key: 'Backups', type: 'line', color: '#f59e0b' },
       ],
     }),
     defaultColSpan: 3,
