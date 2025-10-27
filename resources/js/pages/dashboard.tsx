@@ -120,7 +120,7 @@ const widgetComponents: WidgetComponentsMap = {
     label: 'Daily Ticket Status (This Month)',
     getInitialProps: (t, data) => ({
       data: data?.dailyTicketStatusData ?? [],
-      iconName: 'BarChart3',
+      iconName: 'BarChart',
       title: t('Daily Ticket Status (This Month)'),
     }),
     defaultColSpan: 3,
@@ -241,7 +241,7 @@ const widgetComponents: WidgetComponentsMap = {
     label: 'Employees (Monthly Total)',
     getInitialProps: (t, data) => ({
       data: data?.monthlyData ?? [],
-      iconName: 'BarChart3',
+      iconName: 'BarChart',
       xAxisDataKey: 'name',
       yAxisDataKey1: 'Users',
       yAxisDataKey2: '',
@@ -319,7 +319,7 @@ const widgetComponents: WidgetComponentsMap = {
     label: 'Resource Usage Area Chart',
     getInitialProps: (t, data) => ({
       data: data?.monthlyData?.map(d => ({ month: d.name, users: d.Users, backups: d.Backups, assets: d.Assets })) ?? [], // Updated
-      iconName: 'ActivitySquare',
+      iconName: 'Insights',
       xAxisDataKey: 'month',
       yAxisDataKey1: 'users',
       yAxisDataKey2: 'backups',

@@ -113,7 +113,13 @@ export default function DailyTicketStatusStacked({ data, title, iconName }: Dail
     >
       <CardHeader className={`px-4 py-3 flex flex-row items-center justify-between space-y-0 pb-2 ${isDark ? 'bg-[#0b1437]' : 'bg-white'}`}>
         <CardTitle className={`text-lg font-semibold flex items-center gap-2 ${isDark ? 'text-white' : 'text-gray-800'}`}>
-          {IconComponent && <IconComponent className="h-5 w-5 text-muted-foreground transition-transform duration-300 group-hover:scale-110" />}
+          {IconComponent && (
+            <div className={`flex-shrink-0 p-2 rounded-xl shadow-lg transition-transform duration-300 group-hover:scale-110 
+              ${isDark ? 'bg-gradient-to-br from-blue-600 to-blue-700 shadow-blue-500/30' : 'bg-gradient-to-br from-blue-500 to-blue-600 shadow-blue-500/30'}`}
+            >
+              <IconComponent className="h-5 w-5 text-white" />
+            </div>
+          )}
           {title ?? t('Daily Ticket Status (This Month)')}
         </CardTitle>
       </CardHeader>
