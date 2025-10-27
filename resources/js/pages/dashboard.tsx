@@ -109,7 +109,7 @@ const widgetComponents: WidgetComponentsMap = {
       label: t('Employees'), 
       value: data?.totalEmployees ?? 0, 
       iconName: 'Users',
-      growth: calculateGrowth(data?.monthlyData ?? [], 'users'),
+      growth: calculateGrowth(data?.monthlyData ?? [], 'Users'),
       showGrowth: true
     }),
     defaultColSpan: 1,
@@ -150,7 +150,7 @@ const widgetComponents: WidgetComponentsMap = {
       label: t('Backups'), 
       value: data?.totalBackups ?? 0, 
       iconName: 'HardDrive',
-      growth: calculateGrowth(data?.monthlyData ?? [], 'backups'),
+      growth: calculateGrowth(data?.monthlyData ?? [], 'Backups'),
       showGrowth: true
     }),
     defaultColSpan: 1,
@@ -163,7 +163,8 @@ const widgetComponents: WidgetComponentsMap = {
       label: t('Activity Logs'), 
       value: data?.totalActivityLogs ?? 0, 
       iconName: 'Activity',
-      showGrowth: false
+      growth: calculateGrowth(data?.monthlyData ?? [], 'ActivityLogs'),
+      showGrowth: true
     }),
     defaultColSpan: 1,
     icon: <Activity className="h-5 w-5" />,
@@ -171,14 +172,26 @@ const widgetComponents: WidgetComponentsMap = {
   SummaryCardDivisions: { // New Summary Card
     component: SummaryCard,
     label: 'Summary Card (Divisions)',
-    getInitialProps: (t, data) => ({ label: t('Total Divisions'), value: data?.totalDivisions ?? 0, iconName: 'Building2', showGrowth: false }),
+    getInitialProps: (t, data) => ({ 
+      label: t('Total Divisions'), 
+      value: data?.totalDivisions ?? 0, 
+      iconName: 'Building2', 
+      growth: calculateGrowth(data?.monthlyData ?? [], 'Divisions'),
+      showGrowth: true 
+    }),
     defaultColSpan: 1,
     icon: <Building2 className="h-5 w-5" />,
   },
   SummaryCardAssetCategories: { // New Summary Card
     component: SummaryCard,
     label: 'Summary Card (Asset Categories)',
-    getInitialProps: (t, data) => ({ label: t('Total Asset Categories'), value: data?.totalAssetCategories ?? 0, iconName: 'Tags', showGrowth: false }),
+    getInitialProps: (t, data) => ({ 
+      label: t('Total Asset Categories'), 
+      value: data?.totalAssetCategories ?? 0, 
+      iconName: 'Tags', 
+      growth: calculateGrowth(data?.monthlyData ?? [], 'AssetCategories'),
+      showGrowth: true 
+    }),
     defaultColSpan: 1,
     icon: <Tags className="h-5 w-5" />,
   },
@@ -189,7 +202,7 @@ const widgetComponents: WidgetComponentsMap = {
       label: t('Total Assets'), 
       value: data?.totalAssets ?? 0, 
       iconName: 'Package',
-      growth: calculateGrowth(data?.monthlyData ?? [], 'assets'),
+      growth: calculateGrowth(data?.monthlyData ?? [], 'Assets'),
       showGrowth: true
     }),
     defaultColSpan: 1,
@@ -202,7 +215,7 @@ const widgetComponents: WidgetComponentsMap = {
       label: t('Total Tickets'), 
       value: data?.totalTickets ?? 0, 
       iconName: 'Headphones',
-      growth: calculateGrowth(data?.monthlyData ?? [], 'tickets'),
+      growth: calculateGrowth(data?.monthlyData ?? [], 'Tickets'),
       showGrowth: true
     }),
     defaultColSpan: 1,

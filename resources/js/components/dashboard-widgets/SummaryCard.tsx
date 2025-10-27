@@ -40,9 +40,11 @@ export default function SummaryCard({
   const IconComponent = iconName ? iconMapper(iconName) : null;
   const isPositive = growth !== undefined && growth >= 0;
 
+  const labelIsLong = label && label.length > 18;
+
   return (
     <div
-      className={`summary-card relative h-full w-full flex items-start gap-4 p-5 rounded-2xl shadow-sm border overflow-hidden hover:shadow-2xl hover:scale-[1.02] transition-all duration-300
+      className={`summary-card relative h-full w-full flex items-center gap-4 p-5 rounded-2xl shadow-sm border overflow-hidden hover:shadow-2xl hover:scale-[1.02] transition-all duration-300
         ${isDark
           ? 'bg-[#0b1437] border-[#1a2541] hover:border-blue-500'
           : 'bg-white border-gray-100 hover:border-blue-400'}`}
@@ -62,61 +64,60 @@ export default function SummaryCard({
       {/* Content */}
       <div className="flex-1 min-w-0 flex flex-col gap-1">
         <p
-          className={`text-sm font-medium ${
+          className={`font-medium ${
             isDark ? 'text-gray-400' : 'text-gray-600'
-          }`}
+          } ${labelIsLong ? 'text-[12px]' : 'text-sm'} whitespace-nowrap overflow-hidden text-ellipsis`}
+          title={label}
         >
           {label}
         </p>
 
-        <h3
-          className={`text-2xl sm:text-3xl font-bold ${
-            isDark ? 'text-white' : 'text-gray-900'
-          }`}
-        >
-          {value.toLocaleString()}
-        </h3>
+        <div className="flex items-baseline gap-2">
+          <h3
+            className={`text-2xl sm:text-3xl font-bold ${
+              isDark ? 'text-white' : 'text-gray-900'
+            }`}
+          >
+            {value.toLocaleString()}
+          </h3>
 
-        {/* Growth indicator */}
+          {showGrowth && growth !== undefined && (
+            <div className="flex items-center gap-1 text-[10px]">
+              {isPositive ? (
+                <TrendingUp
+                  className={`h-3 w-3 ${
+                    isDark ? 'text-green-400' : 'text-green-600'
+                  }`}
+                />
+              ) : (
+                <TrendingDown
+                  className={`h-3 w-3 ${
+                    isDark ? 'text-red-400' : 'text-red-600'
+                  }`}
+                />
+              )}
+              <span
+                className={`font-semibold ${
+                  isPositive
+                    ? isDark
+                      ? 'text-green-400'
+                      : 'text-green-600'
+                    : isDark
+                    ? 'text-red-400'
+                    : 'text-red-600'
+                }`}
+              >
+                {isPositive ? '+' : ''}
+                {growth.toFixed(1)}%
+              </span>
+            </div>
+          )}
+        </div>
+
         {showGrowth && growth !== undefined && (
-          <div className="flex items-center gap-1.5 text-xs self-start mt-1">
-            {isPositive ? (
-              <TrendingUp
-                className={`h-3.5 w-3.5 ${
-                  isDark ? 'text-green-400' : 'text-green-600'
-                }`}
-              />
-            ) : (
-              <TrendingDown
-                className={`h-3.5 w-3.5 ${
-                  isDark ? 'text-red-400' : 'text-red-600'
-                }`}
-              />
-            )}
-
-            <span
-              className={`font-semibold ${
-                isPositive
-                  ? isDark
-                    ? 'text-green-400'
-                    : 'text-green-600'
-                  : isDark
-                  ? 'text-red-400'
-                  : 'text-red-600'
-              }`}
-            >
-              {isPositive ? '+' : ''}
-              {growth.toFixed(1)}%
-            </span>
-
-            <span
-              className={`${
-                isDark ? 'text-gray-400' : 'text-gray-500'
-              }`}
-            >
-              since last month
-            </span>
-          </div>
+          <span className={`${isDark ? 'text-gray-500' : 'text-gray-500'} text-[10px]`}>
+            since last month
+          </span>
         )}
       </div>
     </div>

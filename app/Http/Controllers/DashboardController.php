@@ -101,7 +101,28 @@ class DashboardController extends Controller
             ->get()
             ->keyBy('month');
 
-        $monthlyData = $months->map(function ($monthDate) use ($monthlyBackups, $monthlyAssetsCreated) {
+        $monthlyTicketsCreated = Ticket::select(
+                DB::raw('DATE_FORMAT(created_at, "%b %Y") as month'),
+                DB::raw('count(*) as count')
+            )
+            ->whereBetween('created_at', [$yearStart, $currentMonthEnd])
+            ->groupBy('month')
+            ->orderBy('month')
+            ->get()
+            ->keyBy('month');
+
+        // Activity Logs per month (counts per month)
+        $monthlyActivityLogs = Activity::select(
+                DB::raw('DATE_FORMAT(created_at, "%b %Y") as month'),
+                DB::raw('count(*) as count')
+            )
+            ->whereBetween('created_at', [$yearStart, $currentMonthEnd])
+            ->groupBy('month')
+            ->orderBy('month')
+            ->get()
+            ->keyBy('month');
+
+        $monthlyData = $months->map(function ($monthDate) use ($monthlyBackups, $monthlyAssetsCreated, $monthlyTicketsCreated, $monthlyActivityLogs) {
             $monthKey = $monthDate->format('M Y');
             $eom = $monthDate->copy()->endOfMonth();
             $activeUsers = User::withTrashed()
@@ -114,11 +135,18 @@ class DashboardController extends Controller
                       ->orWhere('deleted_at', '>', $eom);
                 })
                 ->count();
+            // Cumulative counts by end of month
+            $divisionsCum = Division::where('created_at', '<=', $eom)->count();
+            $assetCategoriesCum = AssetCategory::where('created_at', '<=', $eom)->count();
             return [
                 'name' => $monthKey,
                 'Users' => $activeUsers, // Actually employees (non-admin users)
                 'Backups' => (int) ($monthlyBackups[$monthKey] ?? 0),
                 'Assets' => (int) ($monthlyAssetsCreated[$monthKey]['count'] ?? 0),
+                'Tickets' => (int) ($monthlyTicketsCreated[$monthKey]['count'] ?? 0),
+                'ActivityLogs' => (int) ($monthlyActivityLogs[$monthKey]['count'] ?? 0),
+                'Divisions' => (int) $divisionsCum,
+                'AssetCategories' => (int) $assetCategoriesCum,
             ];
         })->values();
 
