@@ -1,9 +1,23 @@
-import React from 'react';
-import { Line, LineChart, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis, CartesianGrid } from 'recharts';
+import React, { useEffect, useState } from 'react';
+import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Tooltip as ChartTooltip, Legend as ChartLegend } from 'chart.js';
+import { Line } from 'react-chartjs-2';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useTranslation } from '@/lib/i18n';
 import { iconMapper } from '@/lib/iconMapper'; // Import iconMapper
 import { useAppearance } from '@/hooks/use-appearance';
+
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, ChartTooltip, ChartLegend);
+
+// Transparent background plugin
+const TransparentBgPlugin = {
+  id: 'transparentBg',
+  beforeDraw: (chart: any) => {
+    const { ctx, width, height } = chart;
+    ctx.save();
+    ctx.clearRect(0, 0, width, height);
+    ctx.restore();
+  },
+};
 
 export interface MonthlyTrendsChartProps {
   data: { [key: string]: any }[]; // Make data more generic
@@ -17,42 +31,67 @@ export default function MonthlyTrendsChart({ data, xAxisDataKey = 'name', yAxisD
   const { t } = useTranslation();
   const IconComponent = iconName ? iconMapper(iconName) : null;
   const { appearance } = useAppearance();
-  const isDark = appearance === 'dark';
+  const [isDark, setIsDark] = useState(
+    typeof document !== 'undefined' ? document.documentElement.classList.contains('dark') : false
+  );
+  useEffect(() => {
+    const checkDark = () =>
+      setIsDark(typeof document !== 'undefined' && document.documentElement.classList.contains('dark'));
+    checkDark();
+    if (typeof MutationObserver !== 'undefined' && typeof document !== 'undefined') {
+      const observer = new MutationObserver(checkDark);
+      observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+      return () => observer.disconnect();
+    }
+    return () => {};
+  }, [appearance]);
   const axisColor = isDark ? '#cbd5e1' : '#6b7280';
-  const gridColor = isDark ? 'rgba(255,255,255,0.08)' : '#e5e7eb';
+  const gridColor = isDark ? 'rgba(255,255,255,0.06)' : '#e5e7eb';
   const legendColor = isDark ? '#ffffff' : '#111827';
 
-  const LegendContent = ({ payload }: { payload?: any[] }) => (
-    <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center', fontSize: 10, color: legendColor }}>
-      {(payload || []).map((entry: any, index: number) => (
-        <div key={`item-${index}`} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <span style={{ display: 'inline-block', width: 10, height: 10, background: entry.color || 'var(--primary)', borderRadius: 9999 }} />
-          <span>{entry.value}</span>
-        </div>
-      ))}
-    </div>
-  );
+  const rows = (data as Array<Record<string, any>>) || [];
+  const labels = rows.map((d) => String(d[xAxisDataKey] ?? ''));
+  const ds1 = rows.map((d) => Number(d[yAxisDataKey1] ?? 0));
+  const ds2 = rows.map((d) => Number(d[yAxisDataKey2] ?? 0));
+
+  const datasets = [
+    { label: t(String(yAxisDataKey1)), data: ds1, borderColor: 'var(--color-chart-1, #3b82f6)', backgroundColor: 'transparent', tension: 0.4, pointRadius: 0, borderWidth: 2 },
+    { label: t(String(yAxisDataKey2)), data: ds2, borderColor: 'var(--color-chart-2, #10b981)', backgroundColor: 'transparent', tension: 0.4, pointRadius: 0, borderWidth: 2, borderDash: [4, 4] as number[] },
+  ];
+
+  const options = {
+    responsive: true,
+    maintainAspectRatio: false,
+    interaction: { mode: 'index' as const, intersect: false },
+    plugins: {
+      legend: { display: true, position: 'top' as const, labels: { color: legendColor, boxWidth: 10, font: { size: 10 } } },
+      tooltip: {
+        backgroundColor: isDark ? '#0b1437' : '#ffffff',
+        titleColor: legendColor,
+        bodyColor: legendColor,
+        borderColor: isDark ? '#1a2541' : '#e5e7eb',
+        borderWidth: 1,
+      },
+    },
+    scales: {
+      x: { grid: { color: gridColor, drawBorder: false, borderColor: 'transparent' }, ticks: { color: axisColor, font: { size: 10 } }, drawTicks: false },
+      y: { grid: { color: gridColor, drawBorder: false, borderColor: 'transparent' }, ticks: { color: axisColor, font: { size: 10 } }, drawTicks: false },
+    },
+  } as const;
 
   return (
-    <Card className="bg-white dark:!bg-[#0b1437] shadow-sm rounded-2xl overflow-hidden h-full border border-gray-100 dark:!border-[#1a2541] group hover:shadow-xl hover:border-emerald-300 dark:hover:border-emerald-600 transition-all duration-300">
-      <CardHeader className="px-4 py-3 flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-lg font-semibold text-gray-800 dark:text-white flex items-center gap-2">
+    <Card className={`shadow-sm rounded-2xl overflow-hidden h-full border group hover:shadow-xl transition-all duration-300 
+      ${isDark ? 'bg-[#0b1437] border-[#1a2541] hover:border-emerald-600' : 'bg-white border-gray-100 hover:border-emerald-300'}`}>
+      <CardHeader className={`px-4 py-3 flex flex-row items-center justify-between space-y-0 pb-2 ${isDark ? 'bg-[#0b1437]' : 'bg-white'}`}>
+        <CardTitle className={`text-lg font-semibold flex items-center gap-2 ${isDark ? 'text-white' : 'text-gray-800'}`}>
           {IconComponent && <IconComponent className="h-5 w-5 text-muted-foreground" />}
           {t('Monthly Trends')}
         </CardTitle>
       </CardHeader>
-      <CardContent className="h-[240px] sm:h-[280px] md:h-[320px] min-w-0 bg-white dark:!bg-[#0b1437]">
-        <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={data} margin={{ top: 12, right: 4, left: 0, bottom: 8 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
-            <XAxis dataKey={xAxisDataKey} stroke={axisColor} tick={{ fontSize: 9, fill: axisColor }} />
-            <YAxis stroke={axisColor} tick={{ fontSize: 9, fill: axisColor }} width={30} />
-            <Tooltip contentStyle={{ backgroundColor: isDark ? '#0b1437' : '#ffffff', borderColor: isDark ? '#1a2541' : '#e5e7eb' }} labelStyle={{ color: isDark ? '#e5e7eb' : '#111827' }} />
-            <Legend wrapperStyle={{ fontSize: '10px' }} content={<LegendContent />} align="center" verticalAlign="top" />
-            <Line type="monotone" dataKey={yAxisDataKey1} stroke="var(--color-primary, var(--primary))" strokeWidth={2} />
-            <Line type="monotone" dataKey={yAxisDataKey2} stroke="var(--color-primary, var(--primary))" strokeOpacity={0.6} strokeWidth={2} />
-          </LineChart>
-        </ResponsiveContainer>
+      <CardContent className={`h-[240px] sm:h-[280px] md:h-[320px] min-w-0 ${isDark ? 'bg-[#0b1437]' : 'bg-white'}`}>
+        <div key={isDark ? 'dark' : 'light'} className="h-full w-full">
+          <Line data={{ labels, datasets }} options={options} plugins={[TransparentBgPlugin]} />
+        </div>
       </CardContent>
     </Card>
   );

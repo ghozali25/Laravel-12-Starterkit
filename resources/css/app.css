@@ -59,6 +59,21 @@
     background-color: transparent !important;
 }
 
+/* Chart.js dark mode background fix */
+.dark canvas,
+.dark .chartjs-render-monitor,
+.dark .chartjs-size-monitor,
+.dark .chartjs-chart {
+    background-color: transparent !important;
+}
+
+/* Ensure parent wrappers used by charts don't inject white background */
+.dark .widget-card,
+.dark .widget-card .card-content,
+.dark .widget-card .card-header {
+    background-color: #0b1437 !important;
+}
+
 /*
   The default border color has changed to `currentColor` in Tailwind CSS v4,
   so we've added these compatibility styles to make sure everything still

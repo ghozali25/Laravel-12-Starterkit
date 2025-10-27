@@ -1,13 +1,27 @@
-import React from 'react';
-import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis, Legend, CartesianGrid, Bar, BarChart } from 'recharts';
+import React, { useEffect, useState } from 'react';
+import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, BarElement, Tooltip as ChartTooltip, Legend as ChartLegend, Filler } from 'chart.js';
+import { Chart } from 'react-chartjs-2';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useTranslation } from '@/lib/i18n';
 import { iconMapper } from '@/lib/iconMapper';
 import { useAppearance } from '@/hooks/use-appearance';
 
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, ChartTooltip, ChartLegend, Filler);
+
+// Transparent canvas/chart-area plugin
+const TransparentBgPlugin = {
+  id: 'transparentBg',
+  beforeDraw: (chart: any) => {
+    const { ctx, width, height } = chart;
+    ctx.save();
+    ctx.clearRect(0, 0, width, height);
+    ctx.restore();
+  },
+};
+
 export interface DailyActivityChartProps {
   data: Array<{ date: string; day: number; [key: string]: any }>;
-  xAxisDataKey?: string; // default 'day'
+  xAxisDataKey?: string;
   series?: Array<{ key: string; type?: 'line' | 'bar'; color?: string }>;
   title?: string;
   iconName?: string;
@@ -28,70 +42,100 @@ export default function DailyActivityChart({
   const { t } = useTranslation();
   const IconComponent = iconName ? iconMapper(iconName) : null;
 
-  // Choose composite chart: bars for first series if type=bar then overlay lines
-  const hasBar = series.some((s) => s.type === 'bar');
-
   const { appearance } = useAppearance();
-  const isDark = appearance === 'dark';
+  const [isDark, setIsDark] = useState(
+    typeof document !== 'undefined' ? document.documentElement.classList.contains('dark') : false
+  );
+  useEffect(() => {
+    const checkDark = () =>
+      setIsDark(typeof document !== 'undefined' && document.documentElement.classList.contains('dark'));
+    checkDark();
+    if (typeof MutationObserver !== 'undefined' && typeof document !== 'undefined') {
+      const observer = new MutationObserver(checkDark);
+      observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+      return () => observer.disconnect();
+    }
+    return () => {};
+  }, [appearance]);
+
   const axisColor = isDark ? '#cbd5e1' : '#6b7280';
-  const gridColor = isDark ? 'rgba(255,255,255,0.08)' : '#e5e7eb';
-  const legendStyle = { fontSize: 10, color: isDark ? '#e5e7eb' : '#111827' } as const;
+  const gridColor = isDark ? 'rgba(255,255,255,0.01)' : '#e5e7eb';
+  const legendColor = isDark ? '#e5e7eb' : '#111827';
+
+  const labels = Array.isArray(data) ? data.map((d) => String(d[xAxisDataKey as string] ?? '')) : [];
+  const palette = [
+    'var(--color-chart-1, #3b82f6)',
+    'var(--color-chart-2, #10b981)',
+    'var(--color-chart-3, #0ea5e9)',
+    'var(--color-chart-4, #f59e0b)',
+    'var(--color-chart-5, #ef4444)',
+  ];
+  const datasets = series.map((s, i) => {
+    const values = Array.isArray(data) ? data.map((d) => Number(d[s.key] ?? 0)) : [];
+    const base = {
+      label: s.key,
+      data: values,
+      borderColor: s.color ?? palette[i % palette.length],
+      backgroundColor: s.type === 'bar'
+        ? (s.color ?? palette[i % palette.length])
+        : (s.color ?? palette[i % palette.length]),
+    } as any;
+    if (s.type === 'bar') {
+      return { ...base, type: 'bar', borderWidth: 0, borderRadius: 4, barPercentage: 0.8, categoryPercentage: 0.7 };
+    }
+    return { ...base, type: 'line', tension: 0.4, fill: false, pointRadius: 0, borderWidth: 2 };
+  });
+
+  const options = {
+    responsive: true,
+    maintainAspectRatio: false,
+    interaction: { mode: 'index' as const, intersect: false },
+    plugins: {
+      legend: {
+        display: true,
+        labels: { color: legendColor, boxWidth: 10, font: { size: 10 } },
+      },
+      tooltip: {
+        backgroundColor: isDark ? '#0b1437' : '#ffffff',
+        titleColor: legendColor,
+        bodyColor: legendColor,
+        borderColor: isDark ? '#1a2541' : '#e5e7eb',
+        borderWidth: 1,
+      },
+    },
+    scales: {
+      x: {
+        grid: { color: gridColor, drawBorder: false },
+        ticks: { color: axisColor, font: { size: 10 } },
+      },
+      y: {
+        grid: { color: gridColor, drawBorder: false },
+        ticks: { color: axisColor, font: { size: 10 } },
+      },
+    },
+  } as const;
 
   return (
-    <Card className="widget-card bg-white dark:!bg-[#0b1437] shadow-sm rounded-2xl overflow-hidden h-full border border-gray-100 dark:!border-[#1a2541] group hover:shadow-xl hover:border-blue-300 dark:hover:border-blue-600 transition-all duration-300">
-      <CardHeader className="px-4 py-3 flex flex-row items-center justify-between space-y-0 pb-2 bg-white dark:!bg-[#0b1437]">
-        <CardTitle className="text-lg font-semibold text-gray-800 dark:text-white flex items-center gap-2">
+    <Card
+      className={`widget-card shadow-sm rounded-2xl overflow-hidden h-full border group transition-all duration-300 
+        ${isDark ? 'bg-[#0b1437] border-[#1a2541] hover:shadow-xl hover:border-blue-600' : 'bg-white border-gray-100 hover:shadow-xl hover:border-blue-300'}`}
+    >
+      <CardHeader
+        className={`px-4 py-3 flex flex-row items-center justify-between space-y-0 pb-2 ${isDark ? 'bg-[#0b1437]' : 'bg-white'}`}
+      >
+        <CardTitle className={`text-lg font-semibold flex items-center gap-2 ${isDark ? 'text-white' : 'text-gray-800'}`}>
           {IconComponent && <IconComponent className="h-5 w-5 text-muted-foreground" />}
           {title ?? t('Daily Activity (This Month)')}
         </CardTitle>
       </CardHeader>
-      <CardContent className="h-[240px] sm:h-[280px] md:h-[320px] min-w-0 bg-white dark:!bg-[#0b1437]">
-        <ResponsiveContainer width="100%" height="100%">
-          {hasBar ? (
-            <BarChart data={data} margin={{ top: 12, right: 4, left: 0, bottom: 8 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
-              <XAxis dataKey={xAxisDataKey} stroke={axisColor} tick={{ fontSize: 9, fill: axisColor }} interval="preserveEnd" />
-              <YAxis stroke={axisColor} tick={{ fontSize: 9, fill: axisColor }} width={30} />
-              <Tooltip contentStyle={{ backgroundColor: isDark ? '#0b1437' : '#ffffff', borderColor: isDark ? '#1a2541' : '#e5e7eb', color: legendStyle.color as string }} labelStyle={{ color: legendStyle.color as string }} />
-              <Legend wrapperStyle={{ ...legendStyle, fontSize: '10px' }} />
-              {series.map((s) =>
-                s.type === 'bar' ? (
-                  <Bar key={s.key} dataKey={s.key} fill={s.color ?? '#3b82f6'} radius={[4, 4, 0, 0]} />
-                ) : (
-                  <Line
-                    key={s.key}
-                    type="monotone"
-                    dataKey={s.key}
-                    stroke="var(--color-primary, var(--primary))"
-                    strokeOpacity={s.key === 'Users' ? 0.9 : s.key === 'Assets' ? 0.6 : 0.5}
-                    dot={false}
-                    strokeWidth={2}
-                  />
-                ),
-              )}
-            </BarChart>
-          ) : (
-            <LineChart data={data} margin={{ top: 12, right: 4, left: 0, bottom: 8 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
-              <XAxis dataKey={xAxisDataKey} stroke={axisColor} tick={{ fontSize: 9, fill: axisColor }} interval="preserveEnd" />
-              <YAxis stroke={axisColor} tick={{ fontSize: 9, fill: axisColor }} width={30} />
-              <Tooltip contentStyle={{ backgroundColor: isDark ? '#0b1437' : '#ffffff', borderColor: isDark ? '#1a2541' : '#e5e7eb', color: legendStyle.color as string }} labelStyle={{ color: legendStyle.color as string }} />
-              <Legend wrapperStyle={{ ...legendStyle, fontSize: '10px' }} />
-              {series.map((s) => (
-                <Line
-                  key={s.key}
-                  type="monotone"
-                  dataKey={s.key}
-                  stroke="var(--color-primary, var(--primary))"
-                  strokeOpacity={s.key === 'Users' ? 0.9 : s.key === 'Assets' ? 0.6 : 0.5}
-                  dot={false}
-                  strokeWidth={2}
-                />
-              ))}
-            </LineChart>
-          )}
-        </ResponsiveContainer>
+
+      <CardContent className={`h-[240px] sm:h-[280px] md:h-[320px] min-w-0 transition-colors duration-300 ${isDark ? 'bg-[#0b1437]' : 'bg-white'}`}>
+        {/* ✅ Key penting agar chart redraw ketika theme berubah */}
+        <div key={isDark ? 'dark' : 'light'} className="h-full w-full">
+          <Chart type='bar' data={{ labels, datasets }} options={options} plugins={[TransparentBgPlugin]} />
+        </div>
       </CardContent>
     </Card>
   );
 }
+
