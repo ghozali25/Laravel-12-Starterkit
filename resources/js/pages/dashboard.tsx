@@ -343,7 +343,8 @@ const widgetComponents: WidgetComponentsMap = {
       { key: 'yAxisDataKey2', label: 'Y-Axis Data Key 2', type: 'select', dataOptions: ['users', 'backups', 'assets'] }, // Updated
     ],
     defaultColSpan: 3, // Adjusted for 6-column layout
-    icon: <Radar className="h-5 w-5" />,
+    // Fix: use a valid React component for icon prop (was <insights /> which is invalid)
+    icon: <TrendingUp className="h-5 w-5" />,
   },
   // Removed PerformanceMetricsRadialChart - was using dummy data
   // All widgets now use real data from backend
