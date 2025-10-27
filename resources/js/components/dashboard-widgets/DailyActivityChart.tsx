@@ -124,14 +124,14 @@ export default function DailyActivityChart({
         className={`px-4 py-3 flex flex-row items-center justify-between space-y-0 pb-2 ${isDark ? 'bg-[#0b1437]' : 'bg-white'}`}
       >
         <CardTitle className={`text-lg font-semibold flex items-center gap-2 ${isDark ? 'text-white' : 'text-gray-800'}`}>
-          {IconComponent && <IconComponent className="h-5 w-5 text-muted-foreground" />}
+          {IconComponent && <IconComponent className="h-5 w-5 text-muted-foreground transition-transform duration-300 group-hover:scale-110" />}
           {title ?? t('Daily Activity (This Month)')}
         </CardTitle>
       </CardHeader>
 
       <CardContent className={`h-[240px] sm:h-[280px] md:h-[320px] min-w-0 transition-colors duration-300 ${isDark ? 'bg-[#0b1437]' : 'bg-white'}`}>
         {/* ✅ Key penting agar chart redraw ketika theme berubah */}
-        <div key={isDark ? 'dark' : 'light'} className="h-full w-full">
+        <div key={isDark ? 'dark' : 'light'} className="h-full w-full transition-transform duration-300 group-hover:scale-[1.01]">
           <Chart type='bar' data={{ labels, datasets }} options={options} plugins={[TransparentBgPlugin]} />
         </div>
       </CardContent>

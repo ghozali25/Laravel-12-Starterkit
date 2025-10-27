@@ -47,7 +47,7 @@ export default function ResourceUsageAreaChart({ data, xAxisDataKey = 'month', y
     return () => {};
   }, [appearance]);
   const axisColor = isDark ? '#cbd5e1' : '#6b7280';
-  const gridColor = isDark ? 'rgba(255,255,255,0.08)' : '#e5e7eb';
+  const gridColor = isDark ? 'rgba(255,255,255,0.01)' : '#e5e7eb';
 
   const rows = (data as Array<Record<string, any>>) || [];
   const labels = rows.map((d) => String(d[xAxisDataKey] ?? ''));
@@ -85,8 +85,8 @@ export default function ResourceUsageAreaChart({ data, xAxisDataKey = 'month', y
         const { ctx: c, chartArea } = chart;
         if (!chartArea) return 'rgba(59,130,246,0.1)';
         const g = c.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
-        g.addColorStop(0, 'rgba(59,130,246,0.35)');
-        g.addColorStop(1, 'rgba(59,130,246,0.08)');
+        g.addColorStop(0, 'rgba(254, 255, 255, 1)');
+        g.addColorStop(1, 'rgba(42, 116, 228, 0.8)');
         return g;
       },
       tension: 0.4,
@@ -101,10 +101,10 @@ export default function ResourceUsageAreaChart({ data, xAxisDataKey = 'month', y
       backgroundColor: (ctx: any) => {
         const { chart } = ctx;
         const { ctx: c, chartArea } = chart;
-        if (!chartArea) return 'rgba(59,130,246,0.05)';
+        if (!chartArea) return 'rgba(59,130,246,1)';
         const g = c.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
-        g.addColorStop(0, 'rgba(59,130,246,0.25)');
-        g.addColorStop(1, 'rgba(59,130,246,0.05)');
+        g.addColorStop(0, 'rgba(232, 234, 237, 1)');
+        g.addColorStop(1, 'rgba(249, 249, 249, 1)');
         return g;
       },
       tension: 0.4,
@@ -117,12 +117,12 @@ export default function ResourceUsageAreaChart({ data, xAxisDataKey = 'month', y
     >
       <CardHeader className={`px-4 py-3 flex flex-row items-center justify-between space-y-0 pb-2 ${isDark ? 'bg-[#0b1437]' : 'bg-white'}`}>
         <CardTitle className={`text-lg font-semibold flex items-center gap-2 ${isDark ? 'text-white' : 'text-gray-800'}`}>
-          {IconComponent && <IconComponent className="h-5 w-5 text-muted-foreground" />}
+          {IconComponent && <IconComponent className="h-5 w-5 text-muted-foreground transition-transform duration-300 group-hover:scale-110" />}
           {t('Resource Usage')}
         </CardTitle>
       </CardHeader>
       <CardContent className={`h-[240px] sm:h-[280px] md:h-[320px] min-w-0 ${isDark ? 'bg-[#0b1437]' : 'bg-white'}`}>
-        <div key={isDark ? 'dark' : 'light'} className="h-full w-full">
+        <div key={isDark ? 'dark' : 'light'} className="h-full w-full transition-transform duration-300 group-hover:scale-[1.01]">
           <Line data={{ labels, datasets }} options={options} plugins={[TransparentBgPlugin]} />
         </div>
       </CardContent>

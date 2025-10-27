@@ -75,7 +75,8 @@ export default function MonthlyActivityChart({ data, xAxisDataKey = 'name', yAxi
     const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
     return v && v.length > 0 ? v : fallback;
   };
-  const barColor = resolveCssVar('--color-chart-1', '#3b82f6');
+  // Use a fixed orange for Monthly Activity bars (component-level override)
+  const barColor = '#1f8de0ff';
 
   const datasets = [
     {
@@ -121,7 +122,7 @@ export default function MonthlyActivityChart({ data, xAxisDataKey = 'name', yAxi
       ${isDark ? 'bg-[#0b1437] border-[#1a2541] hover:border-blue-600' : 'bg-white border-gray-100 hover:border-blue-300'}`}>
       <CardHeader className={`px-4 py-3 flex flex-row items-center justify-between space-y-0 pb-2 ${isDark ? 'bg-[#0b1437]' : 'bg-white'}`}>
         <CardTitle className={`text-lg font-semibold flex items-center gap-2 ${isDark ? 'text-white' : 'text-gray-800'}`}>
-          {IconComponent && <IconComponent className="h-5 w-5 text-muted-foreground" />}
+          {IconComponent && <IconComponent className="h-5 w-5 text-muted-foreground transition-transform duration-300 group-hover:scale-110" />}
           {t('Monthly Activity')}
         </CardTitle>
         {canToggle && (
@@ -136,7 +137,7 @@ export default function MonthlyActivityChart({ data, xAxisDataKey = 'name', yAxi
         )}
       </CardHeader>
       <CardContent className={`h-[240px] sm:h-[280px] md:h-[320px] min-w-0 ${isDark ? 'bg-[#0b1437]' : 'bg-white'}`}>
-        <div key={isDark ? 'dark' : 'light'} className="h-full w-full">
+        <div key={isDark ? 'dark' : 'light'} className="h-full w-full transition-transform duration-300 group-hover:scale-[1.01]">
           <Bar data={{ labels: labels.map(shortMonth), datasets }} options={options} plugins={[TransparentBgPlugin]} />
         </div>
       </CardContent>
