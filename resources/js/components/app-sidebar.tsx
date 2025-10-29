@@ -57,8 +57,8 @@ function RenderMenu({ items, level = 0, openMenus, toggleMenu, onExpandRequest }
         const indentClass = level > 0 ? `pl-${4 + level * 3}` : '';
 
         const activeClass = isActive
-          ? 'bg-primary/10 text-primary font-medium'
-          : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground';
+          ? 'bg-sidebar-accent text-sidebar-accent-foreground font-medium'
+          : 'text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground';
 
         if (!menu.route && !hasChildren) return null;
 
@@ -168,7 +168,7 @@ export function AppSidebar() {
     <Sidebar
       collapsible="icon"
       variant="inset"
-      className="border-r bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60"
+      className="border-r border-sidebar-border bg-sidebar"
     >
       <SidebarHeader className="px-4 py-3 border-b">
         <SidebarMenu>

@@ -153,13 +153,13 @@
     --chart-3: hsl(30, 80%, 55%);
     --chart-4: hsl(280, 65%, 60%);
     --chart-5: hsl(340, 75%, 55%);
-    --sidebar-background: hsl(231, 53%, 23%); /* #1B2559 */
+    --sidebar-background: hsl(231, 53%, 18%); /* #16204A slightly darker base */
     --sidebar-foreground: hsl(225, 28%, 73%); /* #A3AED0 */
     --sidebar-primary: hsl(253, 100%, 54%);
     --sidebar-primary-foreground: hsl(0, 0%, 100%);
-    --sidebar-accent: hsl(228, 60%, 17%); /* #111c44 */
+    --sidebar-accent: hsl(231, 47%, 24%); /* #22306A soft hover/active */
     --sidebar-accent-foreground: hsl(220, 33%, 92%);
-    --sidebar-border: hsl(227, 35%, 28%);
+    --sidebar-border: hsl(231, 30%, 28%);
     --sidebar-ring: hsl(253, 100%, 54%);
 }
 

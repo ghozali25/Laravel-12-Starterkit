@@ -37,8 +37,9 @@ export function AppSidebarHeader({ breadcrumbs = [] }: { breadcrumbs?: Breadcrum
 
       {/* Center: Greeting */}
       <div className="flex justify-center items-center w-1/3">
-        <span className="text-sm font-medium text-neutral-700 dark:text-neutral-200 text-center truncate">
-          {t('Hello, Welcome')} {auth.user.name} 👋
+        <span className="text-sm font-medium text-foreground text-center truncate">
+          {t('Hello, Welcome')} {auth.user.name}
+          <span className="ml-1 align-middle leading-none text-lg md:text-xl" role="img" aria-label="waving hand">👋</span>
         </span>
       </div>
 
