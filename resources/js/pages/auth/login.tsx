@@ -153,8 +153,10 @@ export default function Login({ status, canResetPassword, recaptchaSiteKey }: Lo
 
                     {recaptchaSiteKey && (
                         <div className="space-y-2">
-                            <div ref={captchaRef} />
-                            <InputError message={errors['g-recaptcha-response'] as string} />
+                            <div className="flex justify-center">
+                                <div ref={captchaRef} />
+                            </div>
+                            <InputError message={errors['g-recaptcha-response'] as string} className="text-center" />
                         </div>
                     )}
 
