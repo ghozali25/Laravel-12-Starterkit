@@ -566,7 +566,7 @@ export default function Dashboard(props: DashboardProps) {
     <AppLayout breadcrumbs={breadcrumbs}>
       <Head title={t('Dashboard')} />
       <div className="flex flex-col gap-6">
-        <div className="flex justify-end">
+        <div className="flex justify-end mt-2">
           <Dialog open={isAddWidgetDialogOpen} onOpenChange={(open) => {
             setIsAddWidgetDialogOpen(open);
             if (!open) {
