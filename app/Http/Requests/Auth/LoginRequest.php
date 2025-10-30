@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Config;
 
 class LoginRequest extends FormRequest
 {
@@ -29,6 +31,7 @@ class LoginRequest extends FormRequest
         return [
             'email' => ['required', 'string', 'email'],
             'password' => ['required', 'string'],
+            'g-recaptcha-response' => ['required', 'string'],
         ];
     }
 
@@ -40,6 +43,8 @@ class LoginRequest extends FormRequest
     public function authenticate(): void
     {
         $this->ensureIsNotRateLimited();
+
+        $this->verifyRecaptcha();
 
         if (! Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {
             RateLimiter::hit($this->throttleKey());
@@ -82,4 +87,39 @@ class LoginRequest extends FormRequest
     {
         return Str::transliterate(Str::lower($this->string('email')).'|'.$this->ip());
     }
+
+    /**
+     * Verify Google reCAPTCHA v2 response with Google API.
+     *
+     * @throws \Illuminate\Validation\ValidationException
+     */
+    protected function verifyRecaptcha(): void
+    {
+        $secret = Config::get('services.recaptcha.secret_key');
+        $response = $this->input('g-recaptcha-response');
+
+        if (! $secret || ! $response) {
+            throw ValidationException::withMessages([
+                'g-recaptcha-response' => __('The reCAPTCHA verification failed.'),
+            ]);
+        }
+
+        $pending = Http::asForm();
+        if (app()->environment('local')) {
+            $pending = $pending->withoutVerifying();
+        }
+
+        $verify = $pending->post('https://www.google.com/recaptcha/api/siteverify', [
+            'secret' => $secret,
+            'response' => $response,
+            'remoteip' => $this->ip(),
+        ]);
+
+        if (! $verify->ok() || ! (bool) data_get($verify->json(), 'success')) {
+            throw ValidationException::withMessages([
+                'g-recaptcha-response' => __('The reCAPTCHA verification failed.'),
+            ]);
+        }
+    }
 }
+
