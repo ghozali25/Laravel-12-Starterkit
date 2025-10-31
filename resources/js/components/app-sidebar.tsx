@@ -170,11 +170,15 @@ export function AppSidebar() {
       variant="inset"
       className="border-r border-sidebar-border bg-sidebar"
     >
-      <SidebarHeader className="px-4 py-3 border-b">
+      <SidebarHeader className="px-4 py-3 border-b group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0">
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton size="lg" asChild className="hover:bg-transparent">
-              <Link href="/dashboard" prefetch>
+            <SidebarMenuButton
+              size="lg"
+              asChild
+              className="hover:bg-transparent justify-center data-[collapsible=icon]:px-0"
+            >
+              <Link href="/dashboard" prefetch className="flex w-full items-center justify-center">
                 <AppLogo />
               </Link>
             </SidebarMenuButton>
