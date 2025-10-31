@@ -176,7 +176,7 @@ export function AppSidebar() {
             <SidebarMenuButton
               size="lg"
               asChild
-              className="hover:bg-transparent justify-center data-[collapsible=icon]:px-0"
+              className="hover:bg-transparent justify-center group-data-[collapsible=icon]:px-0"
             >
               <Link href="/dashboard" prefetch className="flex w-full items-center justify-center">
                 <AppLogo />

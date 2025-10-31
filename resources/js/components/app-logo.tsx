@@ -24,8 +24,8 @@ export default function AppLogo() {
           />
         </div>
       ) : (
-        <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-md">
-          <AppLogoIcon className="size-[1.375rem] fill-current text-white dark:text-black" />
+        <div className="flex aspect-square size-8 items-center justify-center rounded-md">
+          <AppLogoIcon className="size-[1.375rem] fill-current text-black dark:text-white" />
         </div>
       )}
       <div className="grid flex-1 text-left text-sm group-data-[collapsible=icon]:hidden">
@@ -36,3 +36,4 @@ export default function AppLogo() {
     </div>
   );
 }
+
