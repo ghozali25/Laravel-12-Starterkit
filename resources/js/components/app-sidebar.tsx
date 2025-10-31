@@ -200,7 +200,7 @@ export function AppSidebar() {
         </SidebarMenu>
       </SidebarContent>
 
-      <SidebarFooter className="px-4 py-3 border-t">
+      <SidebarFooter className="px-4 py-3 border-t group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:py-2">
         <NavUser />
         <NavFooter items={footerNavItems} className="justify-center gap-4" />
       </SidebarFooter>
