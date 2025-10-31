@@ -16,7 +16,7 @@ export default function AppLogo() {
   return (
     <div className="flex items-center gap-2 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:gap-0 group-data-[collapsible=icon]:w-full">
       {logo ? (
-        <div className="flex aspect-square size-8 items-center justify-center rounded-md">
+        <div className="flex aspect-square size-8 items-center justify-center rounded-md group-data-[collapsible=icon]:mx-auto">
           <img
             src={`/storage/${logo}`}
             alt="Logo"
@@ -24,7 +24,7 @@ export default function AppLogo() {
           />
         </div>
       ) : (
-        <div className="flex aspect-square size-8 items-center justify-center rounded-md">
+        <div className="flex aspect-square size-8 items-center justify-center rounded-md group-data-[collapsible=icon]:mx-auto">
           <AppLogoIcon className="size-[1.375rem] fill-current text-black dark:text-white" />
         </div>
       )}
