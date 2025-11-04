@@ -6,7 +6,6 @@ use App\Http\Controllers\MenuController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\BackupController;
-use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\UserFileController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\SettingAppController;
@@ -24,6 +23,9 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\AssetMovementController;
 use App\Http\Controllers\LoanController;
+use App\Http\Controllers\AuditLogController;
+use App\Http\Controllers\LoginActivityController;
+use App\Http\Controllers\LookupController;
 
 Route::get('/', function () {
     return Inertia::render('welcome');
@@ -49,7 +51,6 @@ Route::middleware(['auth', 'menu.permission'])->group(function () {
     Route::post('/users/bulk-avatar', [UserController::class, 'bulkAvatar'])->name('users.bulk-avatar')->middleware('role:admin|it_support');
     Route::get('/settingsapp', [SettingAppController::class, 'edit'])->name('setting.edit');
     Route::post('/settingsapp', [SettingAppController::class, 'update'])->name('setting.update');
-    Route::get('/audit-logs', [AuditLogController::class, 'index'])->name('audit-logs.index');
     Route::get('/backup', [BackupController::class, 'index'])->name('backup.index');
     Route::post('/backup/run', [BackupController::class, 'run'])->name('backup.run');
     Route::get('/backup/download/{file}', [BackupController::class, 'download'])->name('backup.download');
@@ -103,6 +104,8 @@ Route::middleware(['auth', 'menu.permission'])->group(function () {
     Route::middleware(['role:admin|it_support'])->group(function () {
         Route::get('reports', [ReportController::class, 'index'])->name('reports.index');
         Route::get('reports/export/{type}/{format}', [ReportController::class, 'export'])->name('reports.export');
+        Route::get('audit-logs', [AuditLogController::class, 'index'])->name('audit-logs.index');
+        Route::get('login-activities', [LoginActivityController::class, 'index'])->name('login-activities.index');
     });
 });
 
@@ -110,6 +113,9 @@ Route::middleware(['auth', 'menu.permission'])->group(function () {
 Route::middleware(['auth'])->group(function () {
     Route::post('/notifications/read-all', [NotificationController::class, 'readAll'])->name('notifications.readAll');
     Route::post('/notifications/{id}/read', [NotificationController::class, 'read'])->name('notifications.read');
+    // Async lookups for searchable comboboxes
+    Route::get('/lookups/employees', [LookupController::class, 'employees'])->name('lookups.employees');
+    Route::get('/lookups/locations', [LookupController::class, 'locations'])->name('lookups.locations');
 });
 
 require __DIR__ . '/settings.php';

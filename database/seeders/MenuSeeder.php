@@ -146,30 +146,29 @@ class MenuSeeder extends Seeder
             'permission_name' => 'settings-view',
         ]);
 
+        // Ensure Settings only contains Menu Management and App Settings
+        \App\Models\Menu::where('parent_id', $settingsMenu->id)
+            ->whereNotIn('route', ['/menus', '/settingsapp'])
+            ->delete();
+
         // Sub-menu untuk Settings
-        Menu::create([
-            'title' => 'Menu Management',
-            'icon' => 'List',
+        Menu::firstOrCreate([
             'route' => '/menus',
             'parent_id' => $settingsMenu->id,
+        ],[
+            'title' => 'Menu Management',
+            'icon' => 'List',
             'order' => 1,
             'permission_name' => 'menu-view',
         ]);
-        Menu::create([
-            'title' => 'App Settings',
-            'icon' => 'Settings',
+        Menu::firstOrCreate([
             'route' => '/settingsapp',
             'parent_id' => $settingsMenu->id,
+        ],[
+            'title' => 'App Settings',
+            'icon' => 'Settings',
             'order' => 2,
-            'permission_name' => 'app-settings-view',
-        ]);
-        Menu::create([
-            'title' => 'Backup',
-            'icon' => 'HardDrive',
-            'route' => '/backup',
-            'parent_id' => $settingsMenu->id,
-            'order' => 3,
-            'permission_name' => 'backup-view',
+            'permission_name' => 'settings-view',
         ]);
 
         // Utilities (Parent Menu) - Urutan disesuaikan
@@ -191,11 +190,19 @@ class MenuSeeder extends Seeder
             'permission_name' => 'log-view',
         ]);
         Menu::create([
+            'title' => 'Backup',
+            'icon' => 'Database',
+            'route' => '/backup',
+            'parent_id' => $utilitiesMenu->id,
+            'order' => 2,
+            'permission_name' => 'settings-view',
+        ]);
+        Menu::create([
             'title' => 'File Manager',
             'icon' => 'Folder',
             'route' => '/files',
             'parent_id' => $utilitiesMenu->id,
-            'order' => 2,
+            'order' => 3,
             'permission_name' => 'filemanager-view',
         ]);
     }

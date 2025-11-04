@@ -16,6 +16,11 @@ use App\Observers\GlobalActivityLogger;
 use Illuminate\Support\ServiceProvider;
 use Spatie\Permission\Models\Permission;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Event;
+use Illuminate\Auth\Events\Login as AuthLogin;
+use Illuminate\Auth\Events\Logout as AuthLogout;
+use Illuminate\Auth\Events\Failed as AuthFailed;
+use App\Models\LoginActivity;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -46,5 +51,36 @@ class AppServiceProvider extends ServiceProvider
         Asset::observe(GlobalActivityLogger::class);
         Brand::observe(GlobalActivityLogger::class); // Add Brand observer
         Location::observe(GlobalActivityLogger::class);
+
+        // Login/Logout/Failed event listeners to track login history
+        Event::listen(AuthLogin::class, function (AuthLogin $event) {
+            LoginActivity::create([
+                'user_id' => $event->user->id,
+                'event' => 'login',
+                'ip_address' => request()->ip(),
+                'user_agent' => request()->userAgent(),
+                'session_id' => session()->getId(),
+            ]);
+        });
+
+        Event::listen(AuthLogout::class, function (AuthLogout $event) {
+            LoginActivity::create([
+                'user_id' => $event->user?->id,
+                'event' => 'logout',
+                'ip_address' => request()->ip(),
+                'user_agent' => request()->userAgent(),
+                'session_id' => session()->getId(),
+            ]);
+        });
+
+        Event::listen(AuthFailed::class, function (AuthFailed $event) {
+            LoginActivity::create([
+                'user_id' => optional($event->user)->id,
+                'event' => 'failed',
+                'ip_address' => request()->ip(),
+                'user_agent' => request()->userAgent(),
+                'session_id' => session()->getId(),
+            ]);
+        });
     }
 }

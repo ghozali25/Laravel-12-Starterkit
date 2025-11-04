@@ -46,12 +46,17 @@ class AssetController extends Controller
             $query->where('user_id', $request->user_id);
         }
 
+        if ($request->filled('location_id')) {
+            $query->where('current_location_id', $request->location_id);
+        }
+
         $assets = $query->latest()->paginate(10)->withQueryString();
 
         $categories = AssetCategory::select('id', 'name')->get();
         $employees = User::whereHas('roles', function ($q) {
             $q->where('name', '!=', 'admin');
         })->select('id', 'name')->get();
+        $locations = \App\Models\Location::select('id','name','type')->orderBy('type')->orderBy('name')->get();
 
         return Inertia::render('assets/Index', [
             'assets' => $assets->through(fn ($asset) => [
@@ -72,7 +77,8 @@ class AssetController extends Controller
             ]),
             'categories' => $categories,
             'employees' => $employees,
-            'filters' => $request->only('search', 'category_id', 'user_id'),
+            'locations' => $locations,
+            'filters' => $request->only('search', 'category_id', 'user_id', 'location_id'),
         ]);
     }
 

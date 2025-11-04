@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 
 import AppLayout from '@/layouts/app-layout';
@@ -41,6 +41,8 @@ import {
 } from '@/components/ui/table';
 import { debounce } from '@/lib/utils';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'; // Import Avatar components
 import { useInitials } from '@/hooks/use-initials'; // Import useInitials hook
 import ImagePreviewDialog from '@/components/ImagePreviewDialog'; // Import new dialog component
@@ -85,12 +87,14 @@ interface Props {
     search?: string;
     manager_id?: string;
     division_id?: string;
+    location_id?: string;
   };
   potentialManagers: PotentialManager[];
   divisions: Division[];
+  locations?: { id: number; name: string; type: 'company' | 'branch' | 'site' }[];
 }
 
-export default function EmployeeIndex({ employees, filters, potentialManagers, divisions }: Props) {
+export default function EmployeeIndex({ employees, filters, potentialManagers, divisions, locations = [] }: Props) {
   const { t, locale } = useTranslation();
   const page = usePage();
   const isAdmin = Boolean((page.props as any)?.auth?.is_admin);
@@ -98,6 +102,7 @@ export default function EmployeeIndex({ employees, filters, potentialManagers, d
   const [search, setSearch] = useState(filters.search || '');
   const [selectedManagerFilter, setSelectedManagerFilter] = useState(filters.manager_id || 'all');
   const [selectedDivisionFilter, setSelectedDivisionFilter] = useState(filters.division_id || 'all');
+  const [selectedLocationFilter, setSelectedLocationFilter] = useState(filters.location_id || 'all');
   const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
   const [importFile, setImportFile] = useState<File | null>(null);
   const [importProcessing, setImportProcessing] = useState(false);
@@ -105,6 +110,27 @@ export default function EmployeeIndex({ employees, filters, potentialManagers, d
   const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
   const [previewImageAlt, setPreviewImageAlt] = useState('');
   const getInitials = useInitials(); // Initialize useInitials
+
+  // Search states for comboboxes
+  const [managerQuery, setManagerQuery] = useState('');
+  const [locationQuery, setLocationQuery] = useState('');
+
+  // Debounced setters
+  const setManagerQueryDebounced = useCallback(debounce((v: string) => setManagerQuery(v), 200), []);
+  const setLocationQueryDebounced = useCallback(debounce((v: string) => setLocationQuery(v), 200), []);
+
+  // Filtered lists
+  const filteredManagers = useMemo(() => {
+    const q = managerQuery.trim().toLowerCase();
+    if (!q) return potentialManagers;
+    return potentialManagers.filter((m) => (m.name || '').toLowerCase().includes(q));
+  }, [potentialManagers, managerQuery]);
+
+  const filteredLocations = useMemo(() => {
+    const q = locationQuery.trim().toLowerCase();
+    if (!q) return locations;
+    return locations.filter((l) => `${l.name} ${l.type}`.toLowerCase().includes(q));
+  }, [locations, locationQuery]);
 
   useEffect(() => {
     dayjs.locale(locale);
@@ -133,11 +159,12 @@ export default function EmployeeIndex({ employees, filters, potentialManagers, d
   };
 
   const debouncedSearch = useCallback(
-    debounce((searchValue: string, managerId: string, divisionId: string) => {
+    debounce((searchValue: string, managerId: string, divisionId: string, locationId: string) => {
       router.get('/employees', {
         search: searchValue,
         manager_id: managerId === 'all' ? '' : managerId,
         division_id: divisionId === 'all' ? '' : divisionId,
+        location_id: locationId === 'all' ? '' : locationId,
       }, { preserveState: true, preserveScroll: true });
     }, 500),
     []
@@ -146,17 +173,22 @@ export default function EmployeeIndex({ employees, filters, potentialManagers, d
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setSearch(value);
-    debouncedSearch(value, selectedManagerFilter, selectedDivisionFilter);
+    debouncedSearch(value, selectedManagerFilter, selectedDivisionFilter, selectedLocationFilter);
   };
 
   const handleManagerFilterChange = (value: string) => {
     setSelectedManagerFilter(value);
-    debouncedSearch(search, value, selectedDivisionFilter);
+    debouncedSearch(search, value, selectedDivisionFilter, selectedLocationFilter);
   };
 
   const handleDivisionFilterChange = (value: string) => {
     setSelectedDivisionFilter(value);
-    debouncedSearch(search, selectedManagerFilter, value);
+    debouncedSearch(search, selectedManagerFilter, value, selectedLocationFilter);
+  };
+
+  const handleLocationPick = (value: string) => {
+    setSelectedLocationFilter(value);
+    debouncedSearch(search, selectedManagerFilter, selectedDivisionFilter, value);
   };
 
   const handleImportFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -254,22 +286,30 @@ export default function EmployeeIndex({ employees, filters, potentialManagers, d
             value={search}
             onChange={handleSearchChange}
           />
-          <Select
-            value={selectedManagerFilter}
-            onValueChange={handleManagerFilterChange}
-          >
-            <SelectTrigger className="w-full md:w-[200px]">
-              <SelectValue placeholder={t('Filter by Manager')} />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">{t('All Managers')}</SelectItem>
-              {potentialManagers.map((manager) => (
-                <SelectItem key={manager.id} value={String(manager.id)}>
-                  {manager.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          {/* Manager combobox (searchable) */}
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline" className="w-full md:w-[240px] justify-between">
+                {selectedManagerFilter === 'all' ? t('All Managers') : (potentialManagers.find(m => String(m.id) === String(selectedManagerFilter))?.name || t('Manager'))}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="p-0 w-[280px]">
+              <Command>
+                <CommandInput placeholder={t('Search manager...')} onValueChange={(v) => setManagerQueryDebounced(v)} />
+                <CommandList>
+                  <CommandEmpty>{t('No results')}</CommandEmpty>
+                  <CommandGroup>
+                    <CommandItem value="all" onSelect={() => handleManagerFilterChange('all')}>{t('All Managers')}</CommandItem>
+                    {filteredManagers.map((m) => (
+                      <CommandItem key={m.id} value={String(m.id)} onSelect={() => handleManagerFilterChange(String(m.id))}>
+                        {m.name}
+                      </CommandItem>
+                    ))}
+                  </CommandGroup>
+                </CommandList>
+              </Command>
+            </PopoverContent>
+          </Popover>
           <Select
             value={selectedDivisionFilter}
             onValueChange={handleDivisionFilterChange}
@@ -286,7 +326,31 @@ export default function EmployeeIndex({ employees, filters, potentialManagers, d
               ))}
             </SelectContent>
           </Select>
-          <Button onClick={() => debouncedSearch(search, selectedManagerFilter, selectedDivisionFilter)} variant="secondary">
+          {/* Location combobox (searchable) */}
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline" className="w-full md:w-[240px] justify-between">
+                {selectedLocationFilter === 'all' ? t('All Locations') : (locations.find(l => String(l.id) === String(selectedLocationFilter)) ? `${locations.find(l => String(l.id) === String(selectedLocationFilter))!.name} (${locations.find(l => String(l.id) === String(selectedLocationFilter))!.type})` : t('Location'))}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="p-0 w-[280px]">
+              <Command>
+                <CommandInput placeholder={t('Search location...')} onValueChange={(v) => setLocationQueryDebounced(v)} />
+                <CommandList>
+                  <CommandEmpty>{t('No results')}</CommandEmpty>
+                  <CommandGroup>
+                    <CommandItem value="all" onSelect={() => handleLocationPick('all')}>{t('All Locations')}</CommandItem>
+                    {filteredLocations.map((l) => (
+                      <CommandItem key={l.id} value={String(l.id)} onSelect={() => handleLocationPick(String(l.id))}>
+                        {l.name} ({l.type})
+                      </CommandItem>
+                    ))}
+                  </CommandGroup>
+                </CommandList>
+              </Command>
+            </PopoverContent>
+          </Popover>
+          <Button onClick={() => debouncedSearch(search, selectedManagerFilter, selectedDivisionFilter, selectedLocationFilter)} variant="secondary">
             <FileSearch className="h-4 w-4" />
           </Button>
         </div>

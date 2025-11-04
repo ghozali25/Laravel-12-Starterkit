@@ -45,6 +45,11 @@ class EmployeeController extends Controller
             $query->where('division_id', $request->division_id);
         }
 
+        // Filter by location_id
+        if ($request->filled('location_id')) {
+            $query->where('location_id', $request->location_id);
+        }
+
         $employees = $query->latest()->paginate(10)->withQueryString();
 
         // Get potential managers/leaders for the filter dropdown
@@ -54,6 +59,7 @@ class EmployeeController extends Controller
 
         // Get all divisions for the filter dropdown
         $divisions = Division::select('id', 'name')->get();
+        $locations = \App\Models\Location::select('id','name','type')->orderBy('type')->orderBy('name')->get();
 
         return Inertia::render('employees/Index', [
             'employees' => $employees->through(fn ($employee) => [
@@ -71,9 +77,10 @@ class EmployeeController extends Controller
                 'location' => $employee->location ? ['id' => $employee->location->id, 'name' => $employee->location->name, 'type' => $employee->location->type] : null,
                 'avatar_url' => $employee->getFirstMediaUrl('avatars'), // Get avatar URL
             ]),
-            'filters' => $request->only('search', 'manager_id', 'division_id'),
+            'filters' => $request->only('search', 'manager_id', 'division_id', 'location_id'),
             'potentialManagers' => $potentialManagers,
             'divisions' => $divisions, // Pass divisions to frontend
+            'locations' => $locations,
         ]);
     }
 
