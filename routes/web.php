@@ -23,6 +23,7 @@ use App\Http\Controllers\LocationController; // Import LocationController
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\AssetMovementController;
+use App\Http\Controllers\LoanController;
 
 Route::get('/', function () {
     return Inertia::render('welcome');
@@ -88,6 +89,10 @@ Route::middleware(['auth', 'menu.permission'])->group(function () {
     ]);
     Route::post('asset-movements/{movement}/approve', [AssetMovementController::class, 'approve'])->name('asset-movements.approve');
     Route::post('asset-movements/{movement}/reject', [AssetMovementController::class, 'reject'])->name('asset-movements.reject');
+
+    // Loans Routes
+    Route::resource('loans', LoanController::class);
+    Route::post('loan-items/{item}/return', [LoanController::class, 'returnItem'])->name('loan-items.return');
 
     // Ticket Management Routes
     Route::resource('tickets', TicketController::class);

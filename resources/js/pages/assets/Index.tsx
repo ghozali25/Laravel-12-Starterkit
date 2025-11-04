@@ -263,6 +263,7 @@ export default function AssetIndex({ assets, categories, employees, filters }: P
                     <TableHead className="text-center">{t('Brand')}</TableHead>
                     <TableHead className="text-center">{t('Model')}</TableHead>
                     <TableHead className="text-center">{t('Assigned To')}</TableHead>
+                    <TableHead className="text-center">{t('Location')}</TableHead>
                     <TableHead className="text-center">{t('Status')}</TableHead>
                     <TableHead className="text-center">{t('Last Used')}</TableHead>
                     <TableHead className="text-center">{t('Actions')}</TableHead>
@@ -271,7 +272,7 @@ export default function AssetIndex({ assets, categories, employees, filters }: P
                 <TableBody>
                   {assets.data.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={9} className="h-24 text-center text-muted-foreground">
+                      <TableCell colSpan={10} className="h-24 text-center text-muted-foreground">
                         {t('No asset data available.')}
                       </TableCell>
                     </TableRow>
@@ -286,6 +287,7 @@ export default function AssetIndex({ assets, categories, employees, filters }: P
                         <TableCell className="text-center">{asset.brand || '-'}</TableCell>
                         <TableCell className="text-center">{asset.model || '-'}</TableCell>
                         <TableCell className="text-center">{asset.user?.name || '-'}</TableCell>
+                        <TableCell className="text-center">{(asset as any).current_location ? `${(asset as any).current_location.name} (${(asset as any).current_location.type})` : '-'}</TableCell>
                         <TableCell className="text-center">{t(asset.status)}</TableCell>
                         <TableCell className="text-center">{asset.last_used_at || '-'}</TableCell>
                         <TableCell className="text-center">
