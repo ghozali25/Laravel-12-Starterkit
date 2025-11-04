@@ -112,11 +112,7 @@ export default function Welcome() {
   }, [primaryColor]);
 
   const handleAuthRedirect = (mode: 'login' | 'register') => {
-    router.visit(route(mode), {
-      // Removed data: { initialMode: mode } as it's not needed and adds to the URL
-      preserveState: true,
-      preserveScroll: true,
-    });
+    router.get(route(mode));
   };
 
   return (
@@ -166,19 +162,19 @@ export default function Welcome() {
               </Link>
             ) : (
               <div className="flex flex-col sm:flex-row justify-center lg:justify-start items-center gap-4">
-                <Button
-                  onClick={() => handleAuthRedirect('login')}
-                  className="px-8 py-3 rounded-lg bg-[var(--primary)] text-white font-medium hover:bg-[var(--primary)]/90 transition-all transform hover:-translate-y-0.5 shadow-md hover:shadow-lg"
+                <Link
+                  href={route('login')}
+                  className="inline-flex items-center justify-center px-8 py-3 rounded-lg bg-[var(--primary)] text-white font-medium hover:bg-[var(--primary)]/90 transition-all transform hover:-translate-y-0.5 shadow-md hover:shadow-lg"
                 >
                   {t('Sign In')}
-                </Button>
+                </Link>
                 {registrationEnabled && (
-                  <Button
-                    onClick={() => handleAuthRedirect('register')}
-                    className="px-8 py-3 rounded-lg bg-[var(--primary)] text-white font-medium hover:bg-[var(--primary)]/90 transition-all transform hover:-translate-y-0.5 shadow-md hover:shadow-lg"
+                  <Link
+                    href={route('register')}
+                    className="inline-flex items-center justify-center px-8 py-3 rounded-lg bg-[var(--primary)] text-white font-medium hover:bg-[var(--primary)]/90 transition-all transform hover:-translate-y-0.5 shadow-md hover:shadow-lg"
                   >
                     {t('Register')}
-                  </Button>
+                  </Link>
                 )}
               </div>
             )}

@@ -29,7 +29,7 @@
 
     @routes
     @viteReactRefresh
-    @vite(['resources/js/app.tsx', "resources/js/pages/{$page['component']}.tsx"])
+    @vite(['resources/js/app.tsx'])
     @inertiaHead
     <!-- SweetAlert2 CDN for global usage in React -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

@@ -37,16 +37,9 @@ export default function AuthLayout({ children, title, description }: AuthLayoutP
         document.documentElement.style.setProperty('--color-primary', primaryColor);
         document.documentElement.style.setProperty('--primary-foreground', primaryForeground);
         document.documentElement.style.setProperty('--color-primary-foreground', primaryForeground);
-
-        // Skrip Lottie dihapus sementara untuk debugging
-        const script = document.createElement('script');
-        script.src = 'https://unpkg.com/@lottiefiles/dotlottie-wc@0.8.1/dist/dotlottie-wc.js';
-        script.type = 'module';
-        document.body.appendChild(script);
-
-        return () => {
-            document.body.removeChild(script);
-        };
+        
+        // Removed dynamic Lottie web component script injection to prevent SPA navigation issues
+        return () => {};
     }, [primaryColor, primaryForeground]);
 
     // Particles (local canvas) background
