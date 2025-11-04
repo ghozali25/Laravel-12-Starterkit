@@ -1,5 +1,5 @@
 import React from 'react';
-import { Head, router } from '@inertiajs/react';
+import { Head, router, usePage } from '@inertiajs/react';
 import AppLayout from '@/layouts/app-layout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -23,6 +23,7 @@ interface Backup {
   size: number;
   last_modified: number;
   download_url: string;
+  relative?: string;
 }
 
 interface Props {
@@ -38,6 +39,8 @@ function formatSize(bytes: number) {
 
 export default function BackupIndex({ backups }: Props) {
   const { t } = useTranslation(); // Use the translation hook
+  const page = usePage();
+  const isAdmin = Boolean((page.props as any)?.auth?.is_admin);
 
   const breadcrumbs: BreadcrumbItem[] = [
     { title: t('Backup'), href: '/backup' },
@@ -51,10 +54,18 @@ export default function BackupIndex({ backups }: Props) {
     });
   };
 
-  const handleDelete = (filename: string) => {
-    router.delete(`/backup/delete/${filename}`, {
+  const handleDelete = (file: string) => {
+    router.delete(`/backup/delete/${file}`, {
       onSuccess: () => toast.success('Backup deleted successfully'),
       onError: () => toast.error('Failed to delete backup'),
+      preserveScroll: true,
+    });
+  };
+
+  const handleRestore = (file: string) => {
+    router.post('/backup/restore', { file }, {
+      onSuccess: () => toast.success('Restore started / completed successfully'),
+      onError: () => toast.error('Failed to restore backup'),
       preserveScroll: true,
     });
   };
@@ -101,6 +112,28 @@ export default function BackupIndex({ backups }: Props) {
                         <Button variant="outline" size="sm">{t('Download')}</Button>
                       </a>
 
+                      {isAdmin && (
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button variant="outline" size="sm">{t('Restore')}</Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>{t('Restore this backup?')}</AlertDialogTitle>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>{t('Cancel')}</AlertDialogCancel>
+                              <AlertDialogAction
+                                className="bg-primary text-primary-foreground hover:bg-primary/90"
+                                onClick={() => handleRestore(backup.relative || backup.name)}
+                              >
+                                {t('Yes, Restore')}
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      )}
+
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
                           <Button variant="destructive" size="sm">{t('Delete')}</Button>
@@ -113,7 +146,7 @@ export default function BackupIndex({ backups }: Props) {
                             <AlertDialogCancel>{t('Cancel')}</AlertDialogCancel>
                             <AlertDialogAction
                               className="bg-destructive hover:bg-destructive/90"
-                              onClick={() => handleDelete(backup.name)}
+                              onClick={() => handleDelete(backup.relative || backup.name)}
                             >
                               {t('Yes, Delete')}
                             </AlertDialogAction>

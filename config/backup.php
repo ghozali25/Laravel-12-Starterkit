@@ -97,11 +97,9 @@ return [
             'dump' => [
                 'dump_binary_path' => env('DB_DUMP_COMMAND_PATH', ''), // penting!
                 'use_single_transaction' => true,
-                'timeout' => 60,
+                'timeout' => 300,
                 'exclude_tables' => [],
-                'extra_options' => [
-                    '--socket=/Applications/XAMPP/xamppfiles/var/mysql/mysql.sock',
-                ],
+                'extra_options' => [],
             ],
         ],
 
