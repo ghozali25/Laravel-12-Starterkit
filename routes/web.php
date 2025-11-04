@@ -22,6 +22,7 @@ use App\Http\Controllers\TicketController; // Import TicketController
 use App\Http\Controllers\LocationController; // Import LocationController
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\AssetMovementController;
 
 Route::get('/', function () {
     return Inertia::render('welcome');
@@ -80,6 +81,13 @@ Route::middleware(['auth', 'menu.permission'])->group(function () {
 
     // Locations Management Routes
     Route::resource('locations', LocationController::class);
+
+    // Asset Movements Routes
+    Route::resource('asset-movements', AssetMovementController::class)->parameters([
+        'asset-movements' => 'movement'
+    ]);
+    Route::post('asset-movements/{movement}/approve', [AssetMovementController::class, 'approve'])->name('asset-movements.approve');
+    Route::post('asset-movements/{movement}/reject', [AssetMovementController::class, 'reject'])->name('asset-movements.reject');
 
     // Ticket Management Routes
     Route::resource('tickets', TicketController::class);

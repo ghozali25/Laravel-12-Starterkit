@@ -41,6 +41,12 @@ interface PotentialManager {
   name: string;
 }
 
+interface LocationOption {
+  id: number;
+  name: string;
+  type: 'company' | 'branch' | 'site';
+}
+
 interface Props {
   employee?: Employee;
   roles: Role[];
@@ -48,9 +54,10 @@ interface Props {
   potentialManagers: PotentialManager[];
   divisions: Division[];
   avatar_url?: string | null; // Existing avatar URL
+  locations: LocationOption[];
 }
 
-export default function EmployeeForm({ employee, roles, currentRoles, potentialManagers, divisions, avatar_url }: Props) {
+export default function EmployeeForm({ employee, roles, currentRoles, potentialManagers, divisions, avatar_url, locations }: Props) {
   const { t } = useTranslation();
   const isEdit = !!employee;
   const page = usePage();
@@ -72,6 +79,7 @@ export default function EmployeeForm({ employee, roles, currentRoles, potentialM
     address: employee?.address || '',
     manager_id: employee?.manager_id || null,
     division_id: employee?.division_id || null,
+    location_id: (employee as any)?.location_id || null,
     password: '',
     roles: currentRoles || [],
     avatar: null as File | null, // For new avatar file
@@ -174,6 +182,7 @@ export default function EmployeeForm({ employee, roles, currentRoles, potentialM
     if (data.password) form.append('password', data.password);
     if (data.manager_id !== null && data.manager_id !== undefined) form.append('manager_id', String(data.manager_id));
     if (data.division_id !== null && data.division_id !== undefined) form.append('division_id', String(data.division_id));
+    if (data.location_id !== null && data.location_id !== undefined) form.append('location_id', String(data.location_id));
     // roles[]
     (data.roles || []).forEach((r) => form.append('roles[]', r));
     // avatar
@@ -407,6 +416,28 @@ export default function EmployeeForm({ employee, roles, currentRoles, potentialM
                     </SelectContent>
                   </Select>
                   {errors.division_id && <p className="text-sm text-red-500 mt-2">{errors.division_id}</p>}
+                </div>
+
+                {/* Location (Site/Branch/Company) */}
+                <div>
+                  <Label htmlFor="location_id" className="mb-2 block">{t('Location')}</Label>
+                  <Select
+                    value={data.location_id ? String(data.location_id) : '-1'}
+                    onValueChange={(value) => setData('location_id', value === '-1' ? null : Number(value))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder={t('Select Location')} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="-1">{t('— None —')}</SelectItem>
+                      {locations.map((loc) => (
+                        <SelectItem key={loc.id} value={String(loc.id)}>
+                          {loc.name} ({loc.type})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {errors.location_id && <p className="text-sm text-red-500 mt-2">{errors.location_id}</p>}
                 </div>
 
                 {/* Password */}

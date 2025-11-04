@@ -65,6 +65,7 @@ interface Employee {
     name: string;
   } | null;
   division?: Division | null;
+  location?: { id: number; name: string; type: 'company' | 'branch' | 'site' } | null;
   avatar_url?: string | null; // Add avatar_url
 }
 
@@ -337,6 +338,7 @@ export default function EmployeeIndex({ employees, filters, potentialManagers, d
                     <TableCell className="text-center">{employee.address || '-'}</TableCell>
                     <TableCell className="text-center">{employee.manager?.name || '-'}</TableCell>
                     <TableCell className="text-center">{employee.division?.name || '-'}</TableCell>
+                    <TableCell className="text-center">{employee.location ? `${employee.location.name} (${employee.location.type})` : '-'}</TableCell>
                     <TableCell className="text-center">
                       {employee.roles.length > 0 ? (
                         <div className="flex flex-wrap gap-1 justify-center">

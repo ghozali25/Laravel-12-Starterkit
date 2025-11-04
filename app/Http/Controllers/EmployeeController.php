@@ -22,7 +22,7 @@ class EmployeeController extends Controller
 {
     public function index(Request $request)
     {
-        $query = User::with(['roles', 'manager', 'division']) // Eager load manager and division relationships
+        $query = User::with(['roles', 'manager', 'division', 'location']) // Eager load manager, division, and location relationships
             ->whereHas('roles', function ($q) {
                 $q->where('name', '!=', 'admin'); // Hanya tampilkan non-admin
             });
@@ -68,6 +68,7 @@ class EmployeeController extends Controller
                 'roles' => $employee->roles,
                 'manager' => $employee->manager ? ['id' => $employee->manager->id, 'name' => $employee->manager->name] : null,
                 'division' => $employee->division ? ['id' => $employee->division->id, 'name' => $employee->division->name] : null,
+                'location' => $employee->location ? ['id' => $employee->location->id, 'name' => $employee->location->name, 'type' => $employee->location->type] : null,
                 'avatar_url' => $employee->getFirstMediaUrl('avatars'), // Get avatar URL
             ]),
             'filters' => $request->only('search', 'manager_id', 'division_id'),
@@ -94,11 +95,13 @@ class EmployeeController extends Controller
             $q->whereIn('name', ['manager', 'leader']);
         })->select('id', 'name')->get();
         $divisions = Division::all(); // Get all divisions
+        $locations = \App\Models\Location::select('id','name','type')->orderBy('type')->orderBy('name')->get();
 
         return Inertia::render('employees/Form', [
             'roles' => $roles,
             'potentialManagers' => $potentialManagers,
             'divisions' => $divisions, // Pass divisions to frontend
+            'locations' => $locations,
         ]);
     }
 
@@ -119,6 +122,7 @@ class EmployeeController extends Controller
             'roles.*' => ['required', Rule::exists('roles', 'name')],
             'manager_id' => ['nullable', 'exists:users,id'],
             'division_id' => ['nullable', 'exists:divisions,id'],
+            'location_id' => ['nullable', 'exists:locations,id'],
             'avatar' => ['nullable', 'image', 'max:2048'], // Add avatar validation
         ]);
 
@@ -132,6 +136,7 @@ class EmployeeController extends Controller
             'password' => Hash::make($validated['password']),
             'manager_id' => $validated['manager_id'] ?? null,
             'division_id' => $validated['division_id'] ?? null,
+            'location_id' => $validated['location_id'] ?? null,
         ]);
 
         $employee->assignRole($validated['roles']);
@@ -156,13 +161,15 @@ class EmployeeController extends Controller
         ->where('id', '!=', $employee->id)
         ->select('id', 'name')->get();
         $divisions = Division::all();
+        $locations = \App\Models\Location::select('id','name','type')->orderBy('type')->orderBy('name')->get();
 
         return Inertia::render('employees/Form', [
-            'employee' => $employee->only(['id', 'name', 'email', 'nik', 'personal_email', 'phone_number', 'address', 'manager_id', 'division_id']),
+            'employee' => $employee->only(['id', 'name', 'email', 'nik', 'personal_email', 'phone_number', 'address', 'manager_id', 'division_id', 'location_id']),
             'roles' => $roles,
             'currentRoles' => $employee->roles->pluck('name')->toArray(),
             'potentialManagers' => $potentialManagers,
             'divisions' => $divisions,
+            'locations' => $locations,
             'avatar_url' => $employee->getFirstMediaUrl('avatars'), // Pass existing avatar URL
         ]);
     }
@@ -184,6 +191,7 @@ class EmployeeController extends Controller
             'roles.*' => ['required', Rule::exists('roles', 'name')],
             'manager_id' => ['nullable', 'exists:users,id', Rule::notIn([$employee->id])],
             'division_id' => ['nullable', 'exists:divisions,id'],
+            'location_id' => ['nullable', 'exists:locations,id'],
             'avatar' => ['nullable', 'image', 'max:2048'], // Add avatar validation
             'remove_avatar' => ['boolean'], // Flag to remove existing avatar
         ]);
@@ -200,6 +208,7 @@ class EmployeeController extends Controller
                 : $employee->password,
             'manager_id' => $validated['manager_id'] ?? null,
             'division_id' => $validated['division_id'] ?? null,
+            'location_id' => $validated['location_id'] ?? null,
         ]);
 
         $employee->syncRoles($validated['roles']);

@@ -13,17 +13,25 @@ import { BreadcrumbItem, type Asset, type AssetCategory, type User, type Brand }
 import { useTranslation } from '@/lib/i18n';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
+interface LocationOption {
+  id: number;
+  name: string;
+  type: 'company' | 'branch' | 'site';
+}
+
 interface AssetFormProps {
   asset?: Asset;
   categories: AssetCategory[];
   employees: User[];
   // Removed 'brands: Brand[];' as it's redundant and available via categories[].brands
+  locations: LocationOption[];
 }
 
 // Define an explicit type for the form data
 interface AssetFormData {
   asset_category_id: number | string;
   user_id: number | null;
+  current_location_id: number | null;
   serial_number: string | null;
   brand: string | null;
   model: string | null;
@@ -35,14 +43,15 @@ interface AssetFormData {
   custom_fields_data: Record<string, any>; // Changed from unknown to any for useForm compatibility
 }
 
-export default function AssetForm({ asset, categories, employees }: AssetFormProps) { // Removed 'brands' from props
+export default function AssetForm({ asset, categories, employees, locations }: AssetFormProps) { // Removed 'brands' from props
   const { t } = useTranslation();
   const isEdit = !!asset;
 
   // Use the explicit AssetFormData type with useForm
-  const { data, setData, post, put, processing, errors } = useForm<AssetFormData>({
+  const { data, setData, post, put, processing, errors } = useForm<any>({
     asset_category_id: asset?.asset_category_id || '',
     user_id: asset?.user_id || null,
+    current_location_id: (asset as any)?.current_location_id || null,
     serial_number: asset?.serial_number || '',
     brand: asset?.brand || null,
     model: asset?.model || '',
@@ -104,6 +113,7 @@ export default function AssetForm({ asset, categories, employees }: AssetFormPro
       ...prevData,
       asset_category_id: Number(prevData.asset_category_id),
       user_id: prevData.user_id == null ? null : Number(prevData.user_id),
+      current_location_id: prevData.current_location_id == null ? null : Number(prevData.current_location_id),
     }));
 
     if (isEdit) {
@@ -117,6 +127,31 @@ export default function AssetForm({ asset, categories, employees }: AssetFormPro
     { title: t('Assets List'), href: '/assets' },
     { title: isEdit ? t('Edit Asset') : t('Add Asset'), href: '#' },
   ];
+
+  const locationSelect = (
+    <div className="space-y-2">
+      <Label htmlFor="current_location_id">{t('Location')}</Label>
+      <Select
+        value={data.current_location_id ? String(data.current_location_id) : '-1'}
+        onValueChange={(value) => setData('current_location_id', value === '-1' ? null : Number(value))}
+      >
+        <SelectTrigger>
+          <SelectValue placeholder={t('Select Location')} />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="-1">{t('— None —')}</SelectItem>
+          {locations.map((loc) => (
+            <SelectItem key={loc.id} value={String(loc.id)}>
+              {loc.name} ({loc.type})
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      {errors.current_location_id && (
+        <p className="text-sm text-red-500">{String(errors.current_location_id)}</p>
+      )}
+    </div>
+  );
 
   const assetStatuses = [
     { value: 'available', label: t('Available') },
@@ -186,6 +221,9 @@ export default function AssetForm({ asset, categories, employees }: AssetFormPro
                 </Select>
                 {errors.user_id && <p className="text-sm text-red-500">{errors.user_id}</p>}
               </div>
+
+              {/* Current Location */}
+              {locationSelect}
 
               {/* Serial Number */}
               <div className="space-y-2">

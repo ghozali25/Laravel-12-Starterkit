@@ -120,6 +120,14 @@ class MenuSeeder extends Seeder
             'order' => 3,
             'permission_name' => 'brand-view',
         ]);
+        Menu::create([ // New menu for Locations
+            'title' => 'Locations',
+            'icon' => 'MapPin', // Using MapPin icon for locations
+            'route' => '/locations',
+            'parent_id' => $assetMenu->id,
+            'order' => 4,
+            'permission_name' => 'asset-view', // Reuse asset permission for visibility
+        ]);
 
         // Settings (Parent Menu) - Urutan disesuaikan
         $settingsMenu = Menu::create([

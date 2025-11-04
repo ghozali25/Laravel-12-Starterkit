@@ -33,6 +33,7 @@ class User extends Authenticatable implements HasMedia
         'address', // Tambahkan ini
         'manager_id', // Tambahkan ini
         'division_id', // Tambahkan ini
+        'location_id', // Tambahkan ini
     ];
 
     /**
@@ -110,6 +111,14 @@ class User extends Authenticatable implements HasMedia
     public function division(): BelongsTo
     {
         return $this->belongsTo(Division::class);
+    }
+
+    /**
+     * Get the location (site/branch/company) the user belongs to.
+     */
+    public function location(): BelongsTo
+    {
+        return $this->belongsTo(Location::class);
     }
 
     /**

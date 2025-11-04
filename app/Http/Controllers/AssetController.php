@@ -22,7 +22,7 @@ class AssetController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Asset::with(['category', 'user']);
+        $query = Asset::with(['category', 'user', 'currentLocation']);
 
         if ($request->filled('search')) {
             $query->where(function ($q) use ($request) {
@@ -61,6 +61,7 @@ class AssetController extends Controller
                 'model' => $asset->model,
                 'category' => $asset->category ? ['id' => $asset->category->id, 'name' => $asset->category->name] : null,
                 'user' => $asset->user ? ['id' => $asset->user->id, 'name' => $asset->user->name] : null,
+                'current_location' => $asset->currentLocation ? ['id' => $asset->currentLocation->id, 'name' => $asset->currentLocation->name, 'type' => $asset->currentLocation->type] : null,
                 'purchase_date' => $asset->purchase_date ? $asset->purchase_date->format('Y-m-d') : null,
                 'warranty_end_date' => $asset->warranty_end_date ? $asset->warranty_end_date->format('Y-m-d') : null,
                 'status' => $asset->status,
@@ -85,11 +86,13 @@ class AssetController extends Controller
             $q->where('name', '!=', 'admin');
         })->select('id', 'name')->get();
         $brands = Brand::all(); // Fetch all brands (for initial state or if no category selected)
+        $locations = \App\Models\Location::select('id','name','type')->orderBy('type')->orderBy('name')->get();
 
         return Inertia::render('assets/Form', [
             'categories' => $categories,
             'employees' => $employees,
             'brands' => $brands, // Pass all brands to the frontend
+            'locations' => $locations,
         ]);
     }
 
@@ -101,6 +104,7 @@ class AssetController extends Controller
         $validated = $request->validate([
             'asset_category_id' => 'required|exists:asset_categories,id',
             'user_id' => 'nullable|exists:users,id',
+            'current_location_id' => 'nullable|exists:locations,id',
             'serial_number' => 'nullable|string|max:255|unique:assets,serial_number',
             'brand' => 'nullable|string|max:255',
             'model' => 'nullable|string|max:255',
@@ -132,12 +136,14 @@ class AssetController extends Controller
             $q->where('name', '!=', 'admin');
         })->select('id', 'name')->get();
         $brands = Brand::all(); // Fetch all brands
+        $locations = \App\Models\Location::select('id','name','type')->orderBy('type')->orderBy('name')->get();
 
         return Inertia::render('assets/Form', [
             'asset' => $asset->toArray(),
             'categories' => $categories,
             'employees' => $employees,
             'brands' => $brands, // Pass all brands to the frontend
+            'locations' => $locations,
         ]);
     }
 
@@ -149,6 +155,7 @@ class AssetController extends Controller
         $validated = $request->validate([
             'asset_category_id' => 'required|exists:asset_categories,id',
             'user_id' => 'nullable|exists:users,id',
+            'current_location_id' => 'nullable|exists:locations,id',
             'serial_number' => 'nullable|string|max:255|unique:assets,serial_number,' . $asset->id,
             'brand' => 'nullable|string|max:255',
             'model' => 'nullable|string|max:255',
