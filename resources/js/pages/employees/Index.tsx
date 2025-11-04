@@ -305,6 +305,7 @@ export default function EmployeeIndex({ employees, filters, potentialManagers, d
                 <TableHead className="text-center">{t('Address')}</TableHead>
                 <TableHead className="text-center">{t('Reports To')}</TableHead>
                 <TableHead className="text-center">{t('Division')}</TableHead>
+                <TableHead className="text-center">{t('Location')}</TableHead>
                 <TableHead className="text-center">{t('Roles')}</TableHead>
                 <TableHead className="text-center">{t('Actions')}</TableHead>
               </TableRow>
@@ -312,7 +313,7 @@ export default function EmployeeIndex({ employees, filters, potentialManagers, d
             <TableBody>
               {employees.data.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={12} className="h-24 text-center text-muted-foreground">
+                  <TableCell colSpan={13} className="h-24 text-center text-muted-foreground">
                     {t('No employee data available.')}
                   </TableCell>
                 </TableRow>
