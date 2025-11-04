@@ -38,7 +38,7 @@ export default function Login({ status, canResetPassword, recaptchaSiteKey }: Lo
         };
     }, [reset]);
 
-    // Load Google reCAPTCHA v2 script
+    // Load Google reCAPTCHA v2 script (explicit mode)
     useEffect(() => {
         if (!recaptchaSiteKey) return;
         const scriptId = 'recaptcha-api-js';
@@ -48,7 +48,7 @@ export default function Login({ status, canResetPassword, recaptchaSiteKey }: Lo
         }
         const script = document.createElement('script');
         script.id = scriptId;
-        script.src = 'https://www.google.com/recaptcha/api.js';
+        script.src = 'https://www.google.com/recaptcha/api.js?render=explicit';
         script.async = true;
         script.defer = true;
         script.onload = () => setCaptchaReady(true);
@@ -74,7 +74,8 @@ export default function Login({ status, canResetPassword, recaptchaSiteKey }: Lo
     useEffect(() => {
         if (!recaptchaSiteKey || !captchaReady || widgetId !== null) return;
         const grecaptcha = (window as any).grecaptcha;
-        if (grecaptcha && captchaRef.current) {
+        const tryRender = () => {
+            if (!grecaptcha || typeof grecaptcha.render !== 'function' || !captchaRef.current) return false;
             const id = grecaptcha.render(captchaRef.current, {
                 sitekey: recaptchaSiteKey,
                 callback: (token: string) => {
@@ -83,7 +84,15 @@ export default function Login({ status, canResetPassword, recaptchaSiteKey }: Lo
                 },
             });
             setWidgetId(id);
-        }
+            return true;
+        };
+        // First attempt
+        if (tryRender()) return;
+        // Retry once shortly after in case script namespace initializes late
+        const timeout = window.setTimeout(() => {
+            tryRender();
+        }, 200);
+        return () => window.clearTimeout(timeout);
     }, [recaptchaSiteKey, captchaReady, widgetId, setData, errors, clearErrors]);
 
     const submit: FormEventHandler = (e) => {
