@@ -13,6 +13,7 @@ class Asset extends Model
     protected $fillable = [
         'asset_category_id',
         'user_id',
+        'current_location_id',
         'serial_number',
         'brand',
         'model',
@@ -45,5 +46,13 @@ class Asset extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Get the current location of the asset.
+     */
+    public function currentLocation(): BelongsTo
+    {
+        return $this->belongsTo(Location::class, 'current_location_id');
     }
 }

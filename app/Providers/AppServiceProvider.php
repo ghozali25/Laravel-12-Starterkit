@@ -10,6 +10,7 @@ use App\Models\Division;
 use App\Models\AssetCategory;
 use App\Models\Asset;
 use App\Models\Brand; // Import the new Brand model
+use App\Models\Location;
 use Spatie\Permission\Models\Role;
 use App\Observers\GlobalActivityLogger;
 use Illuminate\Support\ServiceProvider;
@@ -44,5 +45,6 @@ class AppServiceProvider extends ServiceProvider
         AssetCategory::observe(GlobalActivityLogger::class);
         Asset::observe(GlobalActivityLogger::class);
         Brand::observe(GlobalActivityLogger::class); // Add Brand observer
+        Location::observe(GlobalActivityLogger::class);
     }
 }

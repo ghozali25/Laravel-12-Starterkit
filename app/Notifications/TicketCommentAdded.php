@@ -20,7 +20,19 @@ class TicketCommentAdded extends Notification implements ShouldQueue
 
     public function via(object $notifiable): array
     {
-        return ['database'];
+        return ['database', 'mail'];
+    }
+
+    public function toMail(object $notifiable): MailMessage
+    {
+        return (new MailMessage)
+            ->subject('Komentar Baru pada Ticket #' . ($this->ticket->ticket_number ?? $this->ticket->id))
+            ->greeting('Halo ' . ($notifiable->name ?? ''))
+            ->line('Ada komentar baru pada ticket: ' . $this->ticket->title)
+            ->line('Komentar oleh: ' . ($this->comment->user?->name ?? ''))
+            ->line('Isi komentar: "' . $this->comment->comment . '"')
+            ->action('Lihat Ticket', route('tickets.show', $this->ticket))
+            ->line('Terima kasih.');
     }
 
     public function toArray(object $notifiable): array

@@ -19,6 +19,7 @@ use App\Http\Controllers\AssetCategoryController;
 use App\Http\Controllers\AssetController;
 use App\Http\Controllers\BrandController; // Import BrandController
 use App\Http\Controllers\TicketController; // Import TicketController
+use App\Http\Controllers\LocationController; // Import LocationController
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\NotificationController;
 
@@ -76,6 +77,9 @@ Route::middleware(['auth', 'menu.permission'])->group(function () {
 
     // Brand Management Routes
     Route::resource('brands', BrandController::class); // New: Brand Management Routes
+
+    // Locations Management Routes
+    Route::resource('locations', LocationController::class);
 
     // Ticket Management Routes
     Route::resource('tickets', TicketController::class);
