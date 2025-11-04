@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 use Symfony\Component\Process\Process;
 use Inertia\Inertia;
@@ -153,28 +154,39 @@ class BackupController extends Controller
             return redirect()->back()->with('error', 'Tidak ditemukan berkas .sql di dalam backup.');
         }
 
-        // Build mysql client command
+        // Build mysql client command (Windows-friendly quoting)
         $binPath = rtrim(env('DB_DUMP_COMMAND_PATH', ''), "\\/\r\n ");
-        $mysqlBin = $binPath ? ($binPath . DIRECTORY_SEPARATOR . 'mysql') : 'mysql';
+        if ($binPath !== '') {
+            // Normalize to forward slashes to avoid escape issues
+            $binPath = str_replace('\\', '/', $binPath);
+        }
+        $mysqlBin = $binPath ? ($binPath . '/mysql.exe') : 'mysql';
 
-        $host = env('DB_HOST', '127.0.0.1');
-        $port = env('DB_PORT', '3306');
-        $user = env('DB_USERNAME', 'root');
-        $pass = env('DB_PASSWORD', '');
-        $db   = env('DB_DATABASE', 'laravel');
+        $host = (string) env('DB_HOST', '127.0.0.1');
+        $port = (string) env('DB_PORT', '3306');
+        $user = (string) env('DB_USERNAME', 'root');
+        $pass = (string) env('DB_PASSWORD', '');
+        $db   = (string) env('DB_DATABASE', 'laravel');
 
-        // Windows: use shell redirection to feed the SQL file
-        $cmd = sprintf('"%s" --host=%s --port=%s --user=%s %s %s < "%s"',
-            $mysqlBin,
-            escapeshellarg($host),
-            escapeshellarg((string)$port),
-            escapeshellarg($user),
-            $pass !== '' ? ('--password=' . escapeshellarg($pass)) : '',
-            escapeshellarg($db),
-            $sqlFile
-        );
+        // Use only double-quotes; Windows cmd doesn't honor single quotes
+        $cmd = '"' . $mysqlBin . '"'
+            . ' --host="' . $host . '"'
+            . ' --port="' . $port . '"'
+            . ' --user="' . $user . '"'
+            . ($pass !== '' ? (' --password="' . $pass . '"') : '')
+            . ' "' . $db . '"'
+            . ' < "' . str_replace('\\', '/', $sqlFile) . '"';
 
-        // Run through shell so that '<' redirection works on Windows
+        // Log and run through shell so that '<' redirection works on Windows
+        Log::info('[Backup Restore] Starting restore', [
+            'zip' => $zipPath,
+            'sql' => $sqlFile,
+            'mysql' => $mysqlBin,
+            'host' => $host,
+            'port' => $port,
+            'db' => $db,
+        ]);
+
         $process = Process::fromShellCommandline('cmd /c ' . $cmd);
         $process->setTimeout(600);
         $process->run();
@@ -183,9 +195,17 @@ class BackupController extends Controller
         try { File::deleteDirectory($tempDir); } catch (\Throwable $e) {}
 
         if (!$process->isSuccessful()) {
-            return redirect()->back()->with('error', 'Restore gagal: ' . $process->getErrorOutput());
+            Log::error('[Backup Restore] Failed', [
+                'exit_code' => $process->getExitCode(),
+                'error' => $process->getErrorOutput(),
+                'output' => $process->getOutput(),
+            ]);
+            return redirect()->back()->with('error', 'Restore gagal: ' . trim($process->getErrorOutput() ?: $process->getOutput()));
         }
 
+        Log::info('[Backup Restore] Success', [
+            'output' => $process->getOutput(),
+        ]);
         return redirect()->back()->with('success', 'Database berhasil direstore dari backup.');
     }
 }
