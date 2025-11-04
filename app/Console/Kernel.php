@@ -4,6 +4,8 @@ namespace App\Console;
 
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
+use App\Models\Loan;
+use Illuminate\Support\Carbon;
 
 class Kernel extends ConsoleKernel
 {
@@ -15,6 +17,14 @@ class Kernel extends ConsoleKernel
         // Run metrics rebuild daily at 00:05 WIB
         $schedule->command('metrics:rebuild-daily-ticket-status')
             ->dailyAt('00:05');
+
+        // Mark overdue loans daily at 00:10
+        $schedule->call(function () {
+            Loan::where('status', 'ongoing')
+                ->whereNotNull('due_at')
+                ->where('due_at', '<', now())
+                ->update(['status' => 'overdue']);
+        })->dailyAt('00:10');
     }
 
     /**

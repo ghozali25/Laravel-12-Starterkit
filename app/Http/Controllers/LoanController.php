@@ -6,6 +6,8 @@ use App\Models\Asset;
 use App\Models\Loan;
 use App\Models\LoanItem;
 use App\Models\User;
+use App\Notifications\LoanCreated;
+use App\Notifications\LoanItemReturned;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -98,6 +100,15 @@ class LoanController extends Controller
                     'condition_out' => null,
                 ]);
             }
+
+            // Notify borrower and staff via email (if mail configured)
+            $loan->load(['borrower','loanedBy','items.asset']);
+            if ($loan->borrower) {
+                $loan->borrower->notify(new LoanCreated($loan));
+            }
+            if ($loan->loanedBy && $loan->loaned_by_user_id !== $loan->borrower_user_id) {
+                $loan->loanedBy->notify(new LoanCreated($loan));
+            }
         });
 
         return redirect()->route('loans.index')->with('success', 'Peminjaman berhasil dibuat.');
@@ -121,6 +132,15 @@ class LoanController extends Controller
                 'status' => 'returned',
                 'returned_at' => now(),
             ]);
+        }
+
+        // Notify borrower and staff about item return
+        $item->load(['loan.borrower','loan.loanedBy','asset']);
+        if ($item->loan?->borrower) {
+            $item->loan->borrower->notify(new LoanItemReturned($item));
+        }
+        if ($item->loan?->loanedBy && $item->loan->loaned_by_user_id !== $item->loan->borrower_user_id) {
+            $item->loan->loanedBy->notify(new LoanItemReturned($item));
         }
 
         return back()->with('success', 'Item berhasil dikembalikan.');
