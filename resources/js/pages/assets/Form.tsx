@@ -52,7 +52,7 @@ export default function AssetForm({ asset, categories, employees, locations, ven
   const isEdit = !!asset;
 
   // Use the explicit AssetFormData type with useForm
-  const { data, setData, post, put, processing, errors } = useForm<any>({
+  const { data, setData, post, put, processing, errors } = useForm<AssetFormData>({
     asset_category_id: asset?.asset_category_id || '',
     user_id: asset?.user_id || null,
     vendor_id: (asset as any)?.vendor_id || null,
@@ -79,7 +79,7 @@ export default function AssetForm({ asset, categories, employees, locations, ven
       
       // Reset custom fields if category changes and it's not an edit of the same category
       if (category && category.id !== asset?.asset_category_id) {
-        setData(prevData => ({ ...prevData, custom_fields_data: {} }));
+        setData((prevData: AssetFormData) => ({ ...prevData, custom_fields_data: {} }));
       }
 
       // Filter brands based on selected category
@@ -91,12 +91,12 @@ export default function AssetForm({ asset, categories, employees, locations, ven
     } else {
       setSelectedCategory(null);
       setFilteredBrands([]);
-      setData(prevData => ({ ...prevData, custom_fields_data: {} }));
+      setData((prevData: AssetFormData) => ({ ...prevData, custom_fields_data: {} }));
     }
   }, [data.asset_category_id, categories, asset?.asset_category_id, setData]);
 
   const handleCustomFieldChange = (key: string, value: unknown) => {
-    setData((prevData) => ({
+    setData((prevData: AssetFormData) => ({
       ...prevData,
       custom_fields_data: {
         ...prevData.custom_fields_data,
@@ -106,7 +106,7 @@ export default function AssetForm({ asset, categories, employees, locations, ven
   };
 
   const handleStatusChange = (value: string) => {
-    setData((prevData) => ({ ...prevData, status: value as AssetFormData['status'] }));
+    setData((prevData: AssetFormData) => ({ ...prevData, status: value as AssetFormData['status'] }));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -114,7 +114,7 @@ export default function AssetForm({ asset, categories, employees, locations, ven
 
     // The `data` object from useForm is automatically sent.
     // We only need to ensure asset_category_id and user_id are numbers/null.
-    setData((prevData) => ({
+    setData((prevData: AssetFormData) => ({
       ...prevData,
       asset_category_id: Number(prevData.asset_category_id),
       user_id: prevData.user_id == null ? null : Number(prevData.user_id),
@@ -139,7 +139,10 @@ export default function AssetForm({ asset, categories, employees, locations, ven
       <Label htmlFor="current_location_id">{t('Location')}</Label>
       <Select
         value={data.current_location_id ? String(data.current_location_id) : '-1'}
-        onValueChange={(value) => setData('current_location_id', value === '-1' ? null : Number(value))}
+        onValueChange={(value) => setData((prev: AssetFormData) => ({
+          ...prev,
+          current_location_id: value === '-1' ? null : Number(value),
+        }))}
       >
         <SelectTrigger>
           <SelectValue placeholder={t('Select Location')} />
@@ -153,8 +156,8 @@ export default function AssetForm({ asset, categories, employees, locations, ven
           ))}
         </SelectContent>
       </Select>
-      {errors.current_location_id && (
-        <p className="text-sm text-red-500">{String(errors.current_location_id)}</p>
+      {(errors as any).current_location_id && (
+        <p className="text-sm text-red-500">{String((errors as any).current_location_id)}</p>
       )}
     </div>
   );
@@ -190,7 +193,7 @@ export default function AssetForm({ asset, categories, employees, locations, ven
                 <Label htmlFor="asset_category_id">{t('Asset Category')}</Label>
                 <Select
                   value={String(data.asset_category_id)}
-                  onValueChange={(value) => setData('asset_category_id', value)}
+                  onValueChange={(value) => setData((prev: AssetFormData) => ({ ...prev, asset_category_id: value }))}
                 >
                   <SelectTrigger id="asset_category_id">
                     <SelectValue placeholder={t('Select an asset category')} />
@@ -203,7 +206,7 @@ export default function AssetForm({ asset, categories, employees, locations, ven
                     ))}
                   </SelectContent>
                 </Select>
-                {errors.asset_category_id && <p className="text-sm text-red-500">{errors.asset_category_id}</p>}
+                {(errors as any).asset_category_id && <p className="text-sm text-red-500">{String((errors as any).asset_category_id)}</p>}
               </div>
 
               {/* Assigned To (Employee) */}
@@ -211,7 +214,7 @@ export default function AssetForm({ asset, categories, employees, locations, ven
                 <Label htmlFor="user_id">{t('Assigned To (Employee)')}</Label>
                 <Select
                   value={data.user_id ? String(data.user_id) : '-1'}
-                  onValueChange={(value) => setData('user_id', value === '-1' ? null : Number(value))}
+                  onValueChange={(value) => setData((prev: AssetFormData) => ({ ...prev, user_id: value === '-1' ? null : Number(value) }))}
                 >
                   <SelectTrigger id="user_id">
                     <SelectValue placeholder={t('Select an employee')} />
@@ -225,7 +228,7 @@ export default function AssetForm({ asset, categories, employees, locations, ven
                     ))}
                   </SelectContent>
                 </Select>
-                {errors.user_id && <p className="text-sm text-red-500">{errors.user_id}</p>}
+                {(errors as any).user_id && <p className="text-sm text-red-500">{String((errors as any).user_id)}</p>}
               </div>
 
               {/* Vendor */}
@@ -233,7 +236,7 @@ export default function AssetForm({ asset, categories, employees, locations, ven
                 <Label htmlFor="vendor_id">{t('Vendor')}</Label>
                 <Select
                   value={data.vendor_id ? String(data.vendor_id) : '-1'}
-                  onValueChange={(value) => setData('vendor_id', value === '-1' ? null : Number(value))}
+                  onValueChange={(value) => setData((prev: AssetFormData) => ({ ...prev, vendor_id: value === '-1' ? null : Number(value) }))}
                 >
                   <SelectTrigger id="vendor_id">
                     <SelectValue placeholder={t('Select a vendor')} />
@@ -262,10 +265,10 @@ export default function AssetForm({ asset, categories, employees, locations, ven
                   id="serial_number"
                   placeholder={t('Enter serial number')}
                   value={data.serial_number || ''}
-                  onChange={(e) => setData('serial_number', e.target.value)}
-                  className={errors.serial_number ? 'border-red-500' : ''}
+                  onChange={(e) => setData((prev: AssetFormData) => ({ ...prev, serial_number: e.target.value }))}
+                  className={(errors as any).serial_number ? 'border-red-500' : ''}
                 />
-                {errors.serial_number && <p className="text-sm text-red-500">{errors.serial_number}</p>}
+                {(errors as any).serial_number && <p className="text-sm text-red-500">{String((errors as any).serial_number)}</p>}
               </div>
 
               {/* Brand - Now a Select */}
@@ -273,7 +276,7 @@ export default function AssetForm({ asset, categories, employees, locations, ven
                 <Label htmlFor="brand">{t('Brand')}</Label>
                 <Select
                   value={data.brand || '__NONE_BRAND__'} // Use a distinct placeholder value
-                  onValueChange={(value) => setData('brand', value === '__NONE_BRAND__' ? null : value)}
+                  onValueChange={(value) => setData((prev: AssetFormData) => ({ ...prev, brand: value === '__NONE_BRAND__' ? null : value }))}
                   disabled={!selectedCategory} // Only disable if no category is selected
                 >
                   <SelectTrigger id="brand">
@@ -290,7 +293,7 @@ export default function AssetForm({ asset, categories, employees, locations, ven
                     )}
                   </SelectContent>
                 </Select>
-                {errors.brand && <p className="text-sm text-red-500">{errors.brand}</p>}
+                {(errors as any).brand && <p className="text-sm text-red-500">{String((errors as any).brand)}</p>}
               </div>
 
               {/* Model */}
@@ -300,10 +303,10 @@ export default function AssetForm({ asset, categories, employees, locations, ven
                   id="model"
                   placeholder={t('Enter model')}
                   value={data.model || ''}
-                  onChange={(e) => setData('model', e.target.value)}
-                  className={errors.model ? 'border-red-500' : ''}
+                  onChange={(e) => setData((prev: AssetFormData) => ({ ...prev, model: e.target.value }))}
+                  className={(errors as any).model ? 'border-red-500' : ''}
                 />
-                {errors.model && <p className="text-sm text-red-500">{errors.model}</p>}
+                {(errors as any).model && <p className="text-sm text-red-500">{String((errors as any).model)}</p>}
               </div>
 
               {/* Purchase Date */}
@@ -313,10 +316,10 @@ export default function AssetForm({ asset, categories, employees, locations, ven
                   id="purchase_date"
                   type="date"
                   value={data.purchase_date || ''}
-                  onChange={(e) => setData('purchase_date', e.target.value)}
-                  className={errors.purchase_date ? 'border-red-500' : ''}
+                  onChange={(e) => setData((prev: AssetFormData) => ({ ...prev, purchase_date: e.target.value }))}
+                  className={(errors as any).purchase_date ? 'border-red-500' : ''}
                 />
-                {errors.purchase_date && <p className="text-sm text-red-500">{errors.purchase_date}</p>}
+                {(errors as any).purchase_date && <p className="text-sm text-red-500">{String((errors as any).purchase_date)}</p>}
               </div>
 
               {/* Warranty End Date */}
@@ -326,10 +329,10 @@ export default function AssetForm({ asset, categories, employees, locations, ven
                   id="warranty_end_date"
                   type="date"
                   value={data.warranty_end_date || ''}
-                  onChange={(e) => setData('warranty_end_date', e.target.value)}
-                  className={errors.warranty_end_date ? 'border-red-500' : ''}
+                  onChange={(e) => setData((prev: AssetFormData) => ({ ...prev, warranty_end_date: e.target.value }))}
+                  className={(errors as any).warranty_end_date ? 'border-red-500' : ''}
                 />
-                {errors.warranty_end_date && <p className="text-sm text-red-500">{errors.warranty_end_date}</p>}
+                {(errors as any).warranty_end_date && <p className="text-sm text-red-500">{String((errors as any).warranty_end_date)}</p>}
               </div>
 
               {/* Status */}
@@ -350,7 +353,7 @@ export default function AssetForm({ asset, categories, employees, locations, ven
                     ))}
                   </SelectContent>
                 </Select>
-                {errors.status && <p className="text-sm text-red-500">{errors.status}</p>}
+                {(errors as any).status && <p className="text-sm text-red-500">{String((errors as any).status)}</p>}
               </div>
 
               {/* Notes */}
@@ -360,10 +363,10 @@ export default function AssetForm({ asset, categories, employees, locations, ven
                   id="notes"
                   placeholder={t('Any additional notes about the asset')}
                   value={data.notes || ''}
-                  onChange={(e) => setData('notes', e.target.value)}
-                  className={errors.notes ? 'border-red-500' : ''}
+                  onChange={(e) => setData((prev: AssetFormData) => ({ ...prev, notes: e.target.value }))}
+                  className={(errors as any).notes ? 'border-red-500' : ''}
                 />
-                {errors.notes && <p className="text-sm text-red-500">{errors.notes}</p>}
+                {(errors as any).notes && <p className="text-sm text-red-500">{String((errors as any).notes)}</p>}
               </div>
 
               {/* Dynamic Custom Fields */}
