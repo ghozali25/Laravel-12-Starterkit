@@ -209,12 +209,18 @@ class BackupController extends Controller
 
         // Build params (no shell). Use -e to execute SOURCE command.
         $sqlPath = str_replace('\\', '/', $sqlFile);
-        $args = [
-            $mysqlBin,
-            '--host=' . $host,
-            '--port=' . $port,
-            '--user=' . $user,
-        ];
+        $protocol = strtolower(trim((string) env('DB_MYSQL_PROTOCOL', '')));
+        $socket = (string) env('DB_SOCKET', '');
+        $args = [ $mysqlBin, '--user=' . $user ];
+        if ($protocol === 'pipe') {
+            $args[] = '--protocol=pipe';
+            if ($socket !== '') { $args[] = '--socket=' . $socket; }
+        } else {
+            // default to TCP
+            if ($protocol !== '' && $protocol !== 'tcp') { $args[] = '--protocol=' . $protocol; }
+            $args[] = '--host=' . $host;
+            $args[] = '--port=' . $port;
+        }
         if ($pass !== '') { $args[] = '--password=' . $pass; }
         $args[] = $db;
         $args[] = '-e';
@@ -228,6 +234,8 @@ class BackupController extends Controller
             'host' => $host,
             'port' => $port,
             'db' => $db,
+            'protocol' => $protocol ?: 'tcp(default)',
+            'socket' => $socket,
         ]);
 
         $process = new Process($args);
