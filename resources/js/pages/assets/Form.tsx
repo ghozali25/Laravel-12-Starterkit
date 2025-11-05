@@ -19,18 +19,22 @@ interface LocationOption {
   type: 'company' | 'branch' | 'site';
 }
 
+interface VendorLite { id: number; name: string }
+
 interface AssetFormProps {
   asset?: Asset;
   categories: AssetCategory[];
   employees: User[];
   // Removed 'brands: Brand[];' as it's redundant and available via categories[].brands
   locations: LocationOption[];
+  vendors: VendorLite[];
 }
 
 // Define an explicit type for the form data
 interface AssetFormData {
   asset_category_id: number | string;
   user_id: number | null;
+  vendor_id: number | null;
   current_location_id: number | null;
   serial_number: string | null;
   brand: string | null;
@@ -43,7 +47,7 @@ interface AssetFormData {
   custom_fields_data: Record<string, any>; // Changed from unknown to any for useForm compatibility
 }
 
-export default function AssetForm({ asset, categories, employees, locations }: AssetFormProps) { // Removed 'brands' from props
+export default function AssetForm({ asset, categories, employees, locations, vendors }: AssetFormProps) { // Removed 'brands' from props
   const { t } = useTranslation();
   const isEdit = !!asset;
 
@@ -51,6 +55,7 @@ export default function AssetForm({ asset, categories, employees, locations }: A
   const { data, setData, post, put, processing, errors } = useForm<any>({
     asset_category_id: asset?.asset_category_id || '',
     user_id: asset?.user_id || null,
+    vendor_id: (asset as any)?.vendor_id || null,
     current_location_id: (asset as any)?.current_location_id || null,
     serial_number: asset?.serial_number || '',
     brand: asset?.brand || null,
@@ -113,6 +118,7 @@ export default function AssetForm({ asset, categories, employees, locations }: A
       ...prevData,
       asset_category_id: Number(prevData.asset_category_id),
       user_id: prevData.user_id == null ? null : Number(prevData.user_id),
+      vendor_id: prevData.vendor_id == null ? null : Number(prevData.vendor_id),
       current_location_id: prevData.current_location_id == null ? null : Number(prevData.current_location_id),
     }));
 
@@ -220,6 +226,30 @@ export default function AssetForm({ asset, categories, employees, locations }: A
                   </SelectContent>
                 </Select>
                 {errors.user_id && <p className="text-sm text-red-500">{errors.user_id}</p>}
+              </div>
+
+              {/* Vendor */}
+              <div className="space-y-2">
+                <Label htmlFor="vendor_id">{t('Vendor')}</Label>
+                <Select
+                  value={data.vendor_id ? String(data.vendor_id) : '-1'}
+                  onValueChange={(value) => setData('vendor_id', value === '-1' ? null : Number(value))}
+                >
+                  <SelectTrigger id="vendor_id">
+                    <SelectValue placeholder={t('Select a vendor')} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="-1">{t('— None —')}</SelectItem>
+                    {vendors.map((v) => (
+                      <SelectItem key={v.id} value={String(v.id)}>
+                        {v.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {(errors as any).vendor_id && (
+                  <p className="text-sm text-red-500">{String((errors as any).vendor_id)}</p>
+                )}
               </div>
 
               {/* Current Location */}

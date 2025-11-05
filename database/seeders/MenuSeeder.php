@@ -128,10 +128,10 @@ class MenuSeeder extends Seeder
             'order' => 4,
             'permission_name' => 'asset-view', // Reuse asset permission for visibility
         ]);
-        Menu::create([ // New menu for Loans
-            'title' => 'Loans',
-            'icon' => 'HandCoins', // Using HandCoins icon for loans
-            'route' => '/loans',
+        Menu::create([ // New menu for Vendors
+            'title' => 'Vendors',
+            'icon' => 'Factory', // Using Factory icon for vendors
+            'route' => '/vendors',
             'parent_id' => $assetMenu->id,
             'order' => 5,
             'permission_name' => 'asset-view',

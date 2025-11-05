@@ -6,6 +6,7 @@ use App\Models\Asset;
 use App\Models\AssetCategory;
 use App\Models\User;
 use App\Models\Brand; // Import Brand model
+use App\Models\Vendor;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Carbon\Carbon;
@@ -22,7 +23,7 @@ class AssetController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Asset::with(['category', 'user', 'currentLocation']);
+        $query = Asset::with(['category', 'user', 'currentLocation', 'vendor']);
 
         if ($request->filled('search')) {
             $query->where(function ($q) use ($request) {
@@ -57,6 +58,7 @@ class AssetController extends Controller
             $q->where('name', '!=', 'admin');
         })->select('id', 'name')->get();
         $locations = \App\Models\Location::select('id','name','type')->orderBy('type')->orderBy('name')->get();
+        $vendors = Vendor::select('id','name')->get();
 
         return Inertia::render('assets/Index', [
             'assets' => $assets->through(fn ($asset) => [
@@ -67,6 +69,7 @@ class AssetController extends Controller
                 'category' => $asset->category ? ['id' => $asset->category->id, 'name' => $asset->category->name] : null,
                 'user' => $asset->user ? ['id' => $asset->user->id, 'name' => $asset->user->name] : null,
                 'current_location' => $asset->currentLocation ? ['id' => $asset->currentLocation->id, 'name' => $asset->currentLocation->name, 'type' => $asset->currentLocation->type] : null,
+                'vendor' => $asset->vendor ? ['id' => $asset->vendor->id, 'name' => $asset->vendor->name] : null,
                 'purchase_date' => $asset->purchase_date ? $asset->purchase_date->format('Y-m-d') : null,
                 'warranty_end_date' => $asset->warranty_end_date ? $asset->warranty_end_date->format('Y-m-d') : null,
                 'status' => $asset->status,
@@ -78,6 +81,7 @@ class AssetController extends Controller
             'categories' => $categories,
             'employees' => $employees,
             'locations' => $locations,
+            'vendors' => $vendors,
             'filters' => $request->only('search', 'category_id', 'user_id', 'location_id'),
         ]);
     }
@@ -93,12 +97,14 @@ class AssetController extends Controller
         })->select('id', 'name')->get();
         $brands = Brand::all(); // Fetch all brands (for initial state or if no category selected)
         $locations = \App\Models\Location::select('id','name','type')->orderBy('type')->orderBy('name')->get();
+        $vendors = Vendor::select('id','name')->get();
 
         return Inertia::render('assets/Form', [
             'categories' => $categories,
             'employees' => $employees,
             'brands' => $brands, // Pass all brands to the frontend
             'locations' => $locations,
+            'vendors' => $vendors,
         ]);
     }
 
@@ -110,6 +116,7 @@ class AssetController extends Controller
         $validated = $request->validate([
             'asset_category_id' => 'required|exists:asset_categories,id',
             'user_id' => 'nullable|exists:users,id',
+            'vendor_id' => 'nullable|exists:vendors,id',
             'current_location_id' => 'nullable|exists:locations,id',
             'serial_number' => 'nullable|string|max:255|unique:assets,serial_number',
             'brand' => 'nullable|string|max:255',
@@ -136,13 +143,14 @@ class AssetController extends Controller
         if (!Auth::user()->hasRole('admin')) {
             abort(403, 'Anda tidak memiliki izin untuk mengedit aset.');
         }
-        $asset->load('category', 'user');
+        $asset->load('category', 'user', 'vendor');
         $categories = AssetCategory::with('brands')->get(); // Eager load brands
         $employees = User::whereHas('roles', function ($q) {
             $q->where('name', '!=', 'admin');
         })->select('id', 'name')->get();
         $brands = Brand::all(); // Fetch all brands
         $locations = \App\Models\Location::select('id','name','type')->orderBy('type')->orderBy('name')->get();
+        $vendors = Vendor::select('id','name')->get();
 
         return Inertia::render('assets/Form', [
             'asset' => $asset->toArray(),
@@ -150,6 +158,7 @@ class AssetController extends Controller
             'employees' => $employees,
             'brands' => $brands, // Pass all brands to the frontend
             'locations' => $locations,
+            'vendors' => $vendors,
         ]);
     }
 
@@ -161,6 +170,7 @@ class AssetController extends Controller
         $validated = $request->validate([
             'asset_category_id' => 'required|exists:asset_categories,id',
             'user_id' => 'nullable|exists:users,id',
+            'vendor_id' => 'nullable|exists:vendors,id',
             'current_location_id' => 'nullable|exists:locations,id',
             'serial_number' => 'nullable|string|max:255|unique:assets,serial_number,' . $asset->id,
             'brand' => 'nullable|string|max:255',

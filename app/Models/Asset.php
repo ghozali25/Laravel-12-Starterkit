@@ -13,6 +13,7 @@ class Asset extends Model
     protected $fillable = [
         'asset_category_id',
         'user_id',
+        'vendor_id',
         'current_location_id',
         'serial_number',
         'brand',
@@ -54,5 +55,13 @@ class Asset extends Model
     public function currentLocation(): BelongsTo
     {
         return $this->belongsTo(Location::class, 'current_location_id');
+    }
+
+    /**
+     * Get the vendor of the asset.
+     */
+    public function vendor(): BelongsTo
+    {
+        return $this->belongsTo(Vendor::class);
     }
 }

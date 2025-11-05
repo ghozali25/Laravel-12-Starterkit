@@ -348,6 +348,7 @@ export default function AssetIndex({ assets, categories, employees, locations, f
                     <TableHead className="text-center">{t('Brand')}</TableHead>
                     <TableHead className="text-center">{t('Model')}</TableHead>
                     <TableHead className="text-center">{t('Assigned To')}</TableHead>
+                    <TableHead className="text-center">{t('Vendor')}</TableHead>
                     <TableHead className="text-center">{t('Location')}</TableHead>
                     <TableHead className="text-center">{t('Status')}</TableHead>
                     <TableHead className="text-center">{t('Last Used')}</TableHead>
@@ -357,7 +358,7 @@ export default function AssetIndex({ assets, categories, employees, locations, f
                 <TableBody>
                   {assets.data.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={10} className="h-24 text-center text-muted-foreground">
+                      <TableCell colSpan={11} className="h-24 text-center text-muted-foreground">
                         {t('No asset data available.')}
                       </TableCell>
                     </TableRow>
@@ -372,12 +373,18 @@ export default function AssetIndex({ assets, categories, employees, locations, f
                         <TableCell className="text-center">{asset.brand || '-'}</TableCell>
                         <TableCell className="text-center">{asset.model || '-'}</TableCell>
                         <TableCell className="text-center">{asset.user?.name || '-'}</TableCell>
+                        <TableCell className="text-center">{(asset as any).vendor ? (asset as any).vendor.name : '-'}</TableCell>
                         <TableCell className="text-center">{(asset as any).current_location ? `${(asset as any).current_location.name} (${(asset as any).current_location.type})` : '-'}</TableCell>
                         <TableCell className="text-center">{t(asset.status)}</TableCell>
                         <TableCell className="text-center">{asset.last_used_at || '-'}</TableCell>
                         <TableCell className="text-center">
                           {isAdmin && (
                             <div className="flex justify-center gap-2">
+                              <Link href={`/asset-movements?asset_id=${asset.id}`}>
+                                <Button size="sm" variant="outline">
+                                  <FileSearch className="h-4 w-4 mr-1" /> {t('History')}
+                                </Button>
+                              </Link>
                               <Link href={`/assets/${asset.id}/edit`}>
                                 <Button size="sm" variant="outline">
                                   <Edit className="h-4 w-4 mr-1" /> {t('Edit')}
