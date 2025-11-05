@@ -132,32 +132,71 @@ class BackupController extends Controller
             }
         }
 
-        // Extract zip to temp
+        // Prepare temp dir
         $tempDir = storage_path('app/backup-temp/restore_' . time());
         if (!is_dir($tempDir)) { @mkdir($tempDir, 0777, true); }
 
-        $zip = new \ZipArchive();
-        if ($zip->open($zipPath) !== true) {
-            return redirect()->back()->with('error', 'Gagal membuka file ZIP backup.');
-        }
-        $zip->extractTo($tempDir);
-        $zip->close();
-
-        // Find .sql file inside extracted contents
         $sqlFile = null;
-        $rii = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($tempDir));
-        foreach ($rii as $f) {
-            if ($f->isDir()) continue;
-            if (strtolower($f->getExtension()) === 'sql') { $sqlFile = $f->getPathname(); break; }
-        }
-        if (!$sqlFile) {
-            return redirect()->back()->with('error', 'Tidak ditemukan berkas .sql di dalam backup.');
+        $ext = strtolower(pathinfo($zipPath, PATHINFO_EXTENSION));
+
+        if ($ext === 'zip') {
+            $zip = new \ZipArchive();
+            if ($zip->open($zipPath) !== true) {
+                return redirect()->back()->with('error', 'Gagal membuka file ZIP backup.');
+            }
+            $zip->extractTo($tempDir);
+            $zip->close();
+
+            $rii = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($tempDir));
+            foreach ($rii as $f) {
+                if ($f->isDir()) continue;
+                if (strtolower($f->getExtension()) === 'sql') { $sqlFile = $f->getPathname(); break; }
+                if (strtolower($f->getExtension()) === 'gz' && preg_match('/\.sql\.gz$/i', $f->getFilename())) {
+                    $target = $tempDir . '/' . preg_replace('/\.gz$/i', '', $f->getFilename());
+                    $gz = @gzopen($f->getPathname(), 'rb');
+                    if ($gz) {
+                        $out = @fopen($target, 'wb');
+                        if ($out) {
+                            while (!gzeof($gz)) { fwrite($out, gzread($gz, 8192)); }
+                            fclose($out);
+                            $sqlFile = $target;
+                        }
+                        gzclose($gz);
+                    }
+                    if ($sqlFile) { break; }
+                }
+            }
+            if (!$sqlFile) {
+                return redirect()->back()->with('error', 'Tidak ditemukan berkas .sql di dalam backup.');
+            }
+        } elseif ($ext === 'gz') {
+            if (!preg_match('/\.sql\.gz$/i', $zipPath)) {
+                return redirect()->back()->with('error', 'Format .gz tidak dikenali. Harap pilih file .sql.gz atau arsip .zip.');
+            }
+            $baseName = basename($zipPath, '.gz');
+            $target = $tempDir . '/' . $baseName;
+            $gz = @gzopen($zipPath, 'rb');
+            if (!$gz) {
+                return redirect()->back()->with('error', 'Gagal membuka file .gz.');
+            }
+            $out = @fopen($target, 'wb');
+            if (!$out) {
+                gzclose($gz);
+                return redirect()->back()->with('error', 'Gagal menulis file sementara untuk restore.');
+            }
+            while (!gzeof($gz)) { fwrite($out, gzread($gz, 8192)); }
+            fclose($out);
+            gzclose($gz);
+            $sqlFile = $target;
+        } else {
+            return redirect()->back()->with('error', 'Format backup tidak didukung. Harap pilih .zip atau .sql.gz');
         }
 
         // Build mysql client command (Windows-friendly quoting)
-        $binPath = rtrim(env('DB_DUMP_COMMAND_PATH', ''), "\\/\r\n ");
+        $binPath = env('DB_DUMP_COMMAND_PATH', '');
         if ($binPath !== '') {
-            // Normalize to forward slashes to avoid escape issues
+            $binPath = trim($binPath, "\"' \t\r\n");
+            $binPath = rtrim($binPath, "\\/");
             $binPath = str_replace('\\', '/', $binPath);
         }
         $mysqlBin = $binPath ? ($binPath . '/mysql.exe') : 'mysql';
@@ -168,16 +207,20 @@ class BackupController extends Controller
         $pass = (string) env('DB_PASSWORD', '');
         $db   = (string) env('DB_DATABASE', 'laravel');
 
-        // Use only double-quotes; Windows cmd doesn't honor single quotes
-        $cmd = '"' . $mysqlBin . '"'
-            . ' --host="' . $host . '"'
-            . ' --port="' . $port . '"'
-            . ' --user="' . $user . '"'
-            . ($pass !== '' ? (' --password="' . $pass . '"') : '')
-            . ' "' . $db . '"'
-            . ' < "' . str_replace('\\', '/', $sqlFile) . '"';
+        // Build params (no shell). Use -e to execute SOURCE command.
+        $sqlPath = str_replace('\\', '/', $sqlFile);
+        $args = [
+            $mysqlBin,
+            '--host=' . $host,
+            '--port=' . $port,
+            '--user=' . $user,
+        ];
+        if ($pass !== '') { $args[] = '--password=' . $pass; }
+        $args[] = $db;
+        $args[] = '-e';
+        $args[] = 'SOURCE ' . $sqlPath;
 
-        // Log and run through shell so that '<' redirection works on Windows
+        // Log and run without shell
         Log::info('[Backup Restore] Starting restore', [
             'zip' => $zipPath,
             'sql' => $sqlFile,
@@ -187,7 +230,7 @@ class BackupController extends Controller
             'db' => $db,
         ]);
 
-        $process = Process::fromShellCommandline('cmd /c ' . $cmd);
+        $process = new Process($args);
         $process->setTimeout(600);
         $process->run();
 
