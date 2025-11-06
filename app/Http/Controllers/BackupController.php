@@ -8,6 +8,11 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 use Symfony\Component\Process\Process;
 use Inertia\Inertia;
+use App\Models\User;
+use App\Models\Ticket;
+use App\Models\TicketComment;
+use App\Models\Asset;
+use App\Models\Vendor;
 
 class BackupController extends Controller
 {
@@ -54,8 +59,19 @@ class BackupController extends Controller
             ->sortByDesc('last_modified')
             ->values();
 
+        // Soft-deleted data for Trash tab (limit to avoid heavy payloads)
+        $limit = (int) request()->integer('trash_limit', 50);
+        $trash = [
+            'users' => User::onlyTrashed()->select('id','name','email','deleted_at')->latest('deleted_at')->limit($limit)->get(),
+            'tickets' => Ticket::onlyTrashed()->select('id','ticket_number','title','deleted_at')->latest('deleted_at')->limit($limit)->get(),
+            'ticket_comments' => TicketComment::onlyTrashed()->select('id','ticket_id','user_id','deleted_at')->latest('deleted_at')->limit($limit)->get(),
+            'assets' => Asset::onlyTrashed()->select('id','serial_number','brand','model','deleted_at')->latest('deleted_at')->limit($limit)->get(),
+            'vendors' => Vendor::onlyTrashed()->select('id','name','deleted_at')->latest('deleted_at')->limit($limit)->get(),
+        ];
+
         return Inertia::render('backup/Index', [
             'backups' => $backups,
+            'trash' => $trash,
         ]);
     }
 
@@ -382,5 +398,55 @@ class BackupController extends Controller
 
         Log::info('[Backup Restore] Success');
         return redirect()->back()->with('success', 'Database berhasil direstore dari backup.');
+    }
+
+    /**
+     * Restore a soft-deleted record by model key and id.
+     */
+    public function trashRestore(Request $request)
+    {
+        $modelKey = (string) $request->input('model');
+        $id = $request->input('id');
+        $class = $this->resolveTrashModel($modelKey);
+        if (!$class) {
+            return redirect()->back()->with('error', 'Model tidak dikenali.');
+        }
+        $row = $class::withTrashed()->find($id);
+        if (!$row) {
+            return redirect()->back()->with('error', 'Data tidak ditemukan.');
+        }
+        $row->restore();
+        return redirect()->back()->with('success', 'Data berhasil direstore.');
+    }
+
+    /**
+     * Permanently delete a soft-deleted record by model key and id.
+     */
+    public function trashForceDelete(Request $request)
+    {
+        $modelKey = (string) $request->input('model');
+        $id = $request->input('id');
+        $class = $this->resolveTrashModel($modelKey);
+        if (!$class) {
+            return redirect()->back()->with('error', 'Model tidak dikenali.');
+        }
+        $row = $class::withTrashed()->find($id);
+        if (!$row) {
+            return redirect()->back()->with('error', 'Data tidak ditemukan.');
+        }
+        $row->forceDelete();
+        return redirect()->back()->with('success', 'Data dihapus permanen.');
+    }
+
+    protected function resolveTrashModel(string $key): ?string
+    {
+        $map = [
+            'users' => User::class,
+            'tickets' => Ticket::class,
+            'ticket_comments' => TicketComment::class,
+            'assets' => Asset::class,
+            'vendors' => Vendor::class,
+        ];
+        return $map[$key] ?? null;
     }
 }
