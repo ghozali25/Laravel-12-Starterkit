@@ -210,7 +210,7 @@ Contribute new keys by adding to the JSON files and referencing via `t('Your Key
   <summary><strong>Register</strong></summary>
 
   
-  ![Register](example/register.png)
+  <img src="example/register.gif?raw=1" alt="Signup" />
 </details>
 
 <details>
