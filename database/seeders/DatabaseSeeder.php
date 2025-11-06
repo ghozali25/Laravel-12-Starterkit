@@ -42,6 +42,11 @@ class DatabaseSeeder extends Seeder
             AssetSeeder::class,
         ]);
 
+        // Seed movements history for assets
+        $this->call([
+            AssetMovementSeeder::class,
+        ]);
+
         // Panggil TicketSeeder setelah user sudah ada
         $this->call([
             TicketSeeder::class,

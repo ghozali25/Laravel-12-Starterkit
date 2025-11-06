@@ -196,6 +196,50 @@ class AssetController extends Controller
         return redirect()->route('assets.index')->with('success', 'Aset berhasil diperbarui.');
     }
 
+    public function show(Asset $asset)
+    {
+        $asset->load(['category', 'user', 'currentLocation', 'vendor']);
+
+        $movements = \App\Models\AssetMovement::with(['fromLocation','toLocation','fromUser','toUser','requester','approver'])
+            ->where('asset_id', $asset->id)
+            ->latest()
+            ->paginate(10)
+            ->withQueryString();
+
+        return Inertia::render('assets/Show', [
+            'asset' => [
+                'id' => $asset->id,
+                'serial_number' => $asset->serial_number,
+                'brand' => $asset->brand,
+                'model' => $asset->model,
+                'category' => $asset->category ? ['id' => $asset->category->id, 'name' => $asset->category->name] : null,
+                'user' => $asset->user ? ['id' => $asset->user->id, 'name' => $asset->user->name] : null,
+                'current_location' => $asset->currentLocation ? ['id' => $asset->currentLocation->id, 'name' => $asset->currentLocation->name, 'type' => $asset->currentLocation->type] : null,
+                'vendor' => $asset->vendor ? ['id' => $asset->vendor->id, 'name' => $asset->vendor->name] : null,
+                'purchase_date' => $asset->purchase_date ? $asset->purchase_date->format('Y-m-d') : null,
+                'warranty_end_date' => $asset->warranty_end_date ? $asset->warranty_end_date->format('Y-m-d') : null,
+                'status' => $asset->status,
+                'notes' => $asset->notes,
+                'custom_fields_data' => $asset->custom_fields_data,
+                'last_used_at' => $asset->last_used_at ? $asset->last_used_at->diffForHumans() : null,
+                'created_at' => $asset->created_at->toDateTimeString(),
+            ],
+            'movements' => $movements->through(fn($m) => [
+                'id' => $m->id,
+                'from_location' => $m->fromLocation ? ['id' => $m->fromLocation->id, 'name' => $m->fromLocation->name, 'type' => $m->fromLocation->type] : null,
+                'to_location' => $m->toLocation ? ['id' => $m->toLocation->id, 'name' => $m->toLocation->name, 'type' => $m->toLocation->type] : null,
+                'from_user' => $m->fromUser ? ['id' => $m->fromUser->id, 'name' => $m->fromUser->name] : null,
+                'to_user' => $m->toUser ? ['id' => $m->toUser->id, 'name' => $m->toUser->name] : null,
+                'reason' => $m->reason,
+                'status' => $m->status,
+                'requested_by' => $m->requester?->name,
+                'approved_by' => $m->approver?->name,
+                'approved_at' => $m->approved_at?->toDateTimeString(),
+                'created_at' => $m->created_at->toDateTimeString(),
+            ]),
+        ]);
+    }
+
     public function destroy(Asset $asset)
     {
         if (!Auth::user()->hasRole('admin')) {

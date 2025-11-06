@@ -8,7 +8,7 @@ import { Separator } from '@/components/ui/separator';
 import { Input } from '@/components/ui/input';
 import { UploadButton } from '@/components/ui/upload-button';
 import { type BreadcrumbItem, type Asset, type AssetCategory, type User } from '@/types';
-import { Plus, Edit, Trash2, FileSearch, FileDown, FileUp, FileSpreadsheet, FileType, Printer, FileQuestion } from 'lucide-react';
+import { Plus, Edit, Trash2, Eye, FileDown, FileUp, FileSpreadsheet, FileType, Printer, FileQuestion, FileSearch } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogTrigger,
@@ -39,6 +39,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import 'dayjs/locale/id';
@@ -380,11 +381,18 @@ export default function AssetIndex({ assets, categories, employees, locations, f
                         <TableCell className="text-center">
                           {isAdmin && (
                             <div className="flex justify-center gap-2">
-                              <Link href={`/asset-movements?asset_id=${asset.id}`}>
-                                <Button size="sm" variant="outline">
-                                  <FileSearch className="h-4 w-4 mr-1" /> {t('History')}
-                                </Button>
-                              </Link>
+                              <TooltipProvider delayDuration={0}>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <Link href={`/assets/${asset.id}`}>
+                                      <Button size="icon" variant="outline" aria-label={t('Detail')}>
+                                        <Eye className="h-4 w-4" />
+                                      </Button>
+                                    </Link>
+                                  </TooltipTrigger>
+                                  <TooltipContent>{t('Detail')}</TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
                               <Link href={`/assets/${asset.id}/edit`}>
                                 <Button size="sm" variant="outline">
                                   <Edit className="h-4 w-4 mr-1" /> {t('Edit')}
