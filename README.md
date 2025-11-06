@@ -196,7 +196,7 @@ Contribute new keys by adding to the JSON files and referencing via `t('Your Key
   <summary><strong>Welcome Screen</strong></summary>
 
   
-  ![Welcome](example/welcome page.gif)
+  <img src="example/welcome%20page.gif?raw=1" alt="Welcome" />
 </details>
 
 <details>
