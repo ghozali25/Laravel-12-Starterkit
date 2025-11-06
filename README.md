@@ -214,12 +214,18 @@ Contribute new keys by adding to the JSON files and referencing via `t('Your Key
 </details>
 
 <details>
-  <summary><strong>Dashboard</strong></summary>
+  <summary><strong>Dashboard light mode</strong></summary>
 
   
   ![Dashboard](example/dashboard.png)
 </details>
 
+<details>
+  <summary><strong>Dashboard Dark mode</strong></summary>
+
+  
+  ![Dashboard](example/dashboard dark.png)
+</details>
 ## 📄 License
 
 Released under the [MIT License](https://opensource.org/licenses/MIT). Feel free to use it for personal or commercial projects.
