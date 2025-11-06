@@ -36,8 +36,11 @@ export default function DashboardWidgetWrapper({ id, children, onRemove, colSpan
     opacity: isDragging ? 0.8 : 1,
   };
 
-  // Dynamic column spans - max 6 columns in grid
-  const colSpanClass = `col-span-1 sm:col-span-${Math.min(colSpan, 2)} lg:col-span-${Math.min(colSpan, 3)} xl:col-span-${Math.min(colSpan, 6)}`;
+  // Responsive column spans without dynamic class names (ensure Tailwind generates classes)
+  const smSpan = Math.min(colSpan, 2);
+  const lgSpan = Math.min(colSpan, 3);
+  // On xl, dashboard uses 6 columns
+  const xlSpan = Math.min(colSpan, 6);
 
   return (
     <div
@@ -45,7 +48,23 @@ export default function DashboardWidgetWrapper({ id, children, onRemove, colSpan
       style={style}
       className={cn(
         "relative w-full min-w-0 rounded-2xl bg-transparent text-card-foreground overflow-visible",
-        colSpanClass,
+        // base
+        'col-span-1',
+        // sm
+        smSpan === 1 && 'sm:col-span-1',
+        smSpan === 2 && 'sm:col-span-2',
+        // lg
+        lgSpan === 1 && 'lg:col-span-1',
+        lgSpan === 2 && 'lg:col-span-2',
+        lgSpan === 3 && 'lg:col-span-3',
+        // xl
+        xlSpan === 1 && 'xl:col-span-1',
+        xlSpan === 2 && 'xl:col-span-2',
+        xlSpan === 3 && 'xl:col-span-3',
+        xlSpan === 4 && 'xl:col-span-4',
+        xlSpan === 5 && 'xl:col-span-5',
+        xlSpan === 6 && 'xl:col-span-6',
+        
         isDragging && "ring-2 ring-primary ring-offset-2"
       )}
     >
