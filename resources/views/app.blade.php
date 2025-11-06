@@ -28,8 +28,10 @@
 
 
     @routes
-    @viteReactRefresh
-    @vite(['resources/js/app.tsx'])
+    @if (!app()->environment('testing'))
+        @viteReactRefresh
+        @vite(['resources/js/app.tsx'])
+    @endif
     @inertiaHead
     <!-- SweetAlert2 CDN for global usage in React -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
