@@ -7,6 +7,8 @@ import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { useTranslation } from '@/lib/i18n';
 import { type BreadcrumbItem } from '@/types';
 
@@ -38,6 +40,10 @@ export default function AssetMovementForm({ assets, users, locations }: Props) {
 
   const assetLabel = (a: AssetLite) => `${a.serial_number ?? ''} ${a.brand ?? ''} ${a.model ?? ''}`.trim() || `#${a.id}`;
 
+  const [assetOpen, setAssetOpen] = React.useState(false);
+  const [fromUserOpen, setFromUserOpen] = React.useState(false);
+  const [toUserOpen, setToUserOpen] = React.useState(false);
+
   const selectedAsset = useMemo(() => assets.find(a => a.id === Number(data.asset_id)), [assets, data.asset_id]);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -64,22 +70,33 @@ export default function AssetMovementForm({ assets, users, locations }: Props) {
           <Separator />
           <CardContent className="pt-6">
             <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Asset */}
+              {/* Asset (Combobox) */}
               <div className="space-y-2">
                 <Label htmlFor="asset_id">{t('Asset')}</Label>
-                <Select
-                  value={data.asset_id ? String(data.asset_id) : ''}
-                  onValueChange={(v) => setData('asset_id', Number(v))}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder={t('Select asset')} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {assets.map(a => (
-                      <SelectItem key={a.id} value={String(a.id)}>{assetLabel(a)}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Popover open={assetOpen} onOpenChange={setAssetOpen}>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" role="combobox" aria-expanded={assetOpen} className="w-full justify-between">
+                      {data.asset_id
+                        ? assetLabel(assets.find(a => a.id === Number(data.asset_id)) as AssetLite)
+                        : t('Select asset')}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0">
+                    <Command>
+                      <CommandInput placeholder={t('Search asset...')} />
+                      <CommandList>
+                        <CommandEmpty>{t('No results')}</CommandEmpty>
+                        <CommandGroup>
+                          {assets.map((a) => (
+                            <CommandItem key={a.id} value={String(a.id)} onSelect={() => { setData('asset_id', Number(a.id)); setAssetOpen(false); }}>
+                              {assetLabel(a)}
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
                 {errors.asset_id && <p className="text-sm text-red-500">{errors.asset_id}</p>}
               </div>
 
@@ -104,20 +121,31 @@ export default function AssetMovementForm({ assets, users, locations }: Props) {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="from_user_id">{t('From User')}</Label>
-                  <Select
-                    value={data.from_user_id ? String(data.from_user_id) : '-1'}
-                    onValueChange={(v) => setData('from_user_id', v === '-1' ? null : Number(v))}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder={t('— None —')} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="-1">{t('— None —')}</SelectItem>
-                      {users.map(u => (
-                        <SelectItem key={u.id} value={String(u.id)}>{u.name}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <Popover open={fromUserOpen} onOpenChange={setFromUserOpen}>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" role="combobox" aria-expanded={fromUserOpen} className="w-full justify-between">
+                        {data.from_user_id ? (users.find(u => u.id === data.from_user_id)?.name || t('— None —')) : t('— None —')}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0">
+                      <Command>
+                        <CommandInput placeholder={t('Search user...')} />
+                        <CommandList>
+                          <CommandEmpty>{t('No results')}</CommandEmpty>
+                          <CommandGroup>
+                            <CommandItem value="-1" onSelect={() => { setData('from_user_id', null); setFromUserOpen(false); }}>
+                              {t('— None —')}
+                            </CommandItem>
+                            {users.map(u => (
+                              <CommandItem key={u.id} value={String(u.id)} onSelect={() => { setData('from_user_id', Number(u.id)); setFromUserOpen(false); }}>
+                                {u.name}
+                              </CommandItem>
+                            ))}
+                          </CommandGroup>
+                        </CommandList>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
                 </div>
               </div>
 
@@ -142,20 +170,31 @@ export default function AssetMovementForm({ assets, users, locations }: Props) {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="to_user_id">{t('To User')}</Label>
-                  <Select
-                    value={data.to_user_id ? String(data.to_user_id) : '-1'}
-                    onValueChange={(v) => setData('to_user_id', v === '-1' ? null : Number(v))}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder={t('— None —')} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="-1">{t('— None —')}</SelectItem>
-                      {users.map(u => (
-                        <SelectItem key={u.id} value={String(u.id)}>{u.name}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <Popover open={toUserOpen} onOpenChange={setToUserOpen}>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" role="combobox" aria-expanded={toUserOpen} className="w-full justify-between">
+                        {data.to_user_id ? (users.find(u => u.id === data.to_user_id)?.name || t('— None —')) : t('— None —')}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0">
+                      <Command>
+                        <CommandInput placeholder={t('Search user...')} />
+                        <CommandList>
+                          <CommandEmpty>{t('No results')}</CommandEmpty>
+                          <CommandGroup>
+                            <CommandItem value="-1" onSelect={() => { setData('to_user_id', null); setToUserOpen(false); }}>
+                              {t('— None —')}
+                            </CommandItem>
+                            {users.map(u => (
+                              <CommandItem key={u.id} value={String(u.id)} onSelect={() => { setData('to_user_id', Number(u.id)); setToUserOpen(false); }}>
+                                {u.name}
+                              </CommandItem>
+                            ))}
+                          </CommandGroup>
+                        </CommandList>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
                 </div>
               </div>
 

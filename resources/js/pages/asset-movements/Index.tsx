@@ -18,6 +18,8 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 
 interface MovementItem {
   id: number;
@@ -119,17 +121,33 @@ export default function AssetMovementsIndex({ movements, assets, filters }: Prop
                 </Select>
               </div>
               <div className="w-full md:w-80">
-                <Select value={assetId} onValueChange={(v) => { setAssetId(v); applyFilters('asset_id', v); }}>
-                  <SelectTrigger>
-                    <SelectValue placeholder={t('Asset')} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">{t('All Assets')}</SelectItem>
-                    {assets.map(a => (
-                      <SelectItem key={a.id} value={String(a.id)}>{assetLabel(a)}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" role="combobox" className="w-full justify-between">
+                      {assetId !== 'all' && assetId
+                        ? assetLabel(assets.find(a => String(a.id) === assetId) as AssetLite)
+                        : t('All Assets')}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0">
+                    <Command>
+                      <CommandInput placeholder={t('Search asset...')} />
+                      <CommandList>
+                        <CommandEmpty>{t('No results')}</CommandEmpty>
+                        <CommandGroup>
+                          <CommandItem value="all" onSelect={() => { setAssetId('all'); applyFilters('asset_id', 'all'); }}>
+                            {t('All Assets')}
+                          </CommandItem>
+                          {assets.map((a) => (
+                            <CommandItem key={a.id} value={String(a.id)} onSelect={() => { setAssetId(String(a.id)); applyFilters('asset_id', String(a.id)); }}>
+                              {assetLabel(a)}
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
               </div>
             </div>
 

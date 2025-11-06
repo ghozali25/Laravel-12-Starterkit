@@ -12,6 +12,8 @@ import { Save, ArrowLeft } from 'lucide-react';
 import { BreadcrumbItem, type Asset, type AssetCategory, type User, type Brand } from '@/types';
 import { useTranslation } from '@/lib/i18n';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 
 interface LocationOption {
   id: number;
@@ -169,6 +171,8 @@ export default function AssetForm({ asset, categories, employees, locations, ven
     { value: 'retired', label: t('Retired') },
   ];
 
+  const [empOpen, setEmpOpen] = useState(false);
+
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
       <Head title={isEdit ? t('Edit Asset') : t('Add Asset')} />
@@ -212,22 +216,31 @@ export default function AssetForm({ asset, categories, employees, locations, ven
               {/* Assigned To (Employee) */}
               <div className="space-y-2">
                 <Label htmlFor="user_id">{t('Assigned To (Employee)')}</Label>
-                <Select
-                  value={data.user_id ? String(data.user_id) : '-1'}
-                  onValueChange={(value) => setData((prev: AssetFormData) => ({ ...prev, user_id: value === '-1' ? null : Number(value) }))}
-                >
-                  <SelectTrigger id="user_id">
-                    <SelectValue placeholder={t('Select an employee')} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="-1">{t('— None —')}</SelectItem>
-                    {employees.map((employee) => (
-                      <SelectItem key={employee.id} value={String(employee.id)}>
-                        {employee.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Popover open={empOpen} onOpenChange={setEmpOpen}>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" role="combobox" aria-expanded={empOpen} className="w-full justify-between">
+                      {data.user_id ? (employees.find(e => e.id === data.user_id)?.name || t('— None —')) : t('Select an employee')}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0">
+                    <Command>
+                      <CommandInput placeholder={t('Search employee...')} />
+                      <CommandList>
+                        <CommandEmpty>{t('No results')}</CommandEmpty>
+                        <CommandGroup>
+                          <CommandItem value="-1" onSelect={() => { setData((prev: AssetFormData) => ({ ...prev, user_id: null })); setEmpOpen(false); }}>
+                            {t('— None —')}
+                          </CommandItem>
+                          {employees.map((employee) => (
+                            <CommandItem key={employee.id} value={String(employee.id)} onSelect={() => { setData((prev: AssetFormData) => ({ ...prev, user_id: Number(employee.id) })); setEmpOpen(false); }}>
+                              {employee.name}
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
                 {(errors as any).user_id && <p className="text-sm text-red-500">{String((errors as any).user_id)}</p>}
               </div>
 

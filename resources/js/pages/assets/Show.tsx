@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import AppLayout from '@/layouts/app-layout';
 import { Button } from '@/components/ui/button';
@@ -7,6 +7,11 @@ import { Separator } from '@/components/ui/separator';
 import { type BreadcrumbItem, type Asset } from '@/types';
 import { useTranslation } from '@/lib/i18n';
 import * as Tabs from '@radix-ui/react-tabs';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from '@/components/ui/dialog';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Table,
   TableBody,
@@ -36,6 +41,8 @@ interface MovementItem {
   created_at: string;
 }
 
+interface UserLite { id: number; name: string }
+
 interface Props {
   asset: Asset & {
     current_location?: { id: number; name: string; type: string } | null;
@@ -48,12 +55,20 @@ interface Props {
     last_page: number;
     links: { url: string | null; label: string; active: boolean }[];
   };
+  employees: UserLite[];
 }
 
-export default function AssetShow({ asset, movements }: Props) {
+export default function AssetShow({ asset, movements, employees }: Props) {
   const { t, locale } = useTranslation();
   const page = usePage();
   const isAdmin = Boolean((page.props as any)?.auth?.is_admin);
+  const roles: string[] = ((page.props as any)?.auth?.roles || []) as string[];
+  const canTransfer = isAdmin || roles.includes('it_support');
+
+  const [isTransferOpen, setIsTransferOpen] = useState(false);
+  const [toUserId, setToUserId] = useState<string>('-1');
+  const [reason, setReason] = useState<string>('');
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     dayjs.locale(locale);
@@ -90,6 +105,66 @@ export default function AssetShow({ asset, movements }: Props) {
                 </p>
               </div>
               <div className="flex gap-2">
+                {canTransfer && (
+                  <Dialog open={isTransferOpen} onOpenChange={setIsTransferOpen}>
+                    <DialogTrigger asChild>
+                      <Button variant="default">{t('Transfer')}</Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>{t('Transfer Asset')}</DialogTitle>
+                      </DialogHeader>
+                      <div className="space-y-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="to_user_id">{t('To User')}</Label>
+                          <Popover open={isTransferOpen}>
+                            <PopoverTrigger asChild>
+                              <Button variant="outline" role="combobox" className="w-full justify-between">
+                                {toUserId !== '-1' ? (employees.find(u => String(u.id) === toUserId)?.name || t('Select user')) : t('Select user')}
+                              </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0">
+                              <Command>
+                                <CommandInput placeholder={t('Search user...')} />
+                                <CommandList>
+                                  <CommandEmpty>{t('No results')}</CommandEmpty>
+                                  <CommandGroup>
+                                    {employees.map(u => (
+                                      <CommandItem key={u.id} value={String(u.id)} onSelect={() => { setToUserId(String(u.id)); }}>
+                                        {u.name}
+                                      </CommandItem>
+                                    ))}
+                                  </CommandGroup>
+                                </CommandList>
+                              </Command>
+                            </PopoverContent>
+                          </Popover>
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="reason">{t('Reason')}</Label>
+                          <Textarea id="reason" value={reason} onChange={(e) => setReason(e.target.value)} placeholder={t('Optional')} />
+                        </div>
+                      </div>
+                      <DialogFooter>
+                        <DialogClose asChild>
+                          <Button variant="secondary">{t('Cancel')}</Button>
+                        </DialogClose>
+                        <Button
+                          disabled={submitting || toUserId === '-1'}
+                          onClick={() => {
+                            setSubmitting(true);
+                            router.post(`/assets/${asset.id}/transfer`, { to_user_id: Number(toUserId), reason }, {
+                              onFinish: () => setSubmitting(false),
+                              onSuccess: () => setIsTransferOpen(false),
+                            });
+                          }}
+                        >
+                          {submitting ? t('Transferring...') : t('Transfer')}
+                        </Button>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
+                )}
                 {isAdmin && (
                   <Link href={`/assets/${asset.id}/edit`}>
                     <Button variant="outline">{t('Edit')}</Button>
@@ -104,13 +179,13 @@ export default function AssetShow({ asset, movements }: Props) {
               <Tabs.List className="inline-flex items-center gap-2 rounded-lg bg-muted p-1">
                 <Tabs.Trigger
                   value="detail"
-                  className="data-[state=active]:bg-background data-[state=active]:text-foreground rounded-md px-3.5 py-1.5 text-sm text-muted-foreground hover:text-foreground"
+                  className="rounded-md px-3.5 py-1.5 text-sm transition-colors text-muted-foreground hover:text-foreground hover:bg-muted/60 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm"
                 >
                   {t('Detail')}
                 </Tabs.Trigger>
                 <Tabs.Trigger
                   value="history"
-                  className="data-[state=active]:bg-background data-[state=active]:text-foreground rounded-md px-3.5 py-1.5 text-sm text-muted-foreground hover:text-foreground"
+                  className="rounded-md px-3.5 py-1.5 text-sm transition-colors text-muted-foreground hover:text-foreground hover:bg-muted/60 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm"
                 >
                   {t('History')}
                 </Tabs.Trigger>

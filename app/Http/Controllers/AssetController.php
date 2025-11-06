@@ -18,6 +18,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Maatwebsite\Excel\Validators\ValidationException;
 use Maatwebsite\Excel\Validators\Failure;
 use Illuminate\Support\Facades\Auth;
+use App\Models\AssetMovement;
 
 class AssetController extends Controller
 {
@@ -206,6 +207,10 @@ class AssetController extends Controller
             ->paginate(10)
             ->withQueryString();
 
+        $employees = User::whereHas('roles', function ($q) {
+            $q->where('name', '!=', 'admin');
+        })->select('id','name')->get();
+
         return Inertia::render('assets/Show', [
             'asset' => [
                 'id' => $asset->id,
@@ -237,7 +242,41 @@ class AssetController extends Controller
                 'approved_at' => $m->approved_at?->toDateTimeString(),
                 'created_at' => $m->created_at->toDateTimeString(),
             ]),
+            'employees' => $employees,
         ]);
+    }
+
+    public function transfer(Request $request, Asset $asset)
+    {
+        if (!Auth::user()->hasRole(['admin','it_support'])) {
+            abort(403, 'Anda tidak memiliki izin untuk mentransfer aset.');
+        }
+
+        $validated = $request->validate([
+            'to_user_id' => 'required|exists:users,id',
+            'reason' => 'nullable|string',
+        ]);
+
+        // create approved movement record (user-to-user)
+        AssetMovement::create([
+            'asset_id' => $asset->id,
+            'from_location_id' => $asset->current_location_id,
+            'to_location_id' => $asset->current_location_id,
+            'from_user_id' => $asset->user_id,
+            'to_user_id' => $validated['to_user_id'],
+            'reason' => $validated['reason'] ?? 'Direct transfer by admin/it_support',
+            'status' => 'approved',
+            'requested_by' => Auth::id(),
+            'approved_by' => Auth::id(),
+            'approved_at' => now(),
+        ]);
+
+        // update asset ownership and last_used_at
+        $asset->user_id = $validated['to_user_id'];
+        $asset->last_used_at = now();
+        $asset->save();
+
+        return back()->with('success', 'Aset berhasil ditransfer.');
     }
 
     public function destroy(Asset $asset)

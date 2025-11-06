@@ -80,6 +80,7 @@ Route::middleware(['auth', 'menu.permission'])->group(function () {
     Route::get('assets/export/{format}', [AssetController::class, 'export'])->name('assets.export');
     Route::post('assets/import', [AssetController::class, 'import'])->name('assets.import')->withoutMiddleware('menu.permission');
     Route::get('assets/download-import-template', [AssetController::class, 'downloadImportTemplate'])->name('assets.download-import-template')->withoutMiddleware('menu.permission');
+    Route::post('assets/{asset}/transfer', [AssetController::class, 'transfer'])->name('assets.transfer');
     Route::resource('assets', AssetController::class)->where(['asset' => '[0-9]+']);
 
     // Brand Management Routes
