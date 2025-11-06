@@ -192,17 +192,33 @@ Contribute new keys by adding to the JSON files and referencing via `t('Your Key
 
 # Screenshoot
 
-## Welcome Screen
-![Alt Text](example/welcome.png)
+<details>
+  <summary><strong>Welcome Screen</strong></summary>
 
-## Login
-![Alt Text](example/login.png)
+  
+  ![Welcome](example/welcome.png)
+</details>
 
-## Register
-![Alt Text](example/register.png)
+<details>
+  <summary><strong>Login</strong></summary>
 
-## Dashboard
-![Alt Text](example/dashboard.png)
+  
+  ![Login](example/login.png)
+</details>
+
+<details>
+  <summary><strong>Register</strong></summary>
+
+  
+  ![Register](example/register.png)
+</details>
+
+<details>
+  <summary><strong>Dashboard</strong></summary>
+
+  
+  ![Dashboard](example/dashboard.png)
+</details>
 
 ## 📄 License
 
