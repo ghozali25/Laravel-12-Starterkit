@@ -197,6 +197,15 @@ class MenuSeeder extends Seeder
             'order' => 2,
             'permission_name' => 'settings-view',
         ]);
+        Menu::firstOrCreate([
+            'route' => '/utilities/trash',
+            'parent_id' => $utilitiesMenu->id,
+        ], [
+            'title' => 'Trash',
+            'icon' => 'Trash2',
+            'order' => 4,
+            'permission_name' => 'utilities-view',
+        ]);
         Menu::create([
             'title' => 'File Manager',
             'icon' => 'Folder',

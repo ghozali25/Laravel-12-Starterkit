@@ -5,10 +5,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { toast } from 'sonner';
 import { useTranslation } from '@/lib/i18n';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/tabs';
 
 interface TrashPayload {
   users: Array<{ id: number; name: string; email: string; deleted_at: string }>
@@ -32,13 +32,7 @@ export default function UtilitiesTrash({ trash }: Props) {
   const page = usePage();
   const isAdmin = Boolean((page.props as any)?.auth?.is_admin);
 
-  const [open, setOpen] = useState<Record<ModelKey, boolean>>({
-    users: true,
-    tickets: true,
-    ticket_comments: false,
-    assets: false,
-    vendors: false,
-  });
+  const [active, setActive] = useState<ModelKey>('users');
 
   const [selected, setSelected] = useState<SelectionState>({
     users: {}, tickets: {}, ticket_comments: {}, assets: {}, vendors: {},
@@ -167,20 +161,22 @@ export default function UtilitiesTrash({ trash }: Props) {
             <CardTitle className="text-2xl font-bold">{t('Trash')}</CardTitle>
           </CardHeader>
           <Separator />
-          <CardContent className="space-y-6 pt-4">
-            {models.map(({ key, title }) => (
-              <Collapsible key={key} open={open[key]} onOpenChange={(v) => setOpen((prev) => ({ ...prev, [key]: v }))}>
-                <div className="flex items-center justify-between">
-                  <div className="font-semibold">{title} ({counts[key]})</div>
-                  <CollapsibleTrigger asChild>
-                    <Button size="sm" variant="outline">{open[key] ? t('Hide') : t('Show')}</Button>
-                  </CollapsibleTrigger>
-                </div>
-                <CollapsibleContent className="mt-3">
+          <CardContent className="pt-4">
+            <Tabs value={active} onValueChange={(v: string) => setActive(v as ModelKey)}>
+              <TabsList className="flex flex-wrap gap-2">
+                {models.map(({ key, title }) => (
+                  <TabsTrigger key={key} value={key} className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                    {title} ({counts[key]})
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+
+              {models.map(({ key }) => (
+                <TabsContent key={key} value={key} className="mt-4 space-y-3">
                   {renderTable(key)}
-                </CollapsibleContent>
-              </Collapsible>
-            ))}
+                </TabsContent>
+              ))}
+            </Tabs>
           </CardContent>
         </Card>
       </div>
