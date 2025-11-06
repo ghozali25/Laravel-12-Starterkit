@@ -7,6 +7,8 @@ use App\Models\Asset;
 use App\Models\AssetCategory;
 use App\Models\User;
 use App\Models\Brand; // Import Brand model
+use App\Models\Vendor;
+use App\Models\Location;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Hash;
 
@@ -29,6 +31,9 @@ class AssetSeeder extends Seeder
 
         $this->command->info('Seeding example assets...');
 
+        $vendors = Vendor::select('id','name')->get();
+        $locations = Location::select('id','name','type')->get();
+
         foreach ($categories as $category) {
             // Get brands associated with this category
             $availableBrands = $category->brands;
@@ -41,6 +46,8 @@ class AssetSeeder extends Seeder
                 $assetData = [
                     'asset_category_id' => $category->id,
                     'user_id' => $isAssigned ? $employee->id : null,
+                    'vendor_id' => $vendors->isNotEmpty() ? $vendors->random()->id : null,
+                    'current_location_id' => $locations->isNotEmpty() ? $locations->random()->id : null,
                     'serial_number' => 'SN-' . strtoupper(substr($category->name, 0, 3)) . '-' . str_pad(rand(1, 99999), 5, '0', STR_PAD_LEFT) . '-' . $i,
                     'brand' => $selectedBrand, // Use selected brand
                     'model' => fake()->word() . ' ' . fake()->randomNumber(3, true),

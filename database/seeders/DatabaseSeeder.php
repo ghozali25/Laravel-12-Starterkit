@@ -16,8 +16,9 @@ class DatabaseSeeder extends Seeder
             RolePermissionSeeder::class,
             MenuSeeder::class,
             AssetCategorySeeder::class, // Pastikan kategori aset sudah ada
-            BrandSeeder::class, // Add BrandSeeder here
-            SettingAppSeeder::class, // Add SettingAppSeeder here
+            BrandSeeder::class, // Seed brands and attach to categories
+            VendorSeeder::class, // Seed vendors for assets
+            SettingAppSeeder::class, // Seed app settings
         ]);
 
         // Create or retrieve the admin user

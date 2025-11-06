@@ -20,6 +20,17 @@ A modern and flexible starter kit built with **Laravel 12**, **React (Inertia.js
 - 📦 Manual & automatic database backup system
 - 🗂️ File Manager with folder & file operations
 
+### Assets Management (New)
+- 🧾 Assets list with filters (Category, Employee, Location) — Employee/Asset filters use searchable Combobox
+- 📝 Asset create/edit with dynamic custom fields per category
+- 🧍 Assign asset to employee + track `last_used_at`
+- 🏷️ Vendor and Location fields on Asset
+- 🔄 Asset movements history (From → To: user/location)
+- 🚚 Transfer asset (admin/it_support only) without approval, auto-log history
+- 👁️ Asset detail page with tabs: Detail | History
+- ⬇️ Import/Export (Excel/CSV/PDF)
+- 🌐 i18n for UI labels (English/Indonesian)
+
 ---
 
 ## 🧱 Tech Stack
@@ -119,6 +130,63 @@ chown -R www-data:www-data .
 | Audit Logs Functionality | ✅     |
 | Database Backup          | ✅     |
 | File Manager             | ✅     |
+| Assets (CRUD)            | ✅     |
+| Asset Filters (Combobox) | ✅     |
+| Asset Detail + History   | ✅     |
+| Asset Transfer           | ✅     |
+| Vendors & Locations      | ✅     |
+| i18n Labels              | ✅     |
+
+---
+
+## 📦 Seeders Overview (Domain)
+
+The seeding flow creates minimal, coherent domain data for Assets:
+
+- LocationSeeder: creates a sample site (e.g., Karawaci)
+- AssetCategorySeeder: only 3 categories — Laptop, Mobile Phone, Vehicle
+- BrandSeeder: seeds brands and attaches them to categories
+- VendorSeeder: seeds a few vendors
+- AdditionalUserSeeder: seeds employees (non-admin) to assign assets
+- AssetSeeder: creates assets per category and assigns optional employee, vendor, and current location
+- AssetMovementSeeder: generates realistic movement history chain
+
+Re-run full seed:
+
+```
+php artisan migrate:fresh --seed
+```
+
+---
+
+## 🧭 Assets Usage Guide
+
+### Filters (List Page)
+- Use the search box + combobox filters for Employee and Location (contains, case-insensitive)
+
+### Create / Edit Asset
+- Pick Category → dynamic custom fields appear
+- Optional: assign Employee, Vendor, and Location
+
+### Detail & History
+- Detail tab shows core info
+- History tab shows movement logs (From/To user or location, status, reason)
+
+### Transfer Asset (No Approval)
+- On Asset Detail, click Transfer (admin/it_support only)
+- Choose the target user and optional reason → submit
+- System updates owner and logs an approved movement
+
+---
+
+## 🌐 Internationalization (i18n)
+
+Translations are provided via Inertia shared props. Keys are stored in:
+
+- `resources/lang/en.json`
+- `resources/lang/id.json`
+
+Contribute new keys by adding to the JSON files and referencing via `t('Your Key')` on the frontend.
 
 ---
 

@@ -16,7 +16,6 @@ class BrandSeeder extends Seeder
         $laptopBrands = ['HP', 'Lenovo', 'Thinkpad', 'Dell', 'Asus', 'Acer', 'Apple'];
         $mobilePhoneBrands = ['Samsung', 'Apple', 'Xiaomi', 'Oppo', 'Vivo', 'Realme'];
         $vehicleBrands = ['Honda', 'Toyota', 'Suzuki', 'Mitsubishi', 'Nissan', 'Mercedes-Benz', 'BMW'];
-        $monitorBrands = ['Dell', 'HP', 'Samsung', 'LG', 'Asus'];
 
         foreach ($laptopBrands as $name) {
             Brand::firstOrCreate(['name' => $name]);
@@ -25,9 +24,6 @@ class BrandSeeder extends Seeder
             Brand::firstOrCreate(['name' => $name]);
         }
         foreach ($vehicleBrands as $name) {
-            Brand::firstOrCreate(['name' => $name]);
-        }
-        foreach ($monitorBrands as $name) {
             Brand::firstOrCreate(['name' => $name]);
         }
 
@@ -47,10 +43,7 @@ class BrandSeeder extends Seeder
             $vehicleCategory->brands()->sync(Brand::whereIn('name', $vehicleBrands)->pluck('id'));
         }
 
-        $monitorCategory = AssetCategory::where('name', 'Monitor')->first();
-        if ($monitorCategory) {
-            $monitorCategory->brands()->sync(Brand::whereIn('name', $monitorBrands)->pluck('id'));
-        }
+        // Monitor category removed; no monitor brands/attachment
 
         $this->command->info('Brands seeded and attached to categories successfully.');
     }

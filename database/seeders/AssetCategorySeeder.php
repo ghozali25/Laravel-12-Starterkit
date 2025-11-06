@@ -41,14 +41,7 @@ class AssetCategorySeeder extends Seeder
                     'fuel_type' => ['type' => 'text', 'label' => 'Fuel Type'],
                 ],
             ],
-            [
-                'name' => 'Monitor',
-                'description' => 'Monitor dan layar tampilan.',
-                'custom_fields_schema' => [
-                    'size_inch' => ['type' => 'number', 'label' => 'Size (inch)'],
-                    'resolution' => ['type' => 'text', 'label' => 'Resolution'],
-                ],
-            ],
+            
         ];
 
         foreach ($categories as $categoryData) {
