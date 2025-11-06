@@ -203,7 +203,7 @@ Contribute new keys by adding to the JSON files and referencing via `t('Your Key
   <summary><strong>Login</strong></summary>
 
   
-  ![Login](example/login.png)
+  <img src="example/login.gif?raw=1" alt="Login" />
 </details>
 
 <details>
