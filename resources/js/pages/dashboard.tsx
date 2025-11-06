@@ -492,6 +492,10 @@ export default function Dashboard(props: DashboardProps) {
     setWidgets((items) => {
       const newItems = arrayMove(items, items.findIndex((item) => item.id === active.id), items.findIndex((item) => item.id === over.id));
       saveLayout(newItems);
+      // Force Chart.js responsive canvases to recalc after layout change
+      if (typeof window !== 'undefined') {
+        setTimeout(() => window.dispatchEvent(new Event('resize')), 0);
+      }
       return newItems;
     });
   };
@@ -500,6 +504,9 @@ export default function Dashboard(props: DashboardProps) {
     setWidgets((prevWidgets) => {
       const newWidgets = prevWidgets.filter((widget) => widget.id !== id);
       saveLayout(newWidgets);
+      if (typeof window !== 'undefined') {
+        setTimeout(() => window.dispatchEvent(new Event('resize')), 0);
+      }
       return newWidgets;
     });
     notify('success', t('Widget removed successfully!'));
@@ -511,6 +518,9 @@ export default function Dashboard(props: DashboardProps) {
         widget.id === id ? { ...widget, colSpan: newColSpan } : widget
       );
       saveLayout(newWidgets);
+      if (typeof window !== 'undefined') {
+        setTimeout(() => window.dispatchEvent(new Event('resize')), 0);
+      }
       return newWidgets;
     });
     notify('success', t('Widget size updated!'));
@@ -536,6 +546,9 @@ export default function Dashboard(props: DashboardProps) {
     setWidgets((prevWidgets) => {
       const newWidgets = [...prevWidgets, newWidget];
       saveLayout(newWidgets);
+      if (typeof window !== 'undefined') {
+        setTimeout(() => window.dispatchEvent(new Event('resize')), 0);
+      }
       return newWidgets;
     });
 

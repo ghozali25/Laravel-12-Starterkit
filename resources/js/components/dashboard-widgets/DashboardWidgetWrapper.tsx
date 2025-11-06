@@ -20,6 +20,7 @@ interface DashboardWidgetWrapperProps {
 
 export default function DashboardWidgetWrapper({ id, children, onRemove, colSpan, onColSpanChange }: DashboardWidgetWrapperProps) {
   const { t } = useTranslation();
+  const containerRef = React.useRef<HTMLDivElement | null>(null);
   const {
     attributes,
     listeners,
@@ -28,6 +29,18 @@ export default function DashboardWidgetWrapper({ id, children, onRemove, colSpan
     transition,
     isDragging,
   } = useSortable({ id });
+
+  // Notify charts to recalc when the wrapper size changes
+  React.useEffect(() => {
+    if (typeof window === 'undefined' || typeof ResizeObserver === 'undefined') return;
+    const el = containerRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver(() => {
+      window.dispatchEvent(new Event('resize'));
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -109,7 +122,7 @@ export default function DashboardWidgetWrapper({ id, children, onRemove, colSpan
           </Button>
       </div>
 
-      <div className="h-full">
+      <div ref={containerRef} className="h-full w-full min-w-0">
         {children}
       </div>
     </div>
