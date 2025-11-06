@@ -224,7 +224,7 @@ Contribute new keys by adding to the JSON files and referencing via `t('Your Key
   <summary><strong>Dashboard Dark mode</strong></summary>
 
   
-  ![Dashboarddark](example/dashboard dark.png)
+  <img src="example/dashboard%20dark.png?raw=1" alt="Dashboard Dark" />
 </details>
 ## 📄 License
 
