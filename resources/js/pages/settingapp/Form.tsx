@@ -13,6 +13,7 @@ import { type BreadcrumbItem } from '@/types';
 import { useTranslation } from '@/lib/i18n';
 import { XCircle } from 'lucide-react';
 import { Switch } from '@/components/ui/switch'; // Import Switch component
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const DEFAULT_WARNA = '#181818';
 
@@ -29,6 +30,10 @@ interface SettingApp {
     keywords?: string;
   };
   registration_enabled: boolean;
+  backup_schedule_frequency?: 'off' | 'daily' | 'weekly' | 'monthly';
+  backup_schedule_time?: string; // HH:MM
+  backup_schedule_weekday?: number | null; // 0..6
+  backup_schedule_monthday?: number | null; // 1..31
 }
 
 interface Props {
@@ -56,6 +61,10 @@ export default function SettingForm({ setting }: Props) {
     background_image: null as File | null,
     remove_background_image: false as boolean,
     registration_enabled: setting?.registration_enabled ?? true,
+    backup_schedule_frequency: setting?.backup_schedule_frequency ?? 'off',
+    backup_schedule_time: setting?.backup_schedule_time ?? '00:30',
+    backup_schedule_weekday: setting?.backup_schedule_weekday ?? null,
+    backup_schedule_monthday: setting?.backup_schedule_monthday ?? null,
   });
 
   const logoPreview = useRef<string | null>(setting?.logo ? `/storage/${setting.logo}` : null);
@@ -208,6 +217,90 @@ export default function SettingForm({ setting }: Props) {
                   aria-label={t('Toggle user registration')}
                 />
                 {errors.registration_enabled && <p className="text-sm text-red-500 mt-2">{errors.registration_enabled}</p>}
+              </div>
+
+              {/* Backup Schedule */}
+              <Separator />
+              <h3 className="text-lg font-semibold">{t('Backup Schedule')}</h3>
+
+              {/* Frequency */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="space-y-1">
+                  <Label>{t('Frequency')}</Label>
+                  <Select
+                    value={data.backup_schedule_frequency}
+                    onValueChange={(v) => setData('backup_schedule_frequency', v as any)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder={t('Select frequency')} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="off">{t('Off')}</SelectItem>
+                      <SelectItem value="daily">{t('Daily')}</SelectItem>
+                      <SelectItem value="weekly">{t('Weekly')}</SelectItem>
+                      <SelectItem value="monthly">{t('Monthly')}</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  {errors.backup_schedule_frequency && <p className="text-sm text-red-500">{errors.backup_schedule_frequency}</p>}
+                </div>
+
+                {/* Time */}
+                <div className="space-y-1">
+                  <Label htmlFor="backup_schedule_time">{t('Time (24h)')}</Label>
+                  <Input
+                    id="backup_schedule_time"
+                    type="time"
+                    value={data.backup_schedule_time}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setData('backup_schedule_time', e.target.value)}
+                  />
+                  {errors.backup_schedule_time && <p className="text-sm text-red-500">{errors.backup_schedule_time}</p>}
+                </div>
+
+                {/* Weekday (weekly) */}
+                {data.backup_schedule_frequency === 'weekly' && (
+                  <div className="space-y-1">
+                    <Label>{t('Weekday')}</Label>
+                    <Select
+                      value={String(data.backup_schedule_weekday ?? '')}
+                      onValueChange={(v) => setData('backup_schedule_weekday', v ? Number(v) : null)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder={t('Select weekday')} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="0">{t('Sunday')}</SelectItem>
+                        <SelectItem value="1">{t('Monday')}</SelectItem>
+                        <SelectItem value="2">{t('Tuesday')}</SelectItem>
+                        <SelectItem value="3">{t('Wednesday')}</SelectItem>
+                        <SelectItem value="4">{t('Thursday')}</SelectItem>
+                        <SelectItem value="5">{t('Friday')}</SelectItem>
+                        <SelectItem value="6">{t('Saturday')}</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    {errors.backup_schedule_weekday && <p className="text-sm text-red-500">{errors.backup_schedule_weekday}</p>}
+                  </div>
+                )}
+
+                {/* Month day (monthly) */}
+                {data.backup_schedule_frequency === 'monthly' && (
+                  <div className="space-y-1">
+                    <Label>{t('Day of month')}</Label>
+                    <Select
+                      value={String(data.backup_schedule_monthday ?? '')}
+                      onValueChange={(v) => setData('backup_schedule_monthday', v ? Number(v) : null)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder={t('Select date')} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Array.from({ length: 31 }).map((_, i) => (
+                          <SelectItem key={i+1} value={String(i + 1)}>{i + 1}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {errors.backup_schedule_monthday && <p className="text-sm text-red-500">{errors.backup_schedule_monthday}</p>}
+                  </div>
+                )}
               </div>
 
               {/* SEO Section */}

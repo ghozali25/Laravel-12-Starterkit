@@ -16,11 +16,17 @@ class SettingApp extends Model
         'warna',
         'seo',
         'background_image',
-        'registration_enabled', // Add this line
+        'registration_enabled',
+        'backup_schedule_frequency',
+        'backup_schedule_time',
+        'backup_schedule_weekday',
+        'backup_schedule_monthday',
     ];
 
     protected $casts = [
         'seo' => 'array',
-        'registration_enabled' => 'boolean', // Cast to boolean
+        'registration_enabled' => 'boolean',
+        'backup_schedule_weekday' => 'integer',
+        'backup_schedule_monthday' => 'integer',
     ];
 }

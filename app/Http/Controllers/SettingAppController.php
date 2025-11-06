@@ -26,7 +26,12 @@ class SettingAppController extends Controller
             'seo'        => 'nullable|array',
             'background_image' => 'nullable|file|image|max:2048',
             'remove_background_image' => 'boolean',
-            'registration_enabled' => 'required|boolean', // Add validation for the new field
+            'registration_enabled' => 'required|boolean',
+            // Backup schedule fields
+            'backup_schedule_frequency' => 'nullable|in:off,daily,weekly,monthly',
+            'backup_schedule_time' => 'nullable|date_format:H:i',
+            'backup_schedule_weekday' => 'nullable|integer|min:0|max:6',
+            'backup_schedule_monthday' => 'nullable|integer|min:1|max:31',
         ]);
 
         $setting = SettingApp::firstOrNew();
@@ -63,6 +68,16 @@ class SettingAppController extends Controller
             $data['background_image'] = null; // Set ke null di database
         } else {
             unset($data['background_image']); // Jangan update jika tidak ada file baru dan tidak ada permintaan hapus
+        }
+
+        // Normalize backup schedule defaults
+        if (!isset($data['backup_schedule_frequency'])) { $data['backup_schedule_frequency'] = 'off'; }
+        if (!isset($data['backup_schedule_time'])) { $data['backup_schedule_time'] = '00:30'; }
+        if (($data['backup_schedule_frequency'] ?? 'off') !== 'weekly') {
+            $data['backup_schedule_weekday'] = null;
+        }
+        if (($data['backup_schedule_frequency'] ?? 'off') !== 'monthly') {
+            $data['backup_schedule_monthday'] = null;
         }
 
         $setting->fill($data)->save();

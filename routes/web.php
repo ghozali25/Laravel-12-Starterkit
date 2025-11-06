@@ -10,6 +10,7 @@ use App\Http\Controllers\UserFileController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\SettingAppController;
 use App\Http\Controllers\MediaFolderController;
+use App\Http\Controllers\UtilitiesTrashController;
 use App\Http\Controllers\LanguageController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EmployeeController;
@@ -65,6 +66,11 @@ Route::middleware(['auth', 'menu.permission'])->group(function () {
     Route::post('/backup/trash/force-delete', [BackupController::class, 'trashForceDelete'])
         ->middleware('role:admin')
         ->name('backup.trash.forceDelete');
+
+    // Utilities > Trash
+    Route::get('/utilities/trash', [UtilitiesTrashController::class, 'index'])->name('utilities.trash.index');
+    Route::post('/utilities/trash/bulk-restore', [UtilitiesTrashController::class, 'bulkRestore'])->middleware('role:admin')->name('utilities.trash.bulkRestore');
+    Route::post('/utilities/trash/bulk-force-delete', [UtilitiesTrashController::class, 'bulkForceDelete'])->middleware('role:admin')->name('utilities.trash.bulkForceDelete');
     Route::get('/files', [UserFileController::class, 'index'])->name('files.index');
     Route::post('/files', [UserFileController::class, 'store'])->name('files.store');
     Route::delete('/files/{id}', [UserFileController::class, 'destroy'])->name('files.destroy');
