@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\HandleInertiaRequests;
+use App\Http\Middleware\SecurityHeaders;
 use App\Http\Middleware\ShareMenus;
 use App\Http\Middleware\CheckMenuPermission;
 use App\Http\Middleware\SetLocale; // Import the new middleware
@@ -17,6 +18,7 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->web(append: [
+            SecurityHeaders::class,
             SetLocale::class, // Register the SetLocale middleware FIRST
             HandleInertiaRequests::class,
             AddLinkHeadersForPreloadedAssets::class,
