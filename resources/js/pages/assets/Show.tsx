@@ -67,6 +67,7 @@ export default function AssetShow({ asset, movements, employees }: Props) {
 
   const [isTransferOpen, setIsTransferOpen] = useState(false);
   const [toUserId, setToUserId] = useState<string>('-1');
+  const [toUserOpen, setToUserOpen] = useState(false);
   const [reason, setReason] = useState<string>('');
   const [submitting, setSubmitting] = useState(false);
 
@@ -117,7 +118,7 @@ export default function AssetShow({ asset, movements, employees }: Props) {
                       <div className="space-y-4">
                         <div className="space-y-2">
                           <Label htmlFor="to_user_id">{t('To User')}</Label>
-                          <Popover open={isTransferOpen}>
+                          <Popover open={toUserOpen} onOpenChange={setToUserOpen}>
                             <PopoverTrigger asChild>
                               <Button variant="outline" role="combobox" className="w-full justify-between">
                                 {toUserId !== '-1' ? (employees.find(u => String(u.id) === toUserId)?.name || t('Select user')) : t('Select user')}
@@ -130,7 +131,7 @@ export default function AssetShow({ asset, movements, employees }: Props) {
                                   <CommandEmpty>{t('No results')}</CommandEmpty>
                                   <CommandGroup>
                                     {employees.map(u => (
-                                      <CommandItem key={u.id} value={String(u.id)} onSelect={() => { setToUserId(String(u.id)); }}>
+                                      <CommandItem key={u.id} value={(u.name || String(u.id))} onSelect={() => { setToUserId(String(u.id)); setToUserOpen(false); }}>
                                         {u.name}
                                       </CommandItem>
                                     ))}

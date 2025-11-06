@@ -53,6 +53,7 @@ export default function AssetMovementsIndex({ movements, assets, filters }: Prop
   const { t } = useTranslation();
   const [status, setStatus] = useState(filters.status || 'all');
   const [assetId, setAssetId] = useState(filters.asset_id || 'all');
+  const [assetOpen, setAssetOpen] = useState(false);
 
   const breadcrumbs: BreadcrumbItem[] = [
     { title: t('Asset Movements'), href: '/asset-movements' },
@@ -121,7 +122,7 @@ export default function AssetMovementsIndex({ movements, assets, filters }: Prop
                 </Select>
               </div>
               <div className="w-full md:w-80">
-                <Popover>
+                <Popover open={assetOpen} onOpenChange={setAssetOpen}>
                   <PopoverTrigger asChild>
                     <Button variant="outline" role="combobox" className="w-full justify-between">
                       {assetId !== 'all' && assetId
@@ -135,11 +136,11 @@ export default function AssetMovementsIndex({ movements, assets, filters }: Prop
                       <CommandList>
                         <CommandEmpty>{t('No results')}</CommandEmpty>
                         <CommandGroup>
-                          <CommandItem value="all" onSelect={() => { setAssetId('all'); applyFilters('asset_id', 'all'); }}>
+                          <CommandItem value="all" onSelect={() => { setAssetId('all'); applyFilters('asset_id', 'all'); setAssetOpen(false); }}>
                             {t('All Assets')}
                           </CommandItem>
                           {assets.map((a) => (
-                            <CommandItem key={a.id} value={String(a.id)} onSelect={() => { setAssetId(String(a.id)); applyFilters('asset_id', String(a.id)); }}>
+                            <CommandItem key={a.id} value={assetLabel(a)} onSelect={() => { setAssetId(String(a.id)); applyFilters('asset_id', String(a.id)); setAssetOpen(false); }}>
                               {assetLabel(a)}
                             </CommandItem>
                           ))}

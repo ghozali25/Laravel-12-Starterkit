@@ -94,7 +94,7 @@ interface Props {
   locations?: { id: number; name: string; type: 'company' | 'branch' | 'site' }[];
 }
 
-export default function EmployeeIndex({ employees, filters, potentialManagers, divisions, locations = [] }: Props) {
+export default function EmployeeIndex({ employees, divisions, filters, potentialManagers, locations = [] }: Props) {
   const { t, locale } = useTranslation();
   const page = usePage();
   const isAdmin = Boolean((page.props as any)?.auth?.is_admin);
@@ -113,6 +113,7 @@ export default function EmployeeIndex({ employees, filters, potentialManagers, d
 
   // Search states for comboboxes
   const [managerQuery, setManagerQuery] = useState('');
+  const [managerOpen, setManagerOpen] = useState(false);
   const [locationQuery, setLocationQuery] = useState('');
 
   // Debounced setters
@@ -287,7 +288,7 @@ export default function EmployeeIndex({ employees, filters, potentialManagers, d
             onChange={handleSearchChange}
           />
           {/* Manager combobox (searchable) */}
-          <Popover>
+          <Popover open={managerOpen} onOpenChange={setManagerOpen}>
             <PopoverTrigger asChild>
               <Button variant="outline" className="w-full md:w-[240px] justify-between">
                 {selectedManagerFilter === 'all' ? t('All Managers') : (potentialManagers.find(m => String(m.id) === String(selectedManagerFilter))?.name || t('Manager'))}
@@ -299,9 +300,9 @@ export default function EmployeeIndex({ employees, filters, potentialManagers, d
                 <CommandList>
                   <CommandEmpty>{t('No results')}</CommandEmpty>
                   <CommandGroup>
-                    <CommandItem value="all" onSelect={() => handleManagerFilterChange('all')}>{t('All Managers')}</CommandItem>
+                    <CommandItem value="all" onSelect={() => { handleManagerFilterChange('all'); setManagerOpen(false); }}>{t('All Managers')}</CommandItem>
                     {filteredManagers.map((m) => (
-                      <CommandItem key={m.id} value={String(m.id)} onSelect={() => handleManagerFilterChange(String(m.id))}>
+                      <CommandItem key={m.id} value={(m.name || String(m.id))} onSelect={() => { handleManagerFilterChange(String(m.id)); setManagerOpen(false); }}>
                         {m.name}
                       </CommandItem>
                     ))}

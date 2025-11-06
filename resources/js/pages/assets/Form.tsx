@@ -232,7 +232,14 @@ export default function AssetForm({ asset, categories, employees, locations, ven
                             {t('— None —')}
                           </CommandItem>
                           {employees.map((employee) => (
-                            <CommandItem key={employee.id} value={String(employee.id)} onSelect={() => { setData((prev: AssetFormData) => ({ ...prev, user_id: Number(employee.id) })); setEmpOpen(false); }}>
+                            <CommandItem
+                              key={employee.id}
+                              value={(employee.name || String(employee.id))}
+                              onSelect={() => {
+                                setData((prev: AssetFormData) => ({ ...prev, user_id: Number(employee.id) }));
+                                setEmpOpen(false);
+                              }}
+                            >
                               {employee.name}
                             </CommandItem>
                           ))}

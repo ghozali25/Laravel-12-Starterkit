@@ -137,7 +137,7 @@ export default function AssetMovementForm({ assets, users, locations }: Props) {
                               {t('— None —')}
                             </CommandItem>
                             {users.map(u => (
-                              <CommandItem key={u.id} value={String(u.id)} onSelect={() => { setData('from_user_id', Number(u.id)); setFromUserOpen(false); }}>
+                              <CommandItem key={u.id} value={(u.name || String(u.id))} onSelect={() => { setData('from_user_id', Number(u.id)); setFromUserOpen(false); }}>
                                 {u.name}
                               </CommandItem>
                             ))}
@@ -186,7 +186,7 @@ export default function AssetMovementForm({ assets, users, locations }: Props) {
                               {t('— None —')}
                             </CommandItem>
                             {users.map(u => (
-                              <CommandItem key={u.id} value={String(u.id)} onSelect={() => { setData('to_user_id', Number(u.id)); setToUserOpen(false); }}>
+                              <CommandItem key={u.id} value={(u.name || String(u.id))} onSelect={() => { setData('to_user_id', Number(u.id)); setToUserOpen(false); }}>
                                 {u.name}
                               </CommandItem>
                             ))}
