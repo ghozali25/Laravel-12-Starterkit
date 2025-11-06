@@ -192,6 +192,11 @@ class BackupController extends Controller
             return redirect()->back()->with('error', 'Format backup tidak didukung. Harap pilih .zip atau .sql.gz');
         }
 
+        // Ensure SQL file is readable before proceeding
+        if (!$sqlFile || !is_file($sqlFile) || !is_readable($sqlFile)) {
+            return redirect()->back()->with('error', 'Berkas SQL tidak ditemukan atau tidak bisa dibaca.');
+        }
+
         // Build mysql client command (Windows-friendly quoting)
         $binPath = env('DB_DUMP_COMMAND_PATH', '');
         if ($binPath !== '') {
@@ -199,7 +204,17 @@ class BackupController extends Controller
             $binPath = rtrim($binPath, "\\/");
             $binPath = str_replace('\\', '/', $binPath);
         }
-        $mysqlBin = $binPath ? ($binPath . '/mysql.exe') : 'mysql';
+        $isWindows = (PHP_OS_FAMILY ?? (stripos(PHP_OS, 'WIN') === 0 ? 'Windows' : 'Unknown')) === 'Windows';
+        $clientPref = strtolower((string) env('DB_MYSQL_CLIENT', 'auto'));
+        if ($clientPref === 'mariadb') {
+            $mysqlExec = $isWindows ? 'mariadb.exe' : 'mariadb';
+        } elseif ($clientPref === 'mysql') {
+            $mysqlExec = $isWindows ? 'mysql.exe' : 'mysql';
+        } else {
+            // auto: default to mysql, many MariaDB installs provide 'mysql' shim
+            $mysqlExec = $isWindows ? 'mysql.exe' : 'mysql';
+        }
+        $mysqlBin = $binPath ? ($binPath . '/' . $mysqlExec) : $mysqlExec;
 
         $host = (string) env('DB_HOST', '127.0.0.1');
         $port = (string) env('DB_PORT', '3306');
@@ -207,8 +222,7 @@ class BackupController extends Controller
         $pass = (string) env('DB_PASSWORD', '');
         $db   = (string) env('DB_DATABASE', 'laravel');
 
-        // Build params (no shell). Use -e to execute SOURCE command.
-        $sqlPath = str_replace('\\', '/', $sqlFile);
+        // Build params (no shell). We will stream the SQL via STDIN to avoid SOURCE path issues on Windows.
         $protocol = strtolower(trim((string) env('DB_MYSQL_PROTOCOL', '')));
         $socket = (string) env('DB_SOCKET', '');
         $args = [ $mysqlBin, '--user=' . $user ];
@@ -222,9 +236,9 @@ class BackupController extends Controller
             $args[] = '--port=' . $port;
         }
         if ($pass !== '') { $args[] = '--password=' . $pass; }
+        $args[] = '--force';
+        $args[] = '--default-character-set=utf8mb4';
         $args[] = $db;
-        $args[] = '-e';
-        $args[] = 'SOURCE ' . $sqlPath;
 
         // Log and run without shell
         Log::info('[Backup Restore] Starting restore', [
@@ -238,25 +252,135 @@ class BackupController extends Controller
             'socket' => $socket,
         ]);
 
-        $process = new Process($args);
-        $process->setTimeout(600);
-        $process->run();
+        // Pre-step: ensure target database exists
+        try {
+            $createArgs = [$mysqlBin, '--user=' . $user];
+            if ($protocol === 'pipe') {
+                $createArgs[] = '--protocol=pipe';
+                if ($socket !== '') { $createArgs[] = '--socket=' . $socket; }
+            } else {
+                if ($protocol !== '' && $protocol !== 'tcp') { $createArgs[] = '--protocol=' . $protocol; }
+                $createArgs[] = '--host=' . $host;
+                $createArgs[] = '--port=' . $port;
+            }
+            if ($pass !== '') { $createArgs[] = '--password=' . $pass; }
+            $createArgs[] = '-e';
+            $createArgs[] = 'CREATE DATABASE IF NOT EXISTS `' . $db . '` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;';
+            $create = new Process($createArgs);
+            $create->disableOutput();
+            $create->setTimeout(60);
+            $create->run();
+        } catch (\Throwable $e) {
+            Log::warning('[Backup Restore] Failed to pre-create database (will continue)', ['message' => $e->getMessage()]);
+        }
+
+        $process = null;
+        $fallbackTried = false;
+
+        if ($isWindows) {
+            // Prefer shell redirection on Windows to avoid pipe issues
+            $buildArg = function(string $a) {
+                if ($a === '') { return '""'; }
+                $needs = preg_match('/\s|[<>|&]/', $a);
+                $a = str_replace('"', '\\"', $a);
+                return $needs ? '"' . $a . '"' : $a;
+            };
+            $parts = array_map($buildArg, $args);
+            $sqlQuoted = '"' . str_replace('"', '\\"', str_replace('\\', '/', $sqlFile)) . '"';
+            $diagFile = storage_path('logs/restore-mysql-' . time() . '.log');
+            $diagQuoted = '"' . str_replace('"', '\\"', str_replace('\\', '/', $diagFile)) . '"';
+            $cmdline = implode(' ', $parts) . ' < ' . $sqlQuoted . ' > ' . $diagQuoted . ' 2>&1';
+            Log::info('[Backup Restore] Using Windows shell redirection', [ 'cmd' => $cmdline, 'diag' => $diagFile ]);
+            $process = Process::fromShellCommandline($cmdline);
+            $process->disableOutput();
+            $process->setTimeout((int) env('DB_RESTORE_TIMEOUT', 1800));
+            $process->run();
+        } else {
+            // Non-Windows: stream via STDIN and disable output capture to avoid fread on closed pipes
+            $proc = new Process($args);
+            $proc->disableOutput();
+            $proc->setTimeout((int) env('DB_RESTORE_TIMEOUT', 1800));
+            $in = @fopen($sqlFile, 'rb');
+            try {
+                if ($in !== false) { $proc->setInput($in); }
+                $proc->run();
+            } finally {
+                if (is_resource($in)) { @fclose($in); }
+            }
+            $process = $proc;
+        }
 
         // Cleanup temp dir
         try { File::deleteDirectory($tempDir); } catch (\Throwable $e) {}
 
-        if (!$process->isSuccessful()) {
-            Log::error('[Backup Restore] Failed', [
-                'exit_code' => $process->getExitCode(),
-                'error' => $process->getErrorOutput(),
-                'output' => $process->getOutput(),
-            ]);
-            return redirect()->back()->with('error', 'Restore gagal: ' . trim($process->getErrorOutput() ?: $process->getOutput()));
+        if (!$process || !$process->isSuccessful()) {
+            $snippet = null;
+            if (isset($diagFile) && is_string($diagFile) && file_exists($diagFile)) {
+                $size = @filesize($diagFile);
+                $read = 4000;
+                $start = ($size && $size > $read) ? ($size - $read) : 0;
+                $fh = @fopen($diagFile, 'rb');
+                if ($fh) {
+                    if ($start > 0) { @fseek($fh, $start); }
+                    $snippet = @stream_get_contents($fh) ?: null;
+                    @fclose($fh);
+                }
+            }
+
+            // Windows-specific auto-retry: if TCP socket creation failed (ERROR 2004), try named pipe
+            $retriedPipe = false;
+            if ($isWindows && $snippet && str_contains($snippet, 'ERROR 2004')) {
+                $pipeName = (string) env('DB_SOCKET', '\\\\.\\pipe\\MySQL');
+                $buildArg = function(string $a) {
+                    if ($a === '') { return '""'; }
+                    $needs = preg_match('/\s|[<>|&]/', $a);
+                    $a = str_replace('"', '\\"', $a);
+                    return $needs ? '"' . $a . '"' : $a;
+                };
+                $pipeArgs = [$mysqlBin, '--user=' . $user, '--protocol=pipe', '--socket=' . $pipeName, '--force', '--default-character-set=utf8mb4', $db];
+                if ($pass !== '') { array_splice($pipeArgs, 2, 0, ['--password=' . $pass]); }
+                $parts2 = array_map($buildArg, $pipeArgs);
+                $sqlQuoted2 = '"' . str_replace('"', '\\"', str_replace('\\', '/', $sqlFile)) . '"';
+                $diagFile2 = storage_path('logs/restore-mysql-pipe-' . time() . '.log');
+                $diagQuoted2 = '"' . str_replace('"', '\\"', str_replace('\\', '/', $diagFile2)) . '"';
+                $cmdline2 = implode(' ', $parts2) . ' < ' . $sqlQuoted2 . ' > ' . $diagQuoted2 . ' 2>&1';
+                Log::info('[Backup Restore] Retrying via named pipe', [ 'cmd' => $cmdline2, 'diag' => $diagFile2 ]);
+                $proc2 = Process::fromShellCommandline($cmdline2);
+                $proc2->disableOutput();
+                $proc2->setTimeout((int) env('DB_RESTORE_TIMEOUT', 1800));
+                $proc2->run();
+                if ($proc2->isSuccessful()) {
+                    $process = $proc2;
+                } else {
+                    $retriedPipe = true;
+                    // read tail of pipe diag
+                    $snippet2 = null;
+                    $size2 = @filesize($diagFile2);
+                    $start2 = ($size2 && $size2 > 4000) ? ($size2 - 4000) : 0;
+                    $fh2 = @fopen($diagFile2, 'rb');
+                    if ($fh2) {
+                        if ($start2 > 0) { @fseek($fh2, $start2); }
+                        $snippet2 = @stream_get_contents($fh2) ?: null;
+                        @fclose($fh2);
+                    }
+                    Log::error('[Backup Restore] Pipe retry failed', [
+                        'exit_code' => $proc2->getExitCode(),
+                        'diag_tail' => $snippet2,
+                    ]);
+                }
+            }
+
+            if (!$process || !$process->isSuccessful()) {
+                Log::error('[Backup Restore] Failed', [
+                    'exit_code' => $process ? $process->getExitCode() : null,
+                    'fallback' => $isWindows ? ($retriedPipe ? 'pipe' : 'shell_redirection') : 'stdin_stream',
+                    'diag_tail' => $snippet,
+                ]);
+                return redirect()->back()->with('error', 'Gagal melakukan restore database. Cek log untuk detail.');
+            }
         }
 
-        Log::info('[Backup Restore] Success', [
-            'output' => $process->getOutput(),
-        ]);
+        Log::info('[Backup Restore] Success');
         return redirect()->back()->with('success', 'Database berhasil direstore dari backup.');
     }
 }
