@@ -60,12 +60,7 @@ Route::middleware(['auth', 'menu.permission'])->group(function () {
     Route::post('/backup/restore', [BackupController::class, 'restore'])
         ->middleware('role:admin')
         ->name('backup.restore');
-    Route::post('/backup/trash/restore', [BackupController::class, 'trashRestore'])
-        ->middleware('role:admin')
-        ->name('backup.trash.restore');
-    Route::post('/backup/trash/force-delete', [BackupController::class, 'trashForceDelete'])
-        ->middleware('role:admin')
-        ->name('backup.trash.forceDelete');
+    
 
     // Utilities > Trash
     Route::get('/utilities/trash', [UtilitiesTrashController::class, 'index'])->name('utilities.trash.index');
