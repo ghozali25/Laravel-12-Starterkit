@@ -135,7 +135,7 @@ export default function DailyActivityChart({
         </CardTitle>
       </CardHeader>
 
-      <CardContent className={`h-[240px] sm:h-[280px] md:h-[320px] min-w-0 transition-colors duration-300 ${isDark ? 'bg-[#0b1437]' : 'bg-white'}`}>
+      <CardContent className={`h-full min-h-[240px] min-w-0 transition-colors duration-300 ${isDark ? 'bg-[#0b1437]' : 'bg-white'}`}>
         {/* ✅ Key penting agar chart redraw ketika theme berubah */}
         <div key={isDark ? 'dark' : 'light'} className="h-full w-full transition-transform duration-300 group-hover:scale-[1.01]">
           <Chart type='bar' data={{ labels, datasets }} options={options} plugins={[TransparentBgPlugin]} />

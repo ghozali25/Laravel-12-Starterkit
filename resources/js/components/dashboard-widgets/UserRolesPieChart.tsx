@@ -100,7 +100,7 @@ export default function UserRolesPieChart({ data, title, iconName }: UserRolesPi
           {title || t('User Roles')}
         </CardTitle>
       </CardHeader>
-      <CardContent className={`h-[220px] sm:h-[300px] flex items-center justify-center ${isDark ? 'bg-[#0b1437]' : 'bg-white'}`}>
+      <CardContent className={`h-full min-h-[220px] flex items-center justify-center ${isDark ? 'bg-[#0b1437]' : 'bg-white'}`}>
         <div key={isDark ? 'dark' : 'light'} className="h-full w-full transition-transform duration-300 group-hover:scale-[1.01]">
           <Doughnut data={chartData} options={options} plugins={[TransparentBgPlugin]} />
         </div>

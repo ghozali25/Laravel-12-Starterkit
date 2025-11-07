@@ -30,6 +30,9 @@ export default function DashboardWidgetWrapper({
 }: DashboardWidgetWrapperProps) {
   const { t } = useTranslation();
   const containerRef = React.useRef<HTMLDivElement | null>(null);
+  const startPosRef = React.useRef<{ startY: number; startH: number } | null>(null);
+  const [height, setHeight] = React.useState<number>(320);
+  const [isResizing, setIsResizing] = React.useState(false);
 
   // DnD Sortable logic
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
@@ -56,7 +59,32 @@ export default function DashboardWidgetWrapper({
     zIndex: isDragging ? 10 : 0,
     opacity: isDragging ? 0.8 : 1,
     gridColumn: `span ${Math.min(colSpan, 6)}`, // kolom dinamis aman dari purge
+    height: `${Math.max(200, height)}px`,
   } as React.CSSProperties;
+
+  const onResizeMouseDown: React.MouseEventHandler<HTMLDivElement> = (e) => {
+    e.preventDefault();
+    const el = containerRef.current;
+    if (!el) return;
+    setIsResizing(true);
+    startPosRef.current = { startY: e.clientY, startH: el.getBoundingClientRect().height };
+
+    const onMove = (ev: MouseEvent) => {
+      if (!startPosRef.current) return;
+      const dy = ev.clientY - startPosRef.current.startY;
+      const next = Math.max(200, Math.round(startPosRef.current.startH + dy));
+      setHeight(next);
+    };
+    const onUp = () => {
+      setIsResizing(false);
+      startPosRef.current = null;
+      if (typeof window !== 'undefined') window.dispatchEvent(new Event('resize'));
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseup', onUp);
+    };
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+  };
 
   return (
     <div
@@ -110,11 +138,20 @@ export default function DashboardWidgetWrapper({
           <GripVertical className="h-3 w-3" />
         </Button>
       </div>
+      
+      <div
+        onMouseDown={onResizeMouseDown}
+        className={cn(
+          'absolute right-10 bottom-2 h-4 w-4 rounded-sm bg-muted hover:bg-muted/70 cursor-ns-resize border border-border',
+          isResizing && 'bg-primary/40'
+        )}
+        title={t('Drag to resize height')}
+      />
 
       {/* Isi widget */}
       <div
         ref={containerRef}
-        className="w-full h-auto min-h-[200px] min-w-0 p-2"
+        className="w-full h-full min-h-[200px] min-w-0 p-2"
       >
         {children}
       </div>

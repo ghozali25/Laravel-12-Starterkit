@@ -142,7 +142,7 @@ export default function MonthlyActivityChart({ data, xAxisDataKey = 'name', yAxi
           </div>
         )}
       </CardHeader>
-      <CardContent className={`h-[240px] sm:h-[280px] md:h-[320px] min-w-0 ${isDark ? 'bg-[#0b1437]' : 'bg-white'}`}>
+      <CardContent className={`h-full min-h-[240px] min-w-0 ${isDark ? 'bg-[#0b1437]' : 'bg-white'}`}>
         <div key={isDark ? 'dark' : 'light'} className="h-full w-full transition-transform duration-300 group-hover:scale-[1.01]">
           <Bar data={{ labels: labels.map(shortMonth), datasets }} options={options} plugins={[TransparentBgPlugin]} />
         </div>
