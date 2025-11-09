@@ -667,10 +667,10 @@ export default function Dashboard(props: DashboardProps) {
             </DialogContent>
           </Dialog>
         </div>
-
+  
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
           <SortableContext items={widgets.map((w) => w.id)} strategy={rectSortingStrategy}>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 grid-flow-row-dense items-start gap-4 md:gap-5 min-w-0">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 grid-flow-row-dense items-start gap-3 md:gap-4 min-w-0">
               {widgets.map((widget) => {
                 const content = renderWidgetComponent(widget);
                 if (!content) return null;
