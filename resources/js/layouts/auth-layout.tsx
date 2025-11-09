@@ -148,7 +148,7 @@ export default function AuthLayout({ children, title, description }: AuthLayoutP
                     onChange={(e) => {
                         const value = e.target.value;
                         if (value !== locale) {
-                            router.get(route('language.set', value), {}, { preserveScroll: true, preserveState: true });
+                            router.get(route('language.set', value), {}, { preserveScroll: true, preserveState: false });
                         }
                     }}
                 >

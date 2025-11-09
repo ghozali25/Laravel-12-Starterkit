@@ -22,7 +22,7 @@ export function AppSidebarHeader({ breadcrumbs = [] }: { breadcrumbs?: Breadcrum
     if (value !== locale) {
       router.get(route('language.set', value), {}, {
         preserveScroll: true,
-        preserveState: true,
+        preserveState: false,
       });
     }
   };
