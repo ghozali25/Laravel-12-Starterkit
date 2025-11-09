@@ -89,18 +89,18 @@ export default function UserRolesPieChart({ data, title, iconName }: UserRolesPi
     <Card className={`shadow-sm rounded-2xl overflow-hidden h-full border group hover:shadow-xl transition-all duration-300 
       ${isDark ? 'bg-[#0b1437] border-[#1a2541] hover:border-indigo-600' : 'bg-white border-gray-100 hover:border-indigo-300'}`}>
       <CardHeader className={`px-4 py-3 flex flex-row items-center justify-between space-y-0 pb-2 ${isDark ? 'bg-[#0b1437]' : 'bg-white'}`}>
-        <CardTitle className={`text-lg font-semibold flex items-center gap-2 ${isDark ? 'text-white' : 'text-gray-800'}`}>
+        <CardTitle className={`text-base sm:text-lg font-semibold flex items-center gap-2 ${isDark ? 'text-white' : 'text-gray-800'}`}>
           {IconComponent && (
             <div className={`flex-shrink-0 p-2 rounded-xl shadow-lg transition-transform duration-300 group-hover:scale-110 
               ${isDark ? 'bg-gradient-to-br from-blue-600 to-blue-700 shadow-blue-500/30' : 'bg-gradient-to-br from-blue-500 to-blue-600 shadow-blue-500/30'}`}
             >
-              <IconComponent className="h-5 w-5 text-white" />
+              <IconComponent className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
             </div>
           )}
           {title || t('User Roles')}
         </CardTitle>
       </CardHeader>
-      <CardContent className={`h-full min-h-[220px] flex items-center justify-center ${isDark ? 'bg-[#0b1437]' : 'bg-white'}`}>
+      <CardContent className={`h-[240px] sm:h-[280px] md:h-[320px] min-w-0 ${isDark ? 'bg-[#0b1437]' : 'bg-white'}`}>
         <div key={isDark ? 'dark' : 'light'} className="h-full w-full transition-transform duration-300 group-hover:scale-[1.01]">
           <Doughnut data={chartData} options={options} plugins={[TransparentBgPlugin]} />
         </div>

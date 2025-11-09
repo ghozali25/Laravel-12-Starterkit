@@ -44,7 +44,7 @@ export default function SummaryCard({
 
   return (
     <div
-      className={`summary-card relative h-full w-full flex items-center gap-4 p-5 rounded-2xl shadow-sm border overflow-hidden hover:shadow-2xl hover:scale-[1.02] transition-all duration-300
+      className={`summary-card relative h-full w-full flex items-center gap-3 sm:gap-4 p-4 sm:p-5 rounded-2xl shadow-sm border overflow-hidden hover:shadow-2xl hover:scale-[1.02] transition-all duration-300
         ${isDark
           ? 'bg-[#0b1437] border-[#1a2541] hover:border-blue-500'
           : 'bg-white border-gray-100 hover:border-blue-400'}`}
@@ -52,12 +52,12 @@ export default function SummaryCard({
       {/* Icon */}
       {IconComponent && (
         <div
-          className={`flex-shrink-0 p-3 rounded-xl shadow-lg hover:scale-110 transition-all duration-300
+          className={`flex-shrink-0 p-2.5 sm:p-3 rounded-xl shadow-lg hover:scale-110 transition-all duration-300
             ${isDark
               ? 'bg-gradient-to-br from-blue-600 to-blue-700 shadow-blue-500/30 hover:shadow-blue-500/50'
               : 'bg-gradient-to-br from-blue-500 to-blue-600 shadow-blue-500/30 hover:shadow-blue-500/50'}`}
         >
-          <IconComponent className="h-6 w-6 text-white" />
+          <IconComponent className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
         </div>
       )}
 
@@ -66,7 +66,7 @@ export default function SummaryCard({
         <p
           className={`font-medium ${
             isDark ? 'text-gray-400' : 'text-gray-600'
-          } ${labelIsLong ? 'text-[12px]' : 'text-sm'} whitespace-nowrap overflow-hidden text-ellipsis`}
+          } ${labelIsLong ? 'text-[11px] sm:text-[12px]' : 'text-xs sm:text-sm'} whitespace-nowrap overflow-hidden text-ellipsis`}
           title={label}
         >
           {label}
@@ -74,7 +74,7 @@ export default function SummaryCard({
 
         <div className="flex items-baseline gap-2">
           <h3
-            className={`text-2xl sm:text-3xl font-bold ${
+            className={`text-xl sm:text-2xl md:text-3xl font-bold ${
               isDark ? 'text-white' : 'text-gray-900'
             }`}
           >

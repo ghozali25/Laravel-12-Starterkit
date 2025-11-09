@@ -123,12 +123,12 @@ export default function DailyActivityChart({
       <CardHeader
         className={`px-4 py-3 flex flex-row items-center justify-between space-y-0 pb-2 ${isDark ? 'bg-[#0b1437]' : 'bg-white'}`}
       >
-        <CardTitle className={`text-lg font-semibold flex items-center gap-2 ${isDark ? 'text-white' : 'text-gray-800'}`}>
+        <CardTitle className={`text-base sm:text-lg font-semibold flex items-center gap-2 ${isDark ? 'text-white' : 'text-gray-800'}`}>
           {IconComponent && (
             <div className={`flex-shrink-0 p-2 rounded-xl shadow-lg transition-transform duration-300 group-hover:scale-110 
               ${isDark ? 'bg-gradient-to-br from-blue-600 to-blue-700 shadow-blue-500/30' : 'bg-gradient-to-br from-blue-500 to-blue-600 shadow-blue-500/30'}`}
             >
-              <IconComponent className="h-5 w-5 text-white" />
+              <IconComponent className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
             </div>
           )}
           {title ?? t('Daily Activity (This Month)')}
