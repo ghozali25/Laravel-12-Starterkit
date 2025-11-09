@@ -99,7 +99,7 @@ export default function DashboardWidgetWrapper({
       {/* Isi widget */}
       <div
         ref={containerRef}
-        className="w-full h-auto min-h-[200px] min-w-0 p-2"
+        className="w-full h-auto min-w-0 p-2"
       >
         {children}
       </div>
