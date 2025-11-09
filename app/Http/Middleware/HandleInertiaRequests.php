@@ -63,7 +63,17 @@ class HandleInertiaRequests extends Middleware
                 'registration_enabled' => SettingApp::first()->registration_enabled,
             ]) : ['registration_enabled' => true], // Provide a default if no settings exist
             'locale' => app()->getLocale(), // Share current locale
-            'translations' => Lang::get('*'), // Share all translations
+            // Share JSON translations (resources/lang/{locale}.json) with fallback to en.json
+            'translations' => (function () {
+                $locale = app()->getLocale() ?: 'en';
+                $base = base_path('resources/lang');
+                $enPath = $base . DIRECTORY_SEPARATOR . 'en.json';
+                $locPath = $base . DIRECTORY_SEPARATOR . $locale . '.json';
+                $en = file_exists($enPath) ? json_decode((string) file_get_contents($enPath), true) ?: [] : [];
+                $loc = file_exists($locPath) ? json_decode((string) file_get_contents($locPath), true) ?: [] : [];
+                // Locale-specific overrides English fallback
+                return array_merge($en, $loc);
+            })(),
         ]);
     }
 }

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { iconMapper } from '@/lib/iconMapper';
 import { TrendingUp, TrendingDown } from 'lucide-react';
 import { useAppearance } from '@/hooks/use-appearance';
+import { useTranslation } from '@/lib/i18n';
 
 export interface SummaryCardProps {
   label: string;
@@ -19,6 +20,7 @@ export default function SummaryCard({
   showGrowth = false,
 }: SummaryCardProps) {
   const { appearance } = useAppearance();
+  const { t } = useTranslation();
 
   // Force re-render saat theme berubah
   const [isDark, setIsDark] = useState(
@@ -116,7 +118,7 @@ export default function SummaryCard({
 
         {showGrowth && growth !== undefined && (
           <span className={`${isDark ? 'text-gray-500' : 'text-gray-500'} text-[9px]`}>
-            since last month
+            {t('since last month')}
           </span>
         )}
       </div>

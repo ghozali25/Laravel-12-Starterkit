@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link, usePage } from '@inertiajs/react';
+import { Link, usePage, router } from '@inertiajs/react';
 import { useTranslation } from '@/lib/i18n';
 import AppLogoIcon from '@/components/app-logo-icon';
 import { cn } from '@/lib/utils';
@@ -12,7 +12,7 @@ interface AuthLayoutProps {
 
 export default function AuthLayout({ children, title, description }: AuthLayoutProps) {
     const { props } = usePage();
-    const { t } = useTranslation();
+    const { t, locale } = useTranslation();
 
     const setting = props?.setting as {
         nama_app: string;
@@ -141,6 +141,21 @@ export default function AuthLayout({ children, title, description }: AuthLayoutP
             )}
             style={backgroundImage ? { backgroundImage: `url(${backgroundImage})` } : {}}
         >
+            <div className="absolute right-4 top-4 z-20">
+                <select
+                    className="rounded-md border px-2 py-1 text-xs bg-white/90 dark:bg-gray-800/90"
+                    value={locale}
+                    onChange={(e) => {
+                        const value = e.target.value;
+                        if (value !== locale) {
+                            router.get(route('language.set', value), {}, { preserveScroll: true, preserveState: true });
+                        }
+                    }}
+                >
+                    <option value="en">EN</option>
+                    <option value="id">ID</option>
+                </select>
+            </div>
             {/* Particles Background */}
             <canvas id="auth-particles-canvas" className="pointer-events-none absolute inset-0 z-0" />
             <div className="w-full max-w-md rounded-xl bg-white/50 shadow-xl backdrop-blur-xl dark:bg-gray-800/50 dark:shadow-none z-10">

@@ -8,7 +8,7 @@ import { ArrowRight } from 'lucide-react';
 
 export default function Welcome() {
   const { auth, setting } = usePage<SharedData>().props;
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
 
   const primaryColor = setting?.warna || '#1ccd5aff';
   const primaryForeground = '#ffffff';
@@ -119,6 +119,22 @@ export default function Welcome() {
     <>
       <Head title={t('Welcome')} />
       <div className="relative min-h-screen flex flex-col justify-center px-6 bg-gradient-to-br from-background to-gray-50 dark:to-gray-900 overflow-hidden">
+        {/* Language switcher */}
+        <div className="absolute right-4 top-4 z-20">
+          <select
+            className="rounded-md border px-2 py-1 text-xs bg-white/90 dark:bg-gray-800/90"
+            value={locale}
+            onChange={(e) => {
+              const value = e.target.value;
+              if (value !== locale) {
+                router.get(route('language.set', value), {}, { preserveScroll: true, preserveState: true });
+              }
+            }}
+          >
+            <option value="en">EN</option>
+            <option value="id">ID</option>
+          </select>
+        </div>
         {/* Particles background */}
         <canvas id="particles-canvas" className="absolute inset-0 z-0 pointer-events-none" />
         {/* Decorative blur elements */}
