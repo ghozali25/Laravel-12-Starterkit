@@ -53,12 +53,12 @@ export default function DashboardWidgetWrapper({
       )}
     >
       {/* Tombol kontrol kanan bawah */}
-      <div className="absolute bottom-2 right-2 z-10 flex items-center justify-center gap-1">
+      <div className="absolute top-2 right-3 z-10 flex items-center justify-center gap-1 pointer-events-none">
         {/* Tombol hapus widget */}
         <Button
           variant="ghost"
           size="icon"
-          className="h-7 w-7 sm:h-5 sm:w-5 text-muted-foreground hover:text-destructive"
+          className="h-7 w-7 sm:h-5 sm:w-5 text-muted-foreground hover:text-destructive pointer-events-auto"
           onClick={() => onRemove(id)}
         >
           <X className="h-3 w-3" />
@@ -70,7 +70,7 @@ export default function DashboardWidgetWrapper({
             <Button
               variant="ghost"
               size="icon"
-              className="h-7 w-7 sm:h-5 sm:w-5 text-muted-foreground hover:text-primary"
+              className="h-7 w-7 sm:h-5 sm:w-5 text-muted-foreground hover:text-primary pointer-events-auto"
             >
               <Maximize2 className="h-3 w-3" />
             </Button>
@@ -88,7 +88,7 @@ export default function DashboardWidgetWrapper({
         <Button
           variant="ghost"
           size="icon"
-          className="h-7 w-7 sm:h-5 sm:w-5 text-muted-foreground hover:text-primary cursor-grab"
+          className="h-7 w-7 sm:h-5 sm:w-5 text-muted-foreground hover:text-primary cursor-grab pointer-events-auto"
           {...listeners}
           {...attributes}
         >
