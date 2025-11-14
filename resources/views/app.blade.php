@@ -4,6 +4,9 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    @if (!app()->environment('production'))
+        <meta name="robots" content="noindex,nofollow">
+    @endif
 
     @php
         $setting = $page['props']['setting'] ?? null;
