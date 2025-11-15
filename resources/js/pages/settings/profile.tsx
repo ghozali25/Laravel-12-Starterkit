@@ -3,7 +3,6 @@ import { Transition } from '@headlessui/react';
 import { Head, Link, useForm, usePage, router } from '@inertiajs/react';
 import { FormEventHandler, useState } from 'react';
 
-import DeleteUser from '@/components/delete-user';
 import HeadingSmall from '@/components/heading-small';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
@@ -249,23 +248,131 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                         )}
 
                         <div className="flex items-center gap-4">
-                            <Button disabled={processing}>{t('Save')}</Button>
-
-                            <Transition
-                                show={recentlySuccessful}
-                                enter="transition ease-in-out"
-                                enterFrom="opacity-0"
-                                leave="transition ease-in-out"
-                                leaveTo="opacity-0"
-                            >
-                                <p className="text-sm text-gray-600">{t('Saved')}</p>
-                            </Transition>
+                            {(previewUrl || auth.user.avatar_url) && (
+                                <img src={previewUrl || (auth.user.avatar_url as string)} alt="Avatar" className="h-12 w-12 rounded-full object-cover" />
+                            )}
+                            <UploadButton
+                                accept="image/jpeg,image/png,image/webp"
+                                label={t('Upload')}
+                                placeholder={t('No file chosen')}
+                                onFileSelected={(file) => {
+                                    (async () => {
+                                        if (file) {
+                                            setOriginalFile(file);
+                                            // Prepare auto-crop as default, then open cropper for manual adjust
+                                            try {
+                                                const blob = await cropToFaceOrCenter(file);
+                                                const auto = new File([blob], file.name.replace(/\.[^.]+$/, '') + '-cropped.jpg', { type: 'image/jpeg' });
+                                                setData('avatar', auto);
+                                                setData('remove_avatar', false);
+                                                setPreviewUrl(URL.createObjectURL(auto));
+                                            } catch {}
+                                            setShowCropper(true);
+                                        } else {
+                                            setData('avatar', null);
+                                            setPreviewUrl(null);
+                                        }
+                                    })();
+                                }}
+                            />
                         </div>
-                    </form>
-                </div>
+                        {showCropper && originalFile && (
+                            <div className="mt-3 space-y-3">
+                                <ReactCrop crop={crop} onChange={(c) => setCrop(c)} onComplete={(pc) => setPixelCrop(pc)} aspect={1}>
+                                    <img src={URL.createObjectURL(originalFile)} alt="crop" />
+                                </ReactCrop>
+                                <div className="flex gap-2">
+                                    <Button type="button" variant="outline" onClick={() => { setShowCropper(false); }}>{t('Cancel')}</Button>
+                                    <Button type="button" onClick={async () => {
+                                        if (!pixelCrop) return;
+                                        const blob = await cropWithPixels(originalFile!, pixelCrop);
+                                        const cropped = new File([blob], originalFile!.name.replace(/\.[^.]+$/, '') + '-cropped.jpg', { type: 'image/jpeg' });
+                                        setData('avatar', cropped);
+                                        setPreviewUrl(URL.createObjectURL(cropped));
+                                        setShowCropper(false);
+                                    }}>{t('Apply Crop')}</Button>
+                                </div>
+                            </div>
+                        )}
+                        {(previewUrl || auth.user.avatar_url) && (
+                            <Button type="button" variant="destructive" size="icon" onClick={() => { setData('remove_avatar', true); setPreviewUrl(null); }} title={t('Delete')}>
+                                <XCircle className="h-4 w-4" />
+                            </Button>
+                        )}
+                    </div>
 
-                {auth.is_admin && <DeleteUser />}
-            </SettingsLayout>
-        </AppLayout>
-    );
+                    <div className="grid gap-2">
+                        <Label htmlFor="name">{t('Name')}</Label>
+
+                        <Input
+                            id="name"
+                            className="mt-1 block w-full"
+                            value={data.name}
+                            onChange={(e) => setData('name', e.target.value)}
+                            required
+                            autoComplete="name"
+                            placeholder={t('Full name')}
+                        />
+
+                        <InputError className="mt-2" message={errors.name} />
+                    </div>
+
+                    <div className="grid gap-2">
+                        <Label htmlFor="email">{t('Email address')}</Label>
+
+                        <Input
+                            id="email"
+                            type="email"
+                            className="mt-1 block w-full"
+                            value={data.email}
+                            onChange={(e) => setData('email', e.target.value)}
+                            required
+                            autoComplete="username"
+                            placeholder={t('Email address')}
+                        />
+
+                        <InputError className="mt-2" message={errors.email} />
+                    </div>
+
+                    {mustVerifyEmail && auth.user.email_verified_at === null && (
+                        <div>
+                            <p className="mt-2 text-sm text-gray-800">
+                                {t('Your email address is unverified.')}
+                                <Link
+                                    href={route('verification.send')}
+                                    method="post"
+                                    as="button"
+                                    className="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:ring-2 focus:ring-offset-2 focus:outline-hidden"
+                                >
+                                    {t('Click here to re-send the verification email.')}
+                                </Link>
+                            </p>
+
+                            {status === 'verification-link-sent' && (
+                                <div className="mt-2 text-sm font-medium text-green-600">
+                                    {t('A new verification link has been sent to your email address.')}
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    <div className="flex items-center gap-4">
+                        <Button disabled={processing}>{t('Save')}</Button>
+
+                        <Transition
+                            show={recentlySuccessful}
+                            enter="transition ease-in-out"
+                            enterFrom="opacity-0"
+                            leave="transition ease-in-out"
+                            leaveTo="opacity-0"
+                        >
+                            <p className="text-sm text-gray-600">{t('Saved')}</p>
+                        </Transition>
+                    </div>
+                </form>
+            </div>
+
+         </SettingsLayout>
+    </AppLayout>
+);
 }
