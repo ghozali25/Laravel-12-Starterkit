@@ -28,11 +28,15 @@ class LoginRequest extends FormRequest
      */
     public function rules(): array
     {
+        // Enable reCAPTCHA whenever it is configured (secret key present), except in testing
+        $recaptchaEnabled = ! app()->environment('testing') && Config::get('services.recaptcha.secret_key');
+
         return [
             'email' => ['required', 'string', 'email'],
             'password' => ['required', 'string'],
-            // In testing, do not require recaptcha to allow feature tests to pass
-            'g-recaptcha-response' => app()->environment('testing') ? ['nullable', 'string'] : ['required', 'string'],
+            'g-recaptcha-response' => $recaptchaEnabled
+                ? ['required', 'string']
+                : ['nullable', 'string'],
         ];
     }
 
@@ -45,7 +49,7 @@ class LoginRequest extends FormRequest
     {
         $this->ensureIsNotRateLimited();
 
-        if (!app()->environment('testing')) {
+        if (! app()->environment('testing') && Config::get('services.recaptcha.secret_key')) {
             $this->verifyRecaptcha();
         }
 
