@@ -180,7 +180,10 @@ export default function Login({ status, canResetPassword, recaptchaSiteKey }: Lo
                         <Label htmlFor="remember" className="text-black dark:text-white">{t('Remember me')}</Label>
                     </div>
 
-                    <Button className="mt-4 w-full" disabled={processing || (Boolean(recaptchaSiteKey) && !data['g-recaptcha-response'])}>
+                    <Button
+                        className="mt-4 w-full rounded-full bg-gradient-to-r from-[#00d4ff] via-[#0579f2] to-[#041b46] bg-[length:200%_100%] bg-left hover:bg-right text-white transition-all duration-500 shadow-md hover:shadow-xl"
+                        disabled={processing || (Boolean(recaptchaSiteKey) && !data['g-recaptcha-response'])}
+                    >
                         {processing && <LoaderCircle className="h-4 w-4 animate-spin" />}
                         {t('Login')}
                     </Button>

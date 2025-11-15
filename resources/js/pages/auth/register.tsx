@@ -105,7 +105,10 @@ export default function Register() {
                         <InputError message={errors.password_confirmation} className="mt-2" />
                     </div>
 
-                    <Button className="mt-4 w-full" disabled={processing}>
+                    <Button
+                        className="mt-4 w-full rounded-full bg-gradient-to-r from-[#041b46] via-[#0579f2] to-[#00d4ff] bg-[length:200%_100%] bg-left hover:bg-right text-white transition-all duration-500 shadow-md hover:shadow-xl"
+                        disabled={processing}
+                    >
                         {processing && <LoaderCircle className="h-4 w-4 animate-spin" />}
                         {t('Register')}
                     </Button>
