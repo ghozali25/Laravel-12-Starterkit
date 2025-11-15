@@ -1,5 +1,5 @@
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
-import { LoaderCircle } from 'lucide-react';
+import { Eye, EyeOff, LoaderCircle } from 'lucide-react';
 import { FormEventHandler, useEffect, useRef, useState } from 'react';
 
 import InputError from '@/components/input-error';
@@ -31,6 +31,7 @@ export default function Login({ status, canResetPassword, recaptchaSiteKey }: Lo
     const [captchaReady, setCaptchaReady] = useState(false);
     const captchaRef = useRef<HTMLDivElement | null>(null);
     const [widgetId, setWidgetId] = useState<number | null>(null);
+    const [showPassword, setShowPassword] = useState(false);
 
     useEffect(() => {
         return () => {
@@ -118,8 +119,8 @@ export default function Login({ status, canResetPassword, recaptchaSiteKey }: Lo
             {status && <div className="mb-4 text-center text-sm font-medium text-green-600">{status}</div>}
 
             <form onSubmit={submit}>
-                <div className="grid gap-6">
-                    <div className="grid gap-2">
+                <div className="grid gap-4">
+                    <div className="grid gap-1.5">
                         <Label htmlFor="email">{t('Email address')}</Label>
                         <Input
                             id="email"
@@ -147,29 +148,43 @@ export default function Login({ status, canResetPassword, recaptchaSiteKey }: Lo
                                 </Link>
                             )}
                         </div>
-                        <Input
-                            id="password"
-                            type="password"
-                            name="password"
-                            value={data.password}
-                            className="mt-1 block w-full"
-                            autoComplete="current-password"
-                            onChange={(e) => setData('password', e.target.value)}
-                            placeholder="●●●●●●●●"
-                        />
+                        <div className="relative">
+                            <Input
+                                id="password"
+                                type={showPassword ? 'text' : 'password'}
+                                name="password"
+                                value={data.password}
+                                className="mt-1 block w-full pr-10"
+                                autoComplete="current-password"
+                                onChange={(e) => setData('password', e.target.value)}
+                                placeholder="●●●●●●●●"
+                            />
+                            <button
+                                type="button"
+                                onClick={() => setShowPassword((prev) => !prev)}
+                                className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                                aria-label={t('Toggle password visibility')}
+                            >
+                                {showPassword ? (
+                                    <EyeOff className="h-4 w-4" />
+                                ) : (
+                                    <Eye className="h-4 w-4" />
+                                )}
+                            </button>
+                        </div>
                         <InputError message={errors.password} className="mt-2" />
                     </div>
 
                     {recaptchaSiteKey && (
-                        <div className="space-y-2">
-                            <div className="flex justify-center">
+                        <div className="space-y-1.5">
+                            <div className="flex justify-center mt-1">
                                 <div ref={captchaRef} />
                             </div>
                             <InputError message={errors['g-recaptcha-response'] as string} className="text-center" />
                         </div>
                     )}
 
-                    <div className="flex items-center space-x-3">
+                    <div className="flex items-center space-x-3 mt-1.5">
                         <Checkbox
                             id="remember"
                             name="remember"
@@ -181,7 +196,7 @@ export default function Login({ status, canResetPassword, recaptchaSiteKey }: Lo
                     </div>
 
                     <Button
-                        className="mt-4 w-full rounded-full bg-gradient-to-r from-[#00d4ff] via-[#0579f2] to-[#041b46] bg-[length:200%_100%] bg-left hover:bg-right text-white transition-all duration-500 shadow-md hover:shadow-xl"
+                        className="mt-3 w-full rounded-full bg-gradient-to-r from-[var(--primary)] via-[#8b5cf6] to-[#a855f7] bg-[length:200%_100%] bg-left hover:bg-right text-white transition-all duration-500 shadow-md hover:shadow-xl"
                         disabled={processing || (Boolean(recaptchaSiteKey) && !data['g-recaptcha-response'])}
                     >
                         {processing && <LoaderCircle className="h-4 w-4 animate-spin" />}

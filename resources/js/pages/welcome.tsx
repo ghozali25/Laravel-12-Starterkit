@@ -68,7 +68,7 @@ export default function Welcome() {
               </div> */}
             </div>
 
-            <p className="text-lg text-foreground max-w-md mx-auto lg:mx-0">
+            <p className="text-lg text-white drop-shadow max-w-md mx-auto lg:mx-0">
               {t('Selamat datang di aplikasi kami. Nikmati pengalaman modern dan mudah digunakan.')}
             </p>
 
@@ -76,7 +76,7 @@ export default function Welcome() {
             {auth.user ? (
               <Link
                 href="/dashboard"
-                className="inline-flex items-center justify-center px-8 py-3 rounded-full bg-gradient-to-r from-[#00d4ff] via-[#0579f2] to-[#041b46] bg-[length:200%_100%] bg-left hover:bg-right text-white font-medium transition-all duration-500 transform hover:-translate-y-0.5 shadow-md hover:shadow-xl"
+                className="inline-flex items-center justify-center px-8 py-3 rounded-full bg-gradient-to-r from-[var(--primary)] via-[#8b5cf6] to-[#a855f7] bg-[length:200%_100%] bg-left hover:bg-right text-white font-semibold transition-all duration-500 transform hover:-translate-y-0.5 shadow-md hover:shadow-xl"
               >
                 {t('Go to Dashboard')}
                 <ArrowRight className="ml-2 h-5 w-5" />
@@ -85,14 +85,14 @@ export default function Welcome() {
               <div className="flex flex-col sm:flex-row justify-center lg:justify-start items-center gap-4">
                 <Link
                   href={route('login')}
-                  className="inline-flex items-center justify-center px-8 py-3 rounded-full bg-gradient-to-r from-[#00d4ff] via-[#0579f2] to-[#041b46] bg-[length:200%_100%] bg-left hover:bg-right text-white font-medium transition-all duration-500 transform hover:-translate-y-0.5 shadow-md hover:shadow-xl"
+                  className="inline-flex items-center justify-center px-8 py-3 rounded-full bg-gradient-to-r from-[var(--primary)] via-[#8b5cf6] to-[#a855f7] bg-[length:200%_100%] bg-left hover:bg-right text-white font-semibold transition-all duration-500 transform hover:-translate-y-0.5 shadow-md hover:shadow-xl"
                 >
                   {t('Sign In')}
                 </Link>
                 {registrationEnabled && (
                   <Link
                     href={route('register')}
-                    className="inline-flex items-center justify-center px-8 py-3 rounded-full bg-gradient-to-r from-[#041b46] via-[#0579f2] to-[#00d4ff] bg-[length:200%_100%] bg-right hover:bg-left text-white font-medium transition-all duration-500 transform hover:-translate-y-0.5 shadow-md hover:shadow-xl"
+                    className="inline-flex items-center justify-center px-8 py-3 rounded-full bg-gradient-to-r from-[var(--primary)] via-[#8b5cf6] to-[#a855f7] bg-[length:200%_100%] bg-right hover:bg-left text-white font-semibold transition-all duration-500 transform hover:-translate-y-0.5 shadow-md hover:shadow-xl"
                   >
                     {t('Register')}
                   </Link>
