@@ -39,8 +39,6 @@
         @vite(['resources/js/app.tsx'])
     @endif
     @inertiaHead
-    <!-- SweetAlert2 CDN for global usage in React -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 
 <body class="font-sans antialiased">

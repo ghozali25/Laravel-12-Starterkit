@@ -29,7 +29,7 @@ export default function Welcome() {
       <Head title={t('Welcome')} />
       <div
         className="relative min-h-screen flex flex-col justify-center px-6 overflow-hidden bg-[#4f46e5] bg-cover bg-center"
-        style={{ backgroundImage: "url('/background.jpg')" }}
+        style={{ backgroundImage: "url('/background.webp')" }}
       >
         {/* Language switcher */}
         <div className="absolute right-4 top-4 z-20">

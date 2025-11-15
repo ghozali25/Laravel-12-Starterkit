@@ -29,8 +29,8 @@ export default function AuthLayout({ children, title, description }: AuthLayoutP
     const primaryColor = setting?.warna || '#1ccd5aff';
     const primaryForeground = '#ffffff';
 
-    // Gunakan gambar latar belakang dari pengaturan atau default ke null, fallback ke /background.jpg
-    const backgroundImage = setting?.background_image ? `/storage/${setting.background_image}` : '/background.jpg';
+    // Gunakan gambar latar belakang dari pengaturan atau default ke null, fallback ke /background.webp
+    const backgroundImage = setting?.background_image ? `/storage/${setting.background_image}` : '/background.webp';
 
     useEffect(() => {
         document.documentElement.style.setProperty('--primary', primaryColor);
