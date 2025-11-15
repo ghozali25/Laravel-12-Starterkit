@@ -48,9 +48,9 @@ export default function Welcome() {
           </select>
         </div>
         {/* MAIN LAYOUT */}
-        <div className="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-8 items-center max-w-7xl mx-auto w-full">
-          {/* LEFT SIDE - TEXT */}
-          <div className="text-center lg:text-left space-y-8 px-4 md:px-8">
+        <div className="relative z-10 flex flex-col items-center max-w-4xl mx-auto w-full">
+          {/* TEXT + CTA */}
+          <div className="text-center space-y-8 px-4 md:px-8">
             <div className="flex justify-center lg:justify-start items-center">
               <h1 className="text-5xl sm:text-6xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-[var(--primary)] to-[var(--primary)]/80 flex items-center">
                 {t('Welcome')}
@@ -91,17 +91,6 @@ export default function Welcome() {
 
             <div className="pt-6 text-sm text-foreground">
               {t('Creator By Ahmad Ghozali')}
-            </div>
-          </div>
-
-          {/* RIGHT SIDE - BIG LOTTIE */}
-          <div className="flex justify-center lg:justify-end">
-            <div className="w-[90%] sm:w-[500px] md:w-[600px] lg:w-[650px]">
-              <DotLottieReact
-                src="https://lottie.host/3fbc8b21-aa97-408a-ae6b-ce4964fba1c8/jDX4a2Fp4D.lottie"
-                loop
-                autoplay
-              />
             </div>
           </div>
         </div>
