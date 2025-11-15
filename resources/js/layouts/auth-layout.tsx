@@ -44,7 +44,7 @@ export default function AuthLayout({ children, title, description }: AuthLayoutP
     return (
         <div
             className={cn(
-                "relative flex min-h-svh flex-col items-center justify-center p-6 md:p-10 bg-cover bg-center bg-fixed",
+                "relative flex min-h-svh flex-col items-center justify-center p-6 md:p-10 bg-[#4f46e5] bg-cover bg-center bg-fixed",
             )}
             style={{ backgroundImage: `url(${backgroundImage})` }}
         >

@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react';
 import { Head, Link, usePage, router } from '@inertiajs/react';
-import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import { type SharedData } from '@/types';
 import { useTranslation } from '@/lib/i18n';
 import { Button } from '@/components/ui/button';
@@ -29,7 +28,7 @@ export default function Welcome() {
     <>
       <Head title={t('Welcome')} />
       <div
-        className="relative min-h-screen flex flex-col justify-center px-6 overflow-hidden bg-cover bg-center"
+        className="relative min-h-screen flex flex-col justify-center px-6 overflow-hidden bg-[#4f46e5] bg-cover bg-center"
         style={{ backgroundImage: "url('/background.jpg')" }}
       >
         {/* Language switcher */}
@@ -56,16 +55,6 @@ export default function Welcome() {
               <h1 className="text-5xl sm:text-6xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-[var(--primary)] to-[var(--primary)]/80 flex items-center">
                 {t('Welcome')}
               </h1>
-
-              {/* 🔹 Lottie animation super close & aligned */}
-              {/* Temporarily removed problematic Lottie animation */}
-              {/* <div className="ml-[-8px] translate-y-[4px] w-[80px] sm:w-[100px] md:w-[140px]">
-                <DotLottieReact
-                  src="https://lottie.host/90eca65f-57a9-408a-ae6b-ce4964fba1c8/5wI2rfFT6b.lottie"
-                  loop
-                  autoplay
-                />
-              </div> */}
             </div>
 
             <p className="text-lg text-white drop-shadow max-w-md mx-auto lg:mx-0">
