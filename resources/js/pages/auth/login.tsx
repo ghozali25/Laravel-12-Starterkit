@@ -142,7 +142,7 @@ export default function Login({ status, canResetPassword, recaptchaSiteKey }: Lo
                             {canResetPassword && (
                                 <Link
                                     href={route('password.request')}
-                                    className="rounded-md text-sm text-black dark:text-white underline underline-offset-4 hover:underline focus:ring-2 focus:ring-offset-2 focus:outline-hidden"
+                                    className="rounded-md text-xs text-black dark:text-white underline underline-offset-4 hover:underline focus:ring-2 focus:ring-offset-2 focus:outline-hidden"
                                 >
                                     {t('Forgot password?')}
                                 </Link>
@@ -175,15 +175,6 @@ export default function Login({ status, canResetPassword, recaptchaSiteKey }: Lo
                         <InputError message={errors.password} className="mt-2" />
                     </div>
 
-                    {recaptchaSiteKey && (
-                        <div className="space-y-1.5">
-                            <div className="flex justify-center mt-1">
-                                <div ref={captchaRef} />
-                            </div>
-                            <InputError message={errors['g-recaptcha-response'] as string} className="text-center" />
-                        </div>
-                    )}
-
                     <div className="flex items-center space-x-3 mt-1.5">
                         <Checkbox
                             id="remember"
@@ -194,6 +185,15 @@ export default function Login({ status, canResetPassword, recaptchaSiteKey }: Lo
                         />
                         <Label htmlFor="remember" className="text-black dark:text-white">{t('Remember me')}</Label>
                     </div>
+
+                    {recaptchaSiteKey && (
+                        <div className="space-y-1.5">
+                            <div className="flex justify-center mt-1">
+                                <div ref={captchaRef} />
+                            </div>
+                            <InputError message={errors['g-recaptcha-response'] as string} className="text-center" />
+                        </div>
+                    )}
 
                     <Button
                         className="mt-3 w-full rounded-full bg-gradient-to-r from-[var(--primary)] via-[#8b5cf6] to-[#a855f7] bg-[length:200%_100%] bg-left hover:bg-right text-white transition-all duration-500 shadow-md hover:shadow-xl"
