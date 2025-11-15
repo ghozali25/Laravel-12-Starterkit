@@ -183,10 +183,39 @@ php artisan migrate:fresh --seed
 
 Translations are provided via Inertia shared props. Keys are stored in:
 
-- `resources/lang/en.json`
-- `resources/lang/id.json`
+- `lang/en.json`
+- `lang/id.json`
 
-Contribute new keys by adding to the JSON files and referencing via `t('Your Key')` on the frontend.
+Frontend uses a simple `t('Your Key')` helper.
+
+### 🔍 i18n Audit Script
+
+This project includes a small audit tool to keep `en.json` and `id.json` in sync with keys used in the code.
+
+Run the audit:
+
+```bash
+node scripts/i18n-audit.js
+```
+
+What it does:
+
+- Scans the React/TypeScript code for `t('...')` usages.
+- Ensures every key exists in `lang/en.json` and `lang/id.json`.
+- Writes or updates `lang/i18n-missing-report.txt` with a summary, e.g.:
+
+```text
+# i18n audit report
+Total keys in code: 561
+Missing in en.json: 0
+Missing in id.json: 0
+```
+
+If `Missing in ...` is greater than 0:
+
+- Open `lang/i18n-missing-report.txt`.
+- Add the missing keys to `en.json` / `id.json` with proper translations.
+- Re-run `node scripts/i18n-audit.js` until both languages show `Missing: 0`.
 
 ---
 
