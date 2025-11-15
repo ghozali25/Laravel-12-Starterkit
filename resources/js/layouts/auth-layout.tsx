@@ -44,12 +44,12 @@ export default function AuthLayout({ children, title, description }: AuthLayoutP
     return (
         <div
             className={cn(
-                "relative flex min-h-svh w-full flex-col items-center justify-center p-4 sm:p-6 md:p-10 bg-[#4f46e5] bg-cover bg-center bg-fixed",
+                "relative flex min-h-svh w-full flex-col items-center justify-center px-0 sm:px-4 md:px-10 py-4 sm:py-6 md:py-10 bg-[#4f46e5] bg-cover bg-center bg-fixed",
             )}
             style={{ backgroundImage: `url(${backgroundImage})` }}
         >
-            <div className="w-full max-w-sm sm:max-w-md mx-auto rounded-xl bg-white/50 shadow-xl backdrop-blur-xl dark:bg-gray-800/50 dark:shadow-none z-10">
-                <div className="p-8 sm:p-10">
+            <div className="w-full sm:max-w-md mx-auto rounded-xl bg-white/50 shadow-xl backdrop-blur-xl dark:bg-gray-800/50 dark:shadow-none z-10">
+                <div className="px-4 py-6 sm:p-8">
                     <div className="flex flex-col gap-8">
                         <div className="flex flex-col items-center gap-0">
                             <Link
@@ -77,7 +77,7 @@ export default function AuthLayout({ children, title, description }: AuthLayoutP
                 </div>
             </div>
             {/* Footer tetap terpisah dan tidak di-blur */}
-            <div className="border-t border-gray-100 px-6 sm:px-8 py-6 text-center dark:border-gray-700/50 w-full max-w-sm sm:max-w-md mx-auto mt-6 rounded-xl bg-white/50 shadow-sm backdrop-blur-xl dark:bg-gray-800/50 dark:shadow-none z-10">
+            <div className="border-t border-gray-100 px-2 sm:px-6 md:px-8 py-6 text-center dark:border-gray-700/50 w-full sm:max-w-md mx-auto mt-6 rounded-xl bg-white/50 shadow-sm backdrop-blur-xl dark:bg-gray-800/50 dark:shadow-none z-10">
                 <p className="text-xs text-gray-700 dark:text-gray-300">
                     © {new Date().getFullYear()} {setting?.nama_app}. {t('All rights reserved.')}
                 </p>
