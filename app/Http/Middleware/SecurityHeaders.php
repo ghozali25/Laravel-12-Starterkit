@@ -30,15 +30,16 @@ class SecurityHeaders
                 . "img-src 'self' data: blob:; "
                 . "font-src 'self' data: https://fonts.bunny.net; "
                 . "style-src 'self' 'unsafe-inline' https://fonts.bunny.net http://localhost:5173 http://127.0.0.1:5173 http://[::1]:5173 http:; "
-                . "script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: http://localhost:5173 http://127.0.0.1:5173 http://[::1]:5173 http:; "
-                . "script-src-elem 'self' 'unsafe-inline' 'unsafe-eval' blob: http://localhost:5173 http://127.0.0.1:5173 http://[::1]:5173 http:; "
+                . "script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: https://www.google.com https://www.gstatic.com http://localhost:5173 http://127.0.0.1:5173 http://[::1]:5173 http:; "
+                . "script-src-elem 'self' 'unsafe-inline' 'unsafe-eval' blob: https://www.google.com https://www.gstatic.com http://localhost:5173 http://127.0.0.1:5173 http://[::1]:5173 http:; "
                 . "connect-src 'self' http://localhost:5173 http://127.0.0.1:5173 http://[::1]:5173 ws://localhost:5173 ws://127.0.0.1:5173 ws://[::1]:5173 http: ws:";
         } else {
             $csp = "default-src 'self'; "
                 . "img-src 'self' data: blob:; "
-                . "font-src 'self' data:; "
-                . "style-src 'self' 'unsafe-inline'; "
-                . "script-src 'self' 'unsafe-inline'; "
+                . "font-src 'self' data: https://fonts.bunny.net; "
+                . "style-src 'self' 'unsafe-inline' https://fonts.bunny.net; "
+                . "script-src 'self' 'unsafe-inline' https://www.google.com https://www.gstatic.com; "
+                . "script-src-elem 'self' 'unsafe-inline' https://www.google.com https://www.gstatic.com; "
                 . "connect-src 'self'";
         }
 
