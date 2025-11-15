@@ -48,22 +48,6 @@ export default function AuthLayout({ children, title, description }: AuthLayoutP
             )}
             style={{ backgroundImage: `url(${backgroundImage})` }}
         >
-            <div className="absolute right-4 top-4 z-20">
-                <select
-                    className="rounded-md border px-2 py-1 text-xs bg-white/90 dark:bg-gray-800/90"
-                    value={locale}
-                    onChange={(e) => {
-                        const value = e.target.value;
-                        if (value !== locale) {
-                            router.get(route('language.set', value), {}, { preserveScroll: true, preserveState: false });
-                        }
-                    }}
-                >
-                    <option value="en">EN</option>
-                    <option value="id">ID</option>
-                </select>
-            </div>
-            
             <div className="w-full max-w-md rounded-xl bg-white/50 shadow-xl backdrop-blur-xl dark:bg-gray-800/50 dark:shadow-none z-10">
                 <div className="p-8 sm:p-10">
                     <div className="flex flex-col gap-8">

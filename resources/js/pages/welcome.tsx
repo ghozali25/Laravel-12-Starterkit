@@ -31,22 +31,6 @@ export default function Welcome() {
         className="relative min-h-screen flex flex-col justify-center px-6 overflow-hidden bg-[#4f46e5] bg-cover bg-center"
         style={{ backgroundImage: "url('/background.webp')" }}
       >
-        {/* Language switcher */}
-        <div className="absolute right-4 top-4 z-20">
-          <select
-            className="rounded-md border px-2 py-1 text-xs bg-white/90 dark:bg-gray-800/90"
-            value={locale}
-            onChange={(e) => {
-              const value = e.target.value;
-              if (value !== locale) {
-                router.get(route('language.set', value), {}, { preserveScroll: true, preserveState: true });
-              }
-            }}
-          >
-            <option value="en">EN</option>
-            <option value="id">ID</option>
-          </select>
-        </div>
         {/* MAIN LAYOUT */}
         <div className="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-8 items-center max-w-7xl mx-auto w-full">
           {/* LEFT SIDE - TEXT/CTA */}
