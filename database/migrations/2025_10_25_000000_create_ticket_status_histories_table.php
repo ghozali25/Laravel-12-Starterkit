@@ -15,7 +15,6 @@ return new class extends Migration {
             $table->timestamp('changed_at')->index();
 
             $table->index(['ticket_id', 'changed_at']);
-            $table->foreign('ticket_id')->references('id')->on('tickets')->onDelete('cascade');
         });
 
         // Backfill from existing tickets: initial status at created_at, and resolved_at if present
