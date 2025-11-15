@@ -1,10 +1,4 @@
 # i18n audit report
-Total keys in code: 436
+Total keys in code: 561
 Missing in en.json: 0
-Missing in id.json: 6
-ID MISSING: Upload an Excel (.xlsx, .xls) or CSV file to import asset data.
-ID MISSING: This is a secure area of the application. Please confirm your password before continuing.
-ID MISSING: Upload an Excel (.xlsx, .xls) or CSV file to import employee data.
-ID MISSING: s
-ID MISSING: SEO Keywords (separate with commas)
-ID MISSING: Update ticket details and assignment.
+Missing in id.json: 0
