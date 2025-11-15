@@ -13,14 +13,31 @@
         $appName = $setting['nama_app'] ?? config('app.name', 'Laravel');
         $favicon = $setting['favicon'] ?? null;
         $seo = $setting['seo'] ?? null;
+        $seoTitle = $seo['title'] ?? $appName;
         $metaDescription = $seo['description'] ?? 'Aplikasi manajemen aset modern yang membantu mengelola inventaris, karyawan, dan proses operasional secara efisien.';
+        $canonicalUrl = config('app.url');
     @endphp
 
-    <title inertia>{{ $appName }}</title>
+    <title inertia>{{ $seoTitle }}</title>
     <meta name="description" content="{{ $metaDescription }}">
 
-    <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" rel="stylesheet" />
+    @if (!empty($canonicalUrl))
+        <link rel="canonical" href="{{ rtrim($canonicalUrl, '/') }}" />
+    @endif
+
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="{{ $seoTitle }}" />
+    <meta property="og:description" content="{{ $metaDescription }}" />
+    @if (!empty($canonicalUrl))
+        <meta property="og:url" content="{{ rtrim($canonicalUrl, '/') }}" />
+    @endif
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="{{ $seoTitle }}" />
+    <meta name="twitter:description" content="{{ $metaDescription }}" />
+
+    <link rel="preconnect" href="https://fonts.bunny.net" crossorigin>
+    <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600&display=swap" rel="stylesheet" />
 
     @php
         $favicon = $page['props']->setting->favicon ?? null;
@@ -28,6 +45,8 @@
 
     @if (!empty($favicon))
         <link rel="icon" href="{{ asset('storage/' . $favicon) }}" type="image/png">
+        <meta property="og:image" content="{{ asset('storage/' . $favicon) }}" />
+        <meta name="twitter:image" content="{{ asset('storage/' . $favicon) }}" />
     @else
         <link rel="icon" href="/favicon.ico" type="image/x-icon">
     @endif
