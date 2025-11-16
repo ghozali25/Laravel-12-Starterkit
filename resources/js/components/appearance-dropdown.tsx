@@ -21,7 +21,7 @@ export default function AppearanceToggleDropdown({ className = '', ...props }: H
     return (
         <div className={className} {...props}>
             <Select value={appearance} onValueChange={handleChange}>
-                <SelectTrigger className="h-9 w-[100px] sm:w-[120px] md:w-[130px]">
+                <SelectTrigger className="w-[110px] sm:w-[120px]">
                     <SelectValue>
                         <span className="flex items-center gap-2 text-xs sm:text-sm">
                             {current.icon}

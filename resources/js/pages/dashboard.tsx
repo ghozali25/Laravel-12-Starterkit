@@ -366,16 +366,9 @@ export default function Dashboard(props: DashboardProps) {
       // Default widgets if none are saved
       setWidgets([
         { id: 'summary-users', type: 'SummaryCardUsers', props: widgetComponents.SummaryCardUsers.getInitialProps(t, dashboardData), colSpan: 1 },
-        { id: 'summary-backups', type: 'SummaryCardBackups', props: widgetComponents.SummaryCardBackups.getInitialProps(t, dashboardData), colSpan: 1 },
-        { id: 'summary-activity', type: 'SummaryCardActivityLogs', props: widgetComponents.SummaryCardActivityLogs.getInitialProps(t, dashboardData), colSpan: 1 },
         { id: 'summary-divisions', type: 'SummaryCardDivisions', props: widgetComponents.SummaryCardDivisions.getInitialProps(t, dashboardData), colSpan: 1 },
         { id: 'summary-asset-categories', type: 'SummaryCardAssetCategories', props: widgetComponents.SummaryCardAssetCategories.getInitialProps(t, dashboardData), colSpan: 1 },
         { id: 'summary-total-assets', type: 'SummaryCardTotalAssets', props: widgetComponents.SummaryCardTotalAssets.getInitialProps(t, dashboardData), colSpan: 1 },
-        { id: 'summary-total-tickets', type: 'SummaryCardTotalTickets', props: widgetComponents.SummaryCardTotalTickets.getInitialProps(t, dashboardData), colSpan: 1 },
-        { id: 'summary-open-tickets', type: 'SummaryCardOpenTickets', props: widgetComponents.SummaryCardOpenTickets.getInitialProps(t, dashboardData), colSpan: 1 },
-        { id: 'summary-in-progress-tickets', type: 'SummaryCardInProgressTickets', props: widgetComponents.SummaryCardInProgressTickets.getInitialProps(t, dashboardData), colSpan: 1 },
-        { id: 'summary-resolved-tickets', type: 'SummaryCardResolvedTickets', props: widgetComponents.SummaryCardResolvedTickets.getInitialProps(t, dashboardData), colSpan: 1 },
-        { id: 'summary-urgent-tickets', type: 'SummaryCardUrgentTickets', props: widgetComponents.SummaryCardUrgentTickets.getInitialProps(t, dashboardData), colSpan: 1 },
         { id: 'daily-activity', type: 'DailyActivityChart', props: widgetComponents.DailyActivityChart.getInitialProps(t, dashboardData), colSpan: 3 },
         { id: 'monthly-activity', type: 'MonthlyActivityChart', props: widgetComponents.MonthlyActivityChart.getInitialProps(t, dashboardData), colSpan: 3 },
         { id: 'daily-ticket-status', type: 'DailyTicketStatusStacked', props: widgetComponents.DailyTicketStatusStacked.getInitialProps(t, dashboardData), colSpan: 3 },

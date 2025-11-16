@@ -46,7 +46,7 @@ export function AppSidebarHeader({ breadcrumbs = [] }: { breadcrumbs?: Breadcrum
       </div>
 
       {/* Right: Notifications + Language + Theme */}
-      <div className="flex items-center justify-end gap-4 w-1/3">
+      <div className="flex items-center justify-end gap-2 sm:gap-4 w-1/3">
         {/* Notifications Bell */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -92,7 +92,7 @@ export function AppSidebarHeader({ breadcrumbs = [] }: { breadcrumbs?: Breadcrum
           </DropdownMenuContent>
         </DropdownMenu>
         <Select value={locale} onValueChange={handleLanguageChange}>
-          <SelectTrigger className="w-[120px]">
+          <SelectTrigger className="w-[110px] sm:w-[120px]">
             <SelectValue placeholder="Language" />
           </SelectTrigger>
           <SelectContent>
