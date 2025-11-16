@@ -1,4 +1,5 @@
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { useAppearance, type Appearance } from '@/hooks/use-appearance';
 import { Monitor, Moon, Sun } from 'lucide-react';
 import type { HTMLAttributes, ReactNode } from 'react';
@@ -14,34 +15,32 @@ export default function AppearanceToggleDropdown({ className = '', ...props }: H
 
     const current = APPEARANCE_OPTIONS.find((opt) => opt.value === appearance) ?? APPEARANCE_OPTIONS[0];
 
-    const handleChange = (value: string) => {
-        updateAppearance(value as Appearance);
-    };
-
     return (
         <div className={className} {...props}>
-            <Select value={appearance} onValueChange={handleChange}>
-                <SelectTrigger className="w-[110px] sm:w-[120px]">
-                    <SelectValue>
-                        <span className="flex items-center gap-2 text-xs sm:text-sm">
-                            {current.icon}
-                            <span className="hidden xs:inline truncate max-w-[36px] sm:max-w-[64px]">
-                                {current.label}
-                            </span>
-                        </span>
-                    </SelectValue>
-                </SelectTrigger>
-                <SelectContent align="end">
+            <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="relative h-9 w-9 rounded-md"
+                        aria-label="Toggle theme"
+                    >
+                        {current.icon}
+                    </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
                     {APPEARANCE_OPTIONS.map((opt) => (
-                        <SelectItem key={opt.value} value={opt.value}>
-                            <span className="flex items-center gap-2 text-sm">
-                                {opt.icon}
-                                <span>{opt.label}</span>
-                            </span>
-                        </SelectItem>
+                        <DropdownMenuItem
+                            key={opt.value}
+                            onClick={() => updateAppearance(opt.value)}
+                            className="flex items-center gap-2 text-sm cursor-pointer"
+                        >
+                            {opt.icon}
+                            <span>{opt.label}</span>
+                        </DropdownMenuItem>
                     ))}
-                </SelectContent>
-            </Select>
+                </DropdownMenuContent>
+            </DropdownMenu>
         </div>
     );
 }
