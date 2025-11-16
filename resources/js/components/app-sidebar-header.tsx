@@ -35,18 +35,8 @@ export function AppSidebarHeader({ breadcrumbs = [] }: { breadcrumbs?: Breadcrum
         <Breadcrumbs breadcrumbs={breadcrumbs} />
       </div>
 
-      {/* Center: Greeting */}
-      <div className="flex justify-center items-center w-1/3 px-1">
-        <span className="text-xs sm:text-sm md:text-base font-medium text-foreground text-center truncate">
-          {t('Hello, Welcome')} {auth.user.name}
-          <span className="ml-1 align-middle leading-none text-base md:text-lg lg:text-xl hidden xs:inline" role="img" aria-label="waving hand">
-            👋
-          </span>
-        </span>
-      </div>
-
-      {/* Right: Language + Theme + Notifications */}
-      <div className="flex items-center justify-end gap-2 sm:gap-4 w-1/3 pr-1">
+      {/* Center: Language + Theme + Notifications (sit just left of greeting on desktop) */}
+      <div className="flex items-center justify-end gap-2 sm:gap-3 w-auto ml-auto px-1">
         <Select value={locale} onValueChange={handleLanguageChange}>
           <SelectTrigger className="w-[110px] sm:w-[120px]">
             <SelectValue placeholder="Language" />
@@ -59,7 +49,7 @@ export function AppSidebarHeader({ breadcrumbs = [] }: { breadcrumbs?: Breadcrum
 
         <AppearanceDropdown />
 
-        {/* Notifications Bell - moved to far right */}
+        {/* Notifications Bell */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
@@ -107,6 +97,16 @@ export function AppSidebarHeader({ breadcrumbs = [] }: { breadcrumbs?: Breadcrum
             )}
           </DropdownMenuContent>
         </DropdownMenu>
+      </div>
+
+      {/* Right: Greeting */}
+      <div className="flex justify-end items-center w-auto px-1">
+        <span className="text-xs sm:text-sm md:text-base font-medium text-foreground text-right truncate">
+          {t('Hello, Welcome')} {auth.user.name}
+          <span className="ml-1 align-middle leading-none text-base md:text-lg lg:text-xl hidden xs:inline" role="img" aria-label="waving hand">
+            👋
+          </span>
+        </span>
       </div>
     </header>
   );
