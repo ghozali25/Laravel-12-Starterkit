@@ -196,6 +196,7 @@ export default function Login({ status, canResetPassword, recaptchaSiteKey }: Lo
                     )}
 
                     <Button
+                        type="submit"
                         className="mt-3 w-full rounded-full bg-gradient-to-r from-[var(--primary)] via-[#8b5cf6] to-[#a855f7] bg-[length:200%_100%] bg-left hover:bg-right text-white transition-all duration-500 shadow-md hover:shadow-xl"
                         disabled={processing}
                     >
