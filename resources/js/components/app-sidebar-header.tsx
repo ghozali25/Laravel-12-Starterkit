@@ -62,7 +62,11 @@ export function AppSidebarHeader({ breadcrumbs = [] }: { breadcrumbs?: Breadcrum
         {/* Notifications Bell - moved to far right */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="relative z-40 h-9 w-9">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="relative z-40 h-10 w-10 ml-1"
+            >
               <Bell className="h-5 w-5" />
               {!!notifications?.unread_count && (
                 <span className="absolute -right-1 -top-1 inline-flex items-center justify-center rounded-full bg-red-500 px-1.5 text-[10px] leading-4 text-white">
