@@ -96,8 +96,8 @@ export default function Login({ status, canResetPassword, recaptchaSiteKey }: Lo
         return () => window.clearTimeout(timeout);
     }, [recaptchaSiteKey, captchaReady, widgetId, setData, errors, clearErrors]);
 
-    const submit: FormEventHandler = (e) => {
-        e.preventDefault();
+    const performSubmit = () => {
+        if (processing) return;
         // Ensure token exists before posting
         if (recaptchaSiteKey && !data['g-recaptcha-response']) {
             // Let backend also validate, but prevent accidental empty submits
@@ -107,6 +107,11 @@ export default function Login({ status, canResetPassword, recaptchaSiteKey }: Lo
             );
         }
         post(route('login'));
+    };
+
+    const submit: FormEventHandler = (e) => {
+        e.preventDefault();
+        performSubmit();
     };
 
     return (
@@ -196,9 +201,10 @@ export default function Login({ status, canResetPassword, recaptchaSiteKey }: Lo
                     )}
 
                     <Button
-                        type="submit"
+                        type="button"
                         className="mt-3 w-full rounded-full bg-gradient-to-r from-[var(--primary)] via-[#8b5cf6] to-[#a855f7] bg-[length:200%_100%] bg-left hover:bg-right text-white transition-all duration-500 shadow-md hover:shadow-xl"
                         disabled={processing}
+                        onClick={performSubmit}
                     >
                         {processing && <LoaderCircle className="h-4 w-4 animate-spin" />}
                         {t('Login')}
