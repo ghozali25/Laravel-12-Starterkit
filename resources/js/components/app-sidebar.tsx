@@ -159,8 +159,7 @@ export function AppSidebar() {
   const footerNavItems = [
     {
       title: t('Creator By Ahmad Ghozali'),
-      url: 'https://github.com/ghozali25/Laravel-12-Starterkit',
-      icon: iconMapper('Star') as LucideIcon,
+      url: '#'
     },
   ];
 
