@@ -32,7 +32,8 @@ class SecurityHeaders
                 . "style-src 'self' 'unsafe-inline' https://fonts.bunny.net http://localhost:5173 http://127.0.0.1:5173 http://[::1]:5173 http:; "
                 . "script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: https://www.google.com https://www.gstatic.com http://localhost:5173 http://127.0.0.1:5173 http://[::1]:5173 http:; "
                 . "script-src-elem 'self' 'unsafe-inline' 'unsafe-eval' blob: https://www.google.com https://www.gstatic.com http://localhost:5173 http://127.0.0.1:5173 http://[::1]:5173 http:; "
-                . "connect-src 'self' http://localhost:5173 http://127.0.0.1:5173 http://[::1]:5173 ws://localhost:5173 ws://127.0.0.1:5173 ws://[::1]:5173 http: ws:";
+                . "frame-src 'self' https://www.google.com https://www.google.com/recaptcha/; "
+                . "connect-src 'self' https://www.google.com https://www.gstatic.com http://localhost:5173 http://127.0.0.1:5173 http://[::1]:5173 ws://localhost:5173 ws://127.0.0.1:5173 ws://[::1]:5173 http: ws:";
         } else {
             $csp = "default-src 'self'; "
                 . "img-src 'self' data: blob:; "
@@ -40,7 +41,8 @@ class SecurityHeaders
                 . "style-src 'self' 'unsafe-inline' https://fonts.bunny.net; "
                 . "script-src 'self' 'unsafe-inline' https://www.google.com https://www.gstatic.com; "
                 . "script-src-elem 'self' 'unsafe-inline' https://www.google.com https://www.gstatic.com; "
-                . "connect-src 'self'";
+                . "frame-src 'self' https://www.google.com https://www.google.com/recaptcha/; "
+                . "connect-src 'self' https://www.google.com https://www.gstatic.com";
         }
 
         // Use Content-Security-Policy-Report-Only initially to avoid breaking existing pages.
