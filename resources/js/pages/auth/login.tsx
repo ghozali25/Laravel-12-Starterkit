@@ -97,6 +97,8 @@ export default function Login({ status, canResetPassword, recaptchaSiteKey }: Lo
     }, [recaptchaSiteKey, captchaReady, widgetId, setData, errors, clearErrors]);
 
     const performSubmit = () => {
+        // TEMP: debug to confirm click handler fires on mobile
+        alert('Login submit handler called');
         if (processing) return;
         // Ensure token exists before posting
         if (recaptchaSiteKey && !data['g-recaptcha-response']) {
