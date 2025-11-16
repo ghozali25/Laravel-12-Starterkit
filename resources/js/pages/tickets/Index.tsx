@@ -320,7 +320,7 @@ export default function TicketIndex({ tickets, filters }: Props) {
                       </div>
                     </TableCell>
                     <TableCell className="text-center">{getCategoryLabel(ticket.category)}</TableCell>
-                    <TableCell className="text-center">{ticket.user.name}</TableCell>
+                    <TableCell className="text-center">{ticket.user?.name || '-'}</TableCell>
                     <TableCell className="text-center">{ticket.assigned_user?.name || '-'}</TableCell>
                     <TableCell className="text-sm text-muted-foreground italic text-center">
                       {dayjs(ticket.created_at).fromNow()}
