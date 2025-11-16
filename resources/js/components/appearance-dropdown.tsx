@@ -25,7 +25,9 @@ export default function AppearanceToggleDropdown({ className = '', ...props }: H
                     <SelectValue>
                         <span className="flex items-center gap-2 text-xs sm:text-sm">
                             {current.icon}
-                            <span>{current.label}</span>
+                            <span className="hidden xs:inline truncate max-w-[36px] sm:max-w-[64px]">
+                                {current.label}
+                            </span>
                         </span>
                     </SelectValue>
                 </SelectTrigger>
