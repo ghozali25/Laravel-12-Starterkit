@@ -11,7 +11,6 @@ import { useAppearance, type Appearance } from '@/hooks/use-appearance';
 import { Monitor, Moon, Sun } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 export function AppearanceDropdown() {
   const { appearance, updateAppearance } = useAppearance();
@@ -43,26 +42,19 @@ export function AppearanceDropdown() {
 
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              className={cn(
-                'relative z-40 rounded-full border border-border/50 shadow-sm transition-colors',
-                open && 'bg-muted/50',
-              )}
-              aria-label="Change Theme"
-            >
-              {current?.icon || <Monitor className="h-4 w-4" />}
-            </Button>
-          </DropdownMenuTrigger>
-        </TooltipTrigger>
-        <TooltipContent side="bottom" className="text-xs font-medium">
-          Change Theme
-        </TooltipContent>
-      </Tooltip>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="ghost"
+          size="icon"
+          className={cn(
+            'relative z-40 rounded-full border border-border/50 shadow-sm transition-colors',
+            open && 'bg-muted/50',
+          )}
+          aria-label="Change Theme"
+        >
+          {current?.icon || <Monitor className="h-4 w-4" />}
+        </Button>
+      </DropdownMenuTrigger>
 
       <DropdownMenuContent align="end" className="w-40 rounded-md shadow-lg">
         {items.map((item) => (
