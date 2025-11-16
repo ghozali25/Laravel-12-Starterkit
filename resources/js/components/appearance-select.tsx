@@ -50,7 +50,7 @@ export function AppearanceDropdown() {
               variant="ghost"
               size="icon"
               className={cn(
-                'rounded-full border border-border/50 shadow-sm transition-colors',
+                'relative z-40 rounded-full border border-border/50 shadow-sm transition-colors',
                 open && 'bg-muted/50',
               )}
               aria-label="Change Theme"

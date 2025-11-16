@@ -66,17 +66,10 @@ type WidgetComponentsMap = {
 interface DashboardData {
   totalUsers: number;
   totalEmployees: number; // Employees (non-admin)
-  totalBackups: number;
-  totalActivityLogs: number;
   totalDivisions: number; // New
   totalAssetCategories: number; // New
   totalAssets: number; // New
   totalTickets: number; // New
-  openTickets: number; // New
-  inProgressTickets: number; // New
-  resolvedTickets: number; // New
-  urgentTickets: number; // New
-  highPriorityTickets: number; // New
   monthlyData: { name: string; Users: number; Backups: number; Assets: number }[]; // Updated
   userRoleDistribution: { name: string; value: number; color: string }[];
   assetCategoryDistribution: { name: string; value: number; color: string }[]; // New
@@ -143,32 +136,6 @@ const widgetComponents: WidgetComponentsMap = {
     defaultColSpan: 3,
     icon: <Activity className="h-5 w-5" />,
   },
-  SummaryCardBackups: {
-    component: SummaryCard,
-    label: 'Summary Card (Backups)',
-    getInitialProps: (t, data) => ({ 
-      label: t('Backups'), 
-      value: data?.totalBackups ?? 0, 
-      iconName: 'HardDrive',
-      growth: calculateGrowth(data?.monthlyData ?? [], 'Backups'),
-      showGrowth: true
-    }),
-    defaultColSpan: 1,
-    icon: <HardDrive className="h-5 w-5" />,
-  },
-  SummaryCardActivityLogs: {
-    component: SummaryCard,
-    label: 'Summary Card (Activity Logs)',
-    getInitialProps: (t, data) => ({ 
-      label: t('Activity Logs'), 
-      value: data?.totalActivityLogs ?? 0, 
-      iconName: 'Activity',
-      growth: calculateGrowth(data?.monthlyData ?? [], 'ActivityLogs'),
-      showGrowth: true
-    }),
-    defaultColSpan: 1,
-    icon: <Activity className="h-5 w-5" />,
-  },
   SummaryCardDivisions: { // New Summary Card
     component: SummaryCard,
     label: 'Summary Card (Divisions)',
@@ -220,34 +187,6 @@ const widgetComponents: WidgetComponentsMap = {
     }),
     defaultColSpan: 1,
     icon: <Headphones className="h-5 w-5" />,
-  },
-  SummaryCardOpenTickets: { // New Summary Card for Open Tickets
-    component: SummaryCard,
-    label: 'Summary Card (Open Tickets)',
-    getInitialProps: (t, data) => ({ label: t('Open Tickets'), value: data?.openTickets ?? 0, iconName: 'AlertCircle', showGrowth: false }),
-    defaultColSpan: 1,
-    icon: <AlertCircle className="h-5 w-5" />,
-  },
-  SummaryCardInProgressTickets: { // New Summary Card for In Progress Tickets
-    component: SummaryCard,
-    label: 'Summary Card (In Progress Tickets)',
-    getInitialProps: (t, data) => ({ label: t('In Progress'), value: data?.inProgressTickets ?? 0, iconName: 'Clock', showGrowth: false }),
-    defaultColSpan: 1,
-    icon: <Clock className="h-5 w-5" />,
-  },
-  SummaryCardResolvedTickets: { // New Summary Card for Resolved Tickets
-    component: SummaryCard,
-    label: 'Summary Card (Resolved Tickets)',
-    getInitialProps: (t, data) => ({ label: t('Resolved'), value: data?.resolvedTickets ?? 0, iconName: 'CheckCircle', showGrowth: false }),
-    defaultColSpan: 1,
-    icon: <CheckCircle className="h-5 w-5" />,
-  },
-  SummaryCardUrgentTickets: { // New Summary Card for Urgent Tickets
-    component: SummaryCard,
-    label: 'Summary Card (Urgent Tickets)',
-    getInitialProps: (t, data) => ({ label: t('Urgent Tickets'), value: data?.urgentTickets ?? 0, iconName: 'AlertTriangle', showGrowth: false }),
-    defaultColSpan: 1,
-    icon: <AlertTriangle className="h-5 w-5" />,
   },
   MonthlyActivityChart: {
     component: MonthlyActivityChart,
@@ -367,8 +306,6 @@ export default function Dashboard(props: DashboardProps) {
     initialWidgets,
     totalUsers,
     totalEmployees,
-    totalBackups,
-    totalActivityLogs,
     monthlyData,
     userRoleDistribution,
     totalDivisions,
@@ -377,11 +314,6 @@ export default function Dashboard(props: DashboardProps) {
     assetCategoryDistribution,
     assetStatusDistribution,
     totalTickets,
-    openTickets,
-    inProgressTickets,
-    resolvedTickets,
-    urgentTickets,
-    highPriorityTickets,
     ticketStatusDistribution,
     ticketPriorityDistribution,
     ticketCategoryDistribution,
@@ -399,17 +331,10 @@ export default function Dashboard(props: DashboardProps) {
   const dashboardData: DashboardData = {
     totalUsers: totalUsers ?? 0,
     totalEmployees: totalEmployees ?? 0,
-    totalBackups: totalBackups ?? 0,
-    totalActivityLogs: totalActivityLogs ?? 0,
     totalDivisions: totalDivisions ?? 0,
     totalAssetCategories: totalAssetCategories ?? 0,
     totalAssets: totalAssets ?? 0,
     totalTickets: totalTickets ?? 0,
-    openTickets: openTickets ?? 0,
-    inProgressTickets: inProgressTickets ?? 0,
-    resolvedTickets: resolvedTickets ?? 0,
-    urgentTickets: urgentTickets ?? 0,
-    highPriorityTickets: highPriorityTickets ?? 0,
     monthlyData: monthlyData ?? [],
     userRoleDistribution: userRoleDistribution ?? [],
     assetCategoryDistribution: assetCategoryDistribution ?? [],
@@ -461,9 +386,9 @@ export default function Dashboard(props: DashboardProps) {
       ]);
     }
   }, [initialWidgets, t,
-    totalUsers, totalEmployees, totalBackups, totalActivityLogs, monthlyData, userRoleDistribution, // Add data dependencies
+    totalUsers, totalEmployees, monthlyData, userRoleDistribution, // Add data dependencies
     totalDivisions, totalAssetCategories, totalAssets, assetCategoryDistribution, assetStatusDistribution, // New data dependencies
-    totalTickets, openTickets, inProgressTickets, resolvedTickets, urgentTickets, highPriorityTickets, // Ticket data dependencies
+    totalTickets, // Ticket data dependencies
     ticketStatusDistribution, ticketPriorityDistribution, ticketCategoryDistribution // Ticket chart dependencies
   ]);
 
