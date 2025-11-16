@@ -194,7 +194,7 @@ export default function Login({ status, canResetPassword, recaptchaSiteKey }: Lo
                     </div>
 
                     {recaptchaSiteKey && (
-                        <div className="space-y-1.5">
+                        <div className="space-y-1.5 relative z-0">
                             <div className="flex justify-center mt-1">
                                 <div ref={captchaRef} />
                             </div>
@@ -204,7 +204,7 @@ export default function Login({ status, canResetPassword, recaptchaSiteKey }: Lo
 
                     <Button
                         type="button"
-                        className="mt-3 w-full rounded-full bg-gradient-to-r from-[var(--primary)] via-[#8b5cf6] to-[#a855f7] bg-[length:200%_100%] bg-left hover:bg-right text-white transition-all duration-500 shadow-md hover:shadow-xl"
+                        className="mt-3 w-full rounded-full bg-gradient-to-r from-[var(--primary)] via-[#8b5cf6] to-[#a855f7] bg-[length:200%_100%] bg-left hover:bg-right text-white transition-all duration-500 shadow-md hover:shadow-xl relative z-10"
                         disabled={processing}
                         onClick={performSubmit}
                     >
