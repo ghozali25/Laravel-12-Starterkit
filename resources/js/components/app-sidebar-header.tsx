@@ -28,15 +28,15 @@ export function AppSidebarHeader({ breadcrumbs = [] }: { breadcrumbs?: Breadcrum
   };
 
   return (
-    <header className="relative z-30 border-sidebar-border/50 flex h-16 shrink-0 items-center justify-between px-6 md:px-4 border-b transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
+    <header className="relative z-30 border-sidebar-border/50 flex flex-col md:flex-row h-auto md:h-16 shrink-0 items-stretch md:items-center justify-between gap-2 md:gap-0 px-4 md:px-4 border-b transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
       {/* Left: Sidebar + Breadcrumb */}
-      <div className="flex items-center gap-2 w-1/3">
+      <div className="flex items-center gap-2 w-full md:w-1/3">
         <SidebarTrigger className="-ml-1" />
         <Breadcrumbs breadcrumbs={breadcrumbs} />
       </div>
 
       {/* Center: Greeting */}
-      <div className="flex justify-center items-center w-1/3 px-1">
+      <div className="flex justify-center items-center w-full md:w-1/3 px-1">
         <span className="text-xs sm:text-sm md:text-base font-medium text-foreground text-center truncate">
           {t('Hello, Welcome')} {auth.user.name}
           <span className="ml-1 align-middle leading-none text-base md:text-lg lg:text-xl hidden xs:inline" role="img" aria-label="waving hand">
@@ -46,7 +46,7 @@ export function AppSidebarHeader({ breadcrumbs = [] }: { breadcrumbs?: Breadcrum
       </div>
 
       {/* Right: Notifications + Language + Theme */}
-      <div className="flex items-center justify-end gap-2 sm:gap-4 w-1/3">
+      <div className="flex items-center justify-end gap-2 sm:gap-4 w-full md:w-1/3">
         {/* Notifications Bell */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
