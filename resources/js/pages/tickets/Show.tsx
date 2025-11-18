@@ -217,7 +217,7 @@ export default function TicketShow({ ticket }: Props) {
                       <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center gap-2">
                           <User className="h-4 w-4" />
-                          <span className="font-medium">{comment.user.name}</span>
+                          <span className="font-medium">{comment.user?.name || t('Unknown user')}</span>
                           {comment.is_internal && (
                             <Badge variant="secondary" className="text-xs">
                               {t('Internal')}
@@ -315,13 +315,13 @@ export default function TicketShow({ ticket }: Props) {
                 
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium text-muted-foreground">{t('Created By')}</span>
-                  <span className="text-sm">{ticket.user.name}</span>
+                  <span className="text-sm">{ticket.user?.name || t('Unknown user')}</span>
                 </div>
                 
                 {ticket.assigned_user && (
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-medium text-muted-foreground">{t('Assigned To')}</span>
-                    <span className="text-sm">{ticket.assigned_user.name}</span>
+                    <span className="text-sm">{ticket.assigned_user?.name || t('Unknown user')}</span>
                   </div>
                 )}
               </CardContent>
