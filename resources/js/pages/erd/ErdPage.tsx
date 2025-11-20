@@ -15,6 +15,10 @@ interface ErdColumn {
   table: string;
   name: string;
   type: string;
+  is_primary?: boolean;
+  is_foreign?: boolean;
+  references_table?: string | null;
+  references_column?: string | null;
 }
 
 interface ErdRelation {
@@ -22,6 +26,8 @@ interface ErdRelation {
   column: string;
   referenced_table: string;
   referenced_column: string;
+  cardinality_from?: string; // e.g. "n"
+  cardinality_to?: string;   // e.g. "1"
 }
 
 interface ErdSchema {
@@ -53,7 +59,6 @@ export default function ErdPage() {
       // semua kolom tetap diambil dari DB, kita hanya batasi jumlah yang ditampilkan di node
       const allTableColumns = columns.filter((c) => c.table === table);
       const tableColumns = allTableColumns.slice(0, 8);
-      const colLines = tableColumns.map((c) => `${c.name}: ${c.type}`).join('\n');
 
       const x = (index % 4) * 280;
       const y = Math.floor(index / 4) * 220;
@@ -68,12 +73,33 @@ export default function ErdPage() {
         data: {
           label: (
             <div className="text-[11px] leading-tight text-slate-50">
-              <div className="font-semibold mb-1 text-slate-50">{table}</div>
-              {tableColumns.length > 0 && (
-                <pre className="whitespace-pre-wrap leading-tight text-[10px] max-h-32 overflow-auto text-slate-100">
-                  {colLines}
-                </pre>
-              )}
+              {/* Header */}
+              <div className="flex items-center justify-between mb-1">
+                <div className="font-semibold text-slate-50 truncate max-w-[140px]">{table}</div>
+              </div>
+
+              {/* Fields */}
+              <div className="space-y-[1px] max-h-32 overflow-auto">
+                {tableColumns.map((c) => {
+                  const icon = c.is_primary ? '🔑' : c.is_foreign ? '🔗' : '◆';
+                  return (
+                    <div
+                      key={c.name}
+                      className="flex items-center justify-between px-1 py-[1px] rounded-sm bg-slate-900/70"
+                    >
+                      <div className="flex items-center gap-1 min-w-0">
+                        <span className="text-[10px]">{icon}</span>
+                        <span className="text-[10px] font-mono truncate max-w-[110px]">
+                          {c.name}
+                        </span>
+                      </div>
+                      <span className="text-[10px] text-slate-300 ml-2 flex-shrink-0">
+                        {c.type}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           ),
         },
@@ -105,7 +131,7 @@ export default function ErdPage() {
         id: edgeId,
         source: rel.table,
         target: rel.referenced_table,
-        label: `${rel.column} -> ${rel.referenced_table}.${rel.referenced_column}`,
+        label: `${rel.cardinality_from ?? 'n'}: ${rel.column} -> ${rel.cardinality_to ?? '1'}: ${rel.referenced_table}.${rel.referenced_column}`,
         type: 'smoothstep',
         animated: isThisSelectedEdge || isFromSelected || isToSelected ? true : false,
         style: {

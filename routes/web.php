@@ -47,21 +47,15 @@ Route::get('/erd', function () {
         [$database]
     ))->pluck('table_name')->values();
 
-    $columns = collect(DB::select(
-        'SELECT TABLE_NAME AS table_name, COLUMN_NAME AS column_name, DATA_TYPE AS data_type
+    $rawColumns = collect(DB::select(
+        'SELECT TABLE_NAME AS table_name, COLUMN_NAME AS column_name, DATA_TYPE AS data_type, COLUMN_KEY
          FROM information_schema.columns
          WHERE table_schema = ?
          ORDER BY TABLE_NAME, ORDINAL_POSITION',
         [$database]
-    ))->map(function ($col) {
-        return [
-            'table' => $col->table_name,
-            'name' => $col->column_name,
-            'type' => $col->data_type,
-        ];
-    })->values();
+    ));
 
-    $relations = collect(DB::select(
+    $rawRelations = collect(DB::select(
         'SELECT
             TABLE_NAME AS table_name,
             COLUMN_NAME AS column_name,
@@ -72,12 +66,36 @@ Route::get('/erd', function () {
            AND REFERENCED_TABLE_NAME IS NOT NULL
          ORDER BY TABLE_NAME, COLUMN_NAME',
         [$database]
-    ))->map(function ($fk) {
+    ));
+
+    // Build FK lookup so we can mark FK columns
+    $fkLookup = $rawRelations->groupBy(function ($fk) {
+        return $fk->table_name . ':' . $fk->column_name;
+    });
+
+    $columns = $rawColumns->map(function ($col) use ($fkLookup) {
+        $key = $col->table_name . ':' . $col->column_name;
+        $fk = $fkLookup->get($key)?->first();
+
+        return [
+            'table' => $col->table_name,
+            'name' => $col->column_name,
+            'type' => $col->data_type,
+            'is_primary' => $col->COLUMN_KEY === 'PRI',
+            'is_foreign' => $fk !== null,
+            'references_table' => $fk->referenced_table ?? null,
+            'references_column' => $fk->referenced_column ?? null,
+        ];
+    })->values();
+
+    $relations = $rawRelations->map(function ($fk) {
         return [
             'table' => $fk->table_name,
             'column' => $fk->column_name,
             'referenced_table' => $fk->referenced_table,
             'referenced_column' => $fk->referenced_column,
+            'cardinality_from' => 'n', // many side (child)
+            'cardinality_to' => '1',   // one side (parent)
         ];
     })->values();
 
