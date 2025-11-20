@@ -39,6 +39,7 @@ export default function ErdPage() {
   const [selectedTable, setSelectedTable] = useState<string | null>(null);
   const [selectedRelation, setSelectedRelation] = useState<ErdRelation | null>(null);
   const [search, setSearch] = useState('');
+  const [selectedEdgeId, setSelectedEdgeId] = useState<string | null>(null);
 
   const { nodes, edges } = useMemo(() => {
     const nodes: Node[] = [];
@@ -49,7 +50,9 @@ export default function ErdPage() {
     const relations: ErdRelation[] = schema?.relations ?? [];
 
     tableList.forEach((table, index) => {
-      const tableColumns = columns.filter((c) => c.table === table).slice(0, 8);
+      // semua kolom tetap diambil dari DB, kita hanya batasi jumlah yang ditampilkan di node
+      const allTableColumns = columns.filter((c) => c.table === table);
+      const tableColumns = allTableColumns.slice(0, 8);
       const colLines = tableColumns.map((c) => `${c.name}: ${c.type}`).join('\n');
 
       const x = (index % 4) * 280;
@@ -64,10 +67,10 @@ export default function ErdPage() {
         id: table,
         data: {
           label: (
-            <div className="text-xs">
-              <div className="font-semibold mb-1">{table}</div>
+            <div className="text-[11px] leading-tight text-slate-50">
+              <div className="font-semibold mb-1 text-slate-50">{table}</div>
               {tableColumns.length > 0 && (
-                <pre className="whitespace-pre-wrap leading-tight text-[10px] max-h-32 overflow-auto">
+                <pre className="whitespace-pre-wrap leading-tight text-[10px] max-h-32 overflow-auto text-slate-100">
                   {colLines}
                 </pre>
               )}
@@ -86,7 +89,7 @@ export default function ErdPage() {
             ? '2px solid #A855F7'
             : '1px solid #4B5563',
           backgroundColor: '#020617',
-          color: '#E5E7EB',
+          color: '#F9FAFB',
           minWidth: 180,
         },
       });
@@ -96,20 +99,29 @@ export default function ErdPage() {
       if (!rel.referenced_table) return;
       const isFromSelected = selectedTable && rel.table === selectedTable;
       const isToSelected = selectedTable && rel.referenced_table === selectedTable;
+      const edgeId = `e-${index}`;
+      const isThisSelectedEdge = selectedEdgeId === edgeId;
       edges.push({
-        id: `e-${index}`,
+        id: edgeId,
         source: rel.table,
         target: rel.referenced_table,
         label: `${rel.column} -> ${rel.referenced_table}.${rel.referenced_column}`,
         type: 'smoothstep',
-        animated: isFromSelected || isToSelected ? true : false,
-        style: { stroke: isFromSelected || isToSelected ? '#38BDF8' : '#4F46E5' },
-        labelStyle: { fontSize: 10, fill: '#E5E7EB', background: '#020617' },
+        animated: isThisSelectedEdge || isFromSelected || isToSelected ? true : false,
+        style: {
+          stroke: isThisSelectedEdge
+            ? '#F97316' // edge yang dipilih paling menonjol
+            : isFromSelected || isToSelected
+            ? '#38BDF8'
+            : '#4F46E5',
+          strokeWidth: isThisSelectedEdge ? 3 : 1.5,
+        },
+        labelStyle: { fontSize: 11, fill: '#F9FAFB', background: '#020617' },
       });
     });
 
     return { nodes, edges };
-  }, [schema, selectedTable, search]);
+  }, [schema, selectedTable, selectedEdgeId, search]);
 
   const schemaData: ErdSchema = schema;
 
@@ -155,6 +167,7 @@ export default function ErdPage() {
             onNodeClick={(_, node) => {
               setSelectedTable(node.id as string);
               setSelectedRelation(null);
+              setSelectedEdgeId(null);
             }}
             onEdgeClick={(_, edge) => {
               const relIndex = parseInt(edge.id.replace('e-', ''), 10);
@@ -162,6 +175,7 @@ export default function ErdPage() {
               if (rel) {
                 setSelectedRelation(rel);
                 setSelectedTable(null);
+                setSelectedEdgeId(edge.id);
               }
             }}
           >

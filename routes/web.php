@@ -35,7 +35,7 @@ Route::get('/', function () {
     return Inertia::render('welcome');
 })->name('home');
 
-// Interactive ERD viewer route using React
+// Interactive ERD viewer route using React (admin / it_support only)
 Route::get('/erd', function () {
     $database = DB::connection()->getDatabaseName();
 
@@ -90,7 +90,7 @@ Route::get('/erd', function () {
     return Inertia::render('erd/ErdPage', [
         'schema' => $schema,
     ]);
-});
+})->middleware(['auth', 'role:admin|it_support']);
 
 // Language switching route
 Route::get('/lang/{locale}', [LanguageController::class, 'setLocale'])->name('language.set');
