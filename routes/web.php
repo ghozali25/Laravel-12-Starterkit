@@ -3,6 +3,7 @@
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\MenuController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
@@ -34,16 +35,60 @@ Route::get('/', function () {
     return Inertia::render('welcome');
 })->name('home');
 
-// ERD viewer route (Laravel ERD generator - PNG)
+// Interactive ERD viewer route using React
 Route::get('/erd', function () {
-    $path = storage_path('app/erd.png'); // Run: php artisan generate:erd storage/app/erd.png
+    $database = DB::connection()->getDatabaseName();
 
-    if (!file_exists($path)) {
-        abort(404, 'ERD file not found. Generate it with: php artisan generate:erd storage/app/erd.png');
-    }
+    $tables = collect(DB::select(
+        'SELECT TABLE_NAME AS table_name
+         FROM information_schema.tables
+         WHERE table_schema = ?
+         ORDER BY TABLE_NAME',
+        [$database]
+    ))->pluck('table_name')->values();
 
-    return response()->file($path, [
-        'Content-Type' => 'image/png',
+    $columns = collect(DB::select(
+        'SELECT TABLE_NAME AS table_name, COLUMN_NAME AS column_name, DATA_TYPE AS data_type
+         FROM information_schema.columns
+         WHERE table_schema = ?
+         ORDER BY TABLE_NAME, ORDINAL_POSITION',
+        [$database]
+    ))->map(function ($col) {
+        return [
+            'table' => $col->table_name,
+            'name' => $col->column_name,
+            'type' => $col->data_type,
+        ];
+    })->values();
+
+    $relations = collect(DB::select(
+        'SELECT
+            TABLE_NAME AS table_name,
+            COLUMN_NAME AS column_name,
+            REFERENCED_TABLE_NAME AS referenced_table,
+            REFERENCED_COLUMN_NAME AS referenced_column
+         FROM information_schema.KEY_COLUMN_USAGE
+         WHERE TABLE_SCHEMA = ?
+           AND REFERENCED_TABLE_NAME IS NOT NULL
+         ORDER BY TABLE_NAME, COLUMN_NAME',
+        [$database]
+    ))->map(function ($fk) {
+        return [
+            'table' => $fk->table_name,
+            'column' => $fk->column_name,
+            'referenced_table' => $fk->referenced_table,
+            'referenced_column' => $fk->referenced_column,
+        ];
+    })->values();
+
+    $schema = [
+        'tables' => $tables,
+        'columns' => $columns,
+        'relations' => $relations,
+    ];
+
+    return Inertia::render('erd/ErdPage', [
+        'schema' => $schema,
     ]);
 });
 
