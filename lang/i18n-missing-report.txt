@@ -1,4 +1,34 @@
 # i18n audit report
-Total keys in code: 561
-Missing in en.json: 0
-Missing in id.json: 0
+Total keys in code: 572
+Missing in en.json: 15
+EN MISSING: Damage Photos (optional, up to 3)
+EN MISSING: Damage Photo Preview
+EN MISSING: Damage Photos
+EN MISSING: Damage Photo
+EN MISSING: Keep
+EN MISSING: Remove
+EN MISSING: Click a photo to preview. Use the Keep/Remove badge to decide which photos stay when saving.
+EN MISSING: Existing photos are shown above. Upload new photos from the ticket detail page if needed.
+EN MISSING: Add New Photos
+EN MISSING: New Damage Photo
+EN MISSING: Prev
+EN MISSING: Next
+EN MISSING: Close
+EN MISSING: Unknown user
+EN MISSING: Status changed to
+Missing in id.json: 15
+ID MISSING: Damage Photos (optional, up to 3)
+ID MISSING: Damage Photo Preview
+ID MISSING: Damage Photos
+ID MISSING: Damage Photo
+ID MISSING: Keep
+ID MISSING: Remove
+ID MISSING: Click a photo to preview. Use the Keep/Remove badge to decide which photos stay when saving.
+ID MISSING: Existing photos are shown above. Upload new photos from the ticket detail page if needed.
+ID MISSING: Add New Photos
+ID MISSING: New Damage Photo
+ID MISSING: Prev
+ID MISSING: Next
+ID MISSING: Close
+ID MISSING: Unknown user
+ID MISSING: Status changed to
