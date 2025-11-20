@@ -34,17 +34,15 @@ Route::get('/', function () {
     return Inertia::render('welcome');
 })->name('home');
 
-// Simple ERD viewer route
+// ERD viewer route (Liam ERD)
 Route::get('/erd', function () {
-    $path = storage_path('app/erd.svg'); // php artisan generate:erd storage/app/erd.svg
+    $url = env('LIAM_ERD_URL');
 
-    if (!file_exists($path)) {
-        abort(404, 'ERD file not found. Run: php artisan generate:erd storage/app/erd.svg');
+    if (!$url) {
+        abort(404, 'LIAM_ERD_URL is not configured. Please set it in your .env file.');
     }
 
-    $file = file_get_contents($path);
-
-    return response($file, 200)->header('Content-Type', 'image/svg+xml');
+    return redirect()->away($url);
 });
 
 // Language switching route
