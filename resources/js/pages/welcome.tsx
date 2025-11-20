@@ -73,7 +73,7 @@ export default function Welcome() {
               </div>
             )}
 
-            <div className="pt-6 text-sm text-foreground">
+            <div className="pt-6 text-sm text-white">
               {t('Creator By Ahmad Ghozali')}
             </div>
           </div>
