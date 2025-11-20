@@ -110,9 +110,9 @@ export default function ErdPage() {
           borderRadius: 8,
           padding: 8,
           border: isSelected
-            ? '2px solid #38BDF8'
+            ? '2px solid #52f838ff'
             : isSearchMatch
-            ? '2px solid #e4f40dff'
+            ? '2px solid #52f838ff'
             : '1px solid #4B5563',
           backgroundColor: '#020617',
           color: '#F9FAFB',
@@ -123,30 +123,41 @@ export default function ErdPage() {
 
     relations.forEach((rel, index) => {
       if (!rel.referenced_table) return;
-      const isFromSelected = selectedTable && rel.table === selectedTable;
-      const isToSelected = selectedTable && rel.referenced_table === selectedTable;
+      const isFromSelected = !!selectedTable && rel.table === selectedTable;
+      const isToSelected = !!selectedTable && rel.referenced_table === selectedTable;
       const edgeId = `e-${index}`;
       const isThisSelectedEdge = selectedEdgeId === edgeId;
+
+      const priority = isThisSelectedEdge ? 2 : isFromSelected || isToSelected ? 1 : 0;
+
       edges.push({
         id: edgeId,
         source: rel.table,
         target: rel.referenced_table,
         label: `${rel.cardinality_from ?? 'n'}: ${rel.column} -> ${rel.cardinality_to ?? '1'}: ${rel.referenced_table}.${rel.referenced_column}`,
         type: 'smoothstep',
-        animated: isThisSelectedEdge || isFromSelected || isToSelected ? true : false,
+        animated: isThisSelectedEdge || isFromSelected || isToSelected,
+        selected: isThisSelectedEdge || isFromSelected || isToSelected,
+        data: { priority },
         style: {
           stroke: isThisSelectedEdge
-            ? '#00f8b2ff' // edge yang dipilih paling menonjol
+            ? '#52f838ff' // edge yang dipilih paling menonjol
             : isFromSelected || isToSelected
-            ? '#38BDF8'
-            : '#4F46E5',
+            ? '#52f838ff'
+            : '#8680f2ff',
           strokeWidth: isThisSelectedEdge ? 6 : 3,
         },
         labelStyle: { fontSize: 11, fill: '#111827' },
       });
     });
 
-    return { nodes, edges };
+    const sortedEdges = [...edges].sort((a, b) => {
+      const pa = (a.data as any)?.priority ?? 0;
+      const pb = (b.data as any)?.priority ?? 0;
+      return pa - pb; // edges with higher priority (2) will be rendered last (on top)
+    });
+
+    return { nodes, edges: sortedEdges };
   }, [schema, selectedTable, selectedEdgeId, search]);
 
   const schemaData: ErdSchema = schema;
