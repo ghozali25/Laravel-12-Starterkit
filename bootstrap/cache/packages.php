@@ -11,13 +11,6 @@
       0 => 'Barryvdh\\DomPDF\\ServiceProvider',
     ),
   ),
-  'beyondcode/laravel-er-diagram-generator' => 
-  array (
-    'providers' => 
-    array (
-      0 => 'BeyondCode\\ErdGenerator\\ErdGeneratorServiceProvider',
-    ),
-  ),
   'inertiajs/inertia-laravel' => 
   array (
     'providers' => 
