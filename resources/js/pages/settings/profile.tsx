@@ -188,43 +188,10 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                                         } catch {
                                             // Jika auto-crop gagal, tetap gunakan preview dari file asli
                                         }
-
-                                        setShowCropper(true);
                                     }}
                                 />
                             </div>
-
-                            {showCropper && originalFile && !data.remove_avatar && (
-                                <div className="mt-3 space-y-3">
-                                    <ReactCrop
-                                        crop={crop}
-                                        onChange={setCrop}
-                                        onComplete={setPixelCrop}
-                                        aspect={1}
-                                    >
-                                        <img src={URL.createObjectURL(originalFile)} />
-                                    </ReactCrop>
-
-                                    <div className="flex gap-2">
-                                        <Button variant="outline" onClick={() => setShowCropper(false)} type="button">
-                                            {t('Cancel')}
-                                        </Button>
-                                        <Button
-                                            type="button"
-                                            onClick={async () => {
-                                                if (!pixelCrop) return;
-                                                const blob = await cropWithPixels(originalFile, pixelCrop);
-                                                const cropped = new File([blob], `${originalFile.name}-cropped.jpg`, { type: 'image/jpeg' });
-                                                setData('avatar', cropped);
-                                                setPreviewUrl(URL.createObjectURL(cropped));
-                                                setShowCropper(false);
-                                            }}
-                                        >
-                                            {t('Apply Crop')}
-                                        </Button>
-                                    </div>
-                                </div>
-                            )}
+                        
                         </div>
 
                         {/* Email */}
