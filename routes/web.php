@@ -34,16 +34,16 @@ Route::get('/', function () {
     return Inertia::render('welcome');
 })->name('home');
 
-// ERD viewer route (Laravel ERD generator - SVG)
+// ERD viewer route (Laravel ERD generator - PNG)
 Route::get('/erd', function () {
-    $path = storage_path('app/erd.svg'); // Run: php artisan generate:erd storage/app/erd.svg
+    $path = storage_path('app/erd.png'); // Run: php artisan generate:erd storage/app/erd.png
 
     if (!file_exists($path)) {
-        abort(404, 'ERD file not found. Generate it with: php artisan generate:erd storage/app/erd.svg');
+        abort(404, 'ERD file not found. Generate it with: php artisan generate:erd storage/app/erd.png');
     }
 
     return response()->file($path, [
-        'Content-Type' => 'image/svg+xml',
+        'Content-Type' => 'image/png',
     ]);
 });
 
