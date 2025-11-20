@@ -38,6 +38,7 @@ export default function ErdPage() {
   const { schema } = usePage<SharedData & { schema: ErdSchema }>().props as any;
   const [selectedTable, setSelectedTable] = useState<string | null>(null);
   const [selectedRelation, setSelectedRelation] = useState<ErdRelation | null>(null);
+  const [search, setSearch] = useState('');
 
   const { nodes, edges } = useMemo(() => {
     const nodes: Node[] = [];
@@ -53,6 +54,11 @@ export default function ErdPage() {
 
       const x = (index % 4) * 280;
       const y = Math.floor(index / 4) * 220;
+
+      const isSelected = selectedTable === table;
+      const isSearchMatch = search
+        ? table.toLowerCase().includes(search.toLowerCase())
+        : false;
 
       nodes.push({
         id: table,
@@ -74,8 +80,13 @@ export default function ErdPage() {
         style: {
           borderRadius: 8,
           padding: 8,
-          border: '1px solid #E5E7EB',
-          backgroundColor: '#FFFFFF',
+          border: isSelected
+            ? '2px solid #38BDF8'
+            : isSearchMatch
+            ? '2px solid #A855F7'
+            : '1px solid #4B5563',
+          backgroundColor: '#020617',
+          color: '#E5E7EB',
           minWidth: 180,
         },
       });
@@ -83,20 +94,22 @@ export default function ErdPage() {
 
     relations.forEach((rel, index) => {
       if (!rel.referenced_table) return;
+      const isFromSelected = selectedTable && rel.table === selectedTable;
+      const isToSelected = selectedTable && rel.referenced_table === selectedTable;
       edges.push({
         id: `e-${index}`,
         source: rel.table,
         target: rel.referenced_table,
         label: `${rel.column} -> ${rel.referenced_table}.${rel.referenced_column}`,
         type: 'smoothstep',
-        animated: false,
-        style: { stroke: '#6366F1' },
-        labelStyle: { fontSize: 10, fill: '#374151' },
+        animated: isFromSelected || isToSelected ? true : false,
+        style: { stroke: isFromSelected || isToSelected ? '#38BDF8' : '#4F46E5' },
+        labelStyle: { fontSize: 10, fill: '#E5E7EB', background: '#020617' },
       });
     });
 
     return { nodes, edges };
-  }, [schema]);
+  }, [schema, selectedTable, search]);
 
   const schemaData: ErdSchema = schema;
 
@@ -121,8 +134,20 @@ export default function ErdPage() {
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
       <Head title="ERD" />
-      <div className="flex h-[calc(100vh-4rem)]">
-        <div className="flex-1 border-r">
+      <div className="flex h-[calc(100vh-4rem)] bg-slate-950 text-slate-50">
+        <div className="flex-1 border-r border-slate-800 flex flex-col">
+          <div className="flex items-center justify-between px-4 py-2 border-b border-slate-800 bg-slate-900/80">
+            <div className="text-xs md:text-sm font-semibold tracking-wide text-slate-200">
+              Database ERD Viewer
+            </div>
+            <input
+              type="text"
+              placeholder="Cari tabel..."
+              className="text-xs md:text-sm px-2 py-1 rounded-md bg-slate-800 border border-slate-600 focus:outline-none focus:ring-1 focus:ring-sky-500"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
           <ReactFlow
             nodes={nodes}
             edges={edges}
@@ -142,24 +167,24 @@ export default function ErdPage() {
           >
             <MiniMap />
             <Controls />
-            <Background gap={16} color="#E5E7EB" />
+            <Background gap={16} color="#1F2937" />
           </ReactFlow>
         </div>
-        <div className="w-80 p-4 bg-white border-l overflow-auto text-sm">
+        <div className="w-80 p-4 bg-slate-900 border-l border-slate-800 overflow-auto text-sm">
           {selectedTable && (
             <div>
-              <h2 className="font-semibold mb-2">Table: {selectedTable}</h2>
-              <h3 className="font-medium mb-1">Columns</h3>
+              <h2 className="font-semibold mb-2 text-sky-400">Table: {selectedTable}</h2>
+              <h3 className="font-medium mb-1 text-slate-100">Columns</h3>
               <ul className="list-disc list-inside space-y-1">
                 {(tableColumnsMap[selectedTable] || []).map((c) => (
                   <li key={c.name}>
                     <span className="font-mono text-xs">{c.name}</span>
-                    <span className="text-xs text-gray-500"> : {c.type}</span>
+                    <span className="text-xs text-slate-400"> : {c.type}</span>
                   </li>
                 ))}
               </ul>
 
-              <h3 className="font-medium mt-3 mb-1">Outgoing Relations</h3>
+              <h3 className="font-medium mt-3 mb-1 text-slate-100">Outgoing Relations</h3>
               <ul className="list-disc list-inside space-y-1">
                 {(tableRelationsMap[selectedTable] || []).map((r, idx) => (
                   <li key={idx}>
@@ -172,8 +197,8 @@ export default function ErdPage() {
 
           {!selectedTable && selectedRelation && (
             <div>
-              <h2 className="font-semibold mb-2">Relation</h2>
-              <p className="text-xs">
+              <h2 className="font-semibold mb-2 text-sky-400">Relation</h2>
+              <p className="text-xs text-slate-100">
                 {selectedRelation.table}.{selectedRelation.column} ··{' '}
                 {selectedRelation.referenced_table}.{selectedRelation.referenced_column}
               </p>
@@ -181,7 +206,7 @@ export default function ErdPage() {
           )}
 
           {!selectedTable && !selectedRelation && (
-            <div className="text-xs text-gray-500">
+            <div className="text-xs text-slate-400">
               Klik tabel atau garis relasi pada diagram untuk melihat detail di sini.
             </div>
           )}
