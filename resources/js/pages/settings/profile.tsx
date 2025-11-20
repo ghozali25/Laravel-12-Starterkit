@@ -149,9 +149,15 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                                         if (!file) {
                                             setData('avatar', null);
                                             setPreviewUrl(null);
+                                            setOriginalFile(null);
+                                            setShowCropper(false);
                                             return;
                                         }
 
+                                        // Selalu tampilkan preview segera setelah file dipilih
+                                        const objectUrl = URL.createObjectURL(file);
+                                        setPreviewUrl(objectUrl);
+                                        setData('avatar', file);
                                         setOriginalFile(file);
 
                                         try {
@@ -159,7 +165,9 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                                             const auto = new File([blob], `${file.name}-cropped.jpg`, { type: 'image/jpeg' });
                                             setData('avatar', auto);
                                             setPreviewUrl(URL.createObjectURL(auto));
-                                        } catch {}
+                                        } catch {
+                                            // Jika auto-crop gagal, tetap gunakan preview dari file asli
+                                        }
 
                                         setShowCropper(true);
                                     }}

@@ -10,8 +10,19 @@ class EmployeeImportTemplateExport implements FromCollection, WithHeadings
 {
     public function collection()
     {
-        // Return an empty collection as this is a template
-        return new Collection([]);
+        // Return a collection with one example row to guide users filling the template
+        return new Collection([
+            [
+                'nama_karyawan'   => 'Leader 2',
+                'email_perusahaan'=> 'leader2@bach-project.com',
+                'nik'             => '1234567890',
+                'email_pribadi'   => 'leader2.personal@example.com',
+                'no_telepon'      => '+6282123456789',
+                'alamat'          => 'Jl. Contoh No. 123, Jakarta',
+                'divisi'          => 'Build To Suit',
+                'roles'           => 'leader',
+            ],
+        ]);
     }
 
     public function headings(): array
