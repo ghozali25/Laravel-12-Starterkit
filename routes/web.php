@@ -2,6 +2,7 @@
 
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Storage;
 use App\Http\Controllers\MenuController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
@@ -32,6 +33,19 @@ use App\Http\Controllers\LookupController;
 Route::get('/', function () {
     return Inertia::render('welcome');
 })->name('home');
+
+// Simple ERD viewer route
+Route::get('/erd', function () {
+    $path = storage_path('app/erd.svg'); // php artisan generate:erd storage/app/erd.svg
+
+    if (!file_exists($path)) {
+        abort(404, 'ERD file not found. Run: php artisan generate:erd storage/app/erd.svg');
+    }
+
+    $file = file_get_contents($path);
+
+    return response($file, 200)->header('Content-Type', 'image/svg+xml');
+});
 
 // Language switching route
 Route::get('/lang/{locale}', [LanguageController::class, 'setLocale'])->name('language.set');
