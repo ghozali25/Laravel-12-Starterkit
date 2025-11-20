@@ -214,7 +214,10 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                                     size="icon"
                                     onClick={() => {
                                         setData('remove_avatar', true);
+                                        setData('avatar', null);
                                         setPreviewUrl(null);
+                                        setOriginalFile(null);
+                                        setShowCropper(false);
                                     }}
                                 >
                                     <XCircle className="h-4 w-4" />

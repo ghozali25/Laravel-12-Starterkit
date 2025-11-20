@@ -47,6 +47,9 @@ export function UploadButton({
     } else {
       setFileName(`${files.length} files selected`);
     }
+
+    // Reset value agar memilih file yang sama tetap memicu onChange
+    e.target.value = '';
   };
 
   const Icon = icon === 'image' ? ImageIcon : icon === 'file' ? FileUp : Upload;
