@@ -110,7 +110,7 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
             preserveScroll: true,
             onSuccess: () => {
                 setData('avatar', null);
-                setPreviewUrl(null);
+                setData('remove_avatar', false);
                 toast.success(t('Saved'));
             },
             onError: () => {
