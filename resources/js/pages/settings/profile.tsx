@@ -134,7 +134,7 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                             <Label>{t('Employee Photo (Max 2MB)')}</Label>
 
                             <div className="flex items-center gap-4">
-                                {(previewUrl || auth.user.avatar_url) && (
+                                {!data.remove_avatar && (previewUrl || auth.user.avatar_url) && (
                                     <img
                                         src={(previewUrl || auth.user.avatar_url) ?? undefined}
                                         className="h-12 w-12 rounded-full object-cover"
@@ -175,7 +175,7 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                                 />
                             </div>
 
-                            {showCropper && originalFile && (
+                            {showCropper && originalFile && !data.remove_avatar && (
                                 <div className="mt-3 space-y-3">
                                     <ReactCrop
                                         crop={crop}
