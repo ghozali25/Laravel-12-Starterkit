@@ -112,7 +112,7 @@ export default function ErdPage() {
           border: isSelected
             ? '2px solid #38BDF8'
             : isSearchMatch
-            ? '2px solid #A855F7'
+            ? '2px solid #e4f40dff'
             : '1px solid #4B5563',
           backgroundColor: '#020617',
           color: '#F9FAFB',
@@ -136,13 +136,13 @@ export default function ErdPage() {
         animated: isThisSelectedEdge || isFromSelected || isToSelected ? true : false,
         style: {
           stroke: isThisSelectedEdge
-            ? '#F97316' // edge yang dipilih paling menonjol
+            ? '#00f8b2ff' // edge yang dipilih paling menonjol
             : isFromSelected || isToSelected
             ? '#38BDF8'
             : '#4F46E5',
-          strokeWidth: isThisSelectedEdge ? 3 : 1.5,
+          strokeWidth: isThisSelectedEdge ? 6 : 3,
         },
-        labelStyle: { fontSize: 11, fill: '#F9FAFB', background: '#020617' },
+        labelStyle: { fontSize: 11, fill: '#111827' },
       });
     });
 
@@ -205,7 +205,6 @@ export default function ErdPage() {
               }
             }}
           >
-            <MiniMap />
             <Controls />
             <Background gap={16} color="#1F2937" />
           </ReactFlow>
