@@ -2,7 +2,7 @@ name: ERD Build & Deploy
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main", "master" ]
 
 permissions:
   contents: read
