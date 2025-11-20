@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import { UploadButton } from '@/components/ui/upload-button';
 import {
   Select,
   SelectContent,
@@ -32,6 +33,8 @@ interface Ticket {
   category: 'hardware' | 'software' | 'network' | 'email' | 'access' | 'other';
   assigned_to?: number;
   resolution?: string;
+  damage_photo_path?: string | null;
+  damage_photos?: string[] | null;
 }
 
 interface Props {
@@ -49,7 +52,18 @@ export default function TicketEdit({ ticket, users }: Props) {
     status: ticket.status,
     assigned_to: ticket.assigned_to ? ticket.assigned_to.toString() : 'unassigned',
     resolution: ticket.resolution || '',
+    damage_photos: [] as File[],
+    keep_damage_photos: (
+      ticket.damage_photos && ticket.damage_photos.length > 0
+        ? ticket.damage_photos
+        : ticket.damage_photo_path
+          ? [ticket.damage_photo_path]
+          : []
+    ) as string[],
   });
+
+  const [previewIndex, setPreviewIndex] = useState<number | null>(null);
+  const [newPreviewUrls, setNewPreviewUrls] = useState<string[]>([]);
 
   const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -80,7 +94,9 @@ export default function TicketEdit({ ticket, users }: Props) {
       });
       if (!result.isConfirmed) return;
     }
-    put(`/tickets/${ticket.id}`);
+    put(`/tickets/${ticket.id}`, {
+      forceFormData: true,
+    });
   };
 
   const getPriorityLabel = (priority: string) => {
@@ -115,6 +131,13 @@ export default function TicketEdit({ ticket, users }: Props) {
     };
     return labels[status] || status;
   };
+
+  const existingPhotos: string[] =
+    (ticket.damage_photos && ticket.damage_photos.length > 0
+      ? ticket.damage_photos
+      : ticket.damage_photo_path
+        ? [ticket.damage_photo_path]
+        : []) ?? [];
 
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
@@ -190,6 +213,121 @@ export default function TicketEdit({ ticket, users }: Props) {
                 />
                 {errors.description && (
                   <p className="text-sm text-red-500">{errors.description}</p>
+                )}
+              </div>
+
+              {existingPhotos.length > 0 && (
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium text-muted-foreground">{t('Damage Photos')}</Label>
+                  <div className="mt-2 flex flex-wrap gap-3">
+                    {existingPhotos.map((path: string, idx: number) => {
+                      const src = `/storage/${path}`;
+                      const isKept = data.keep_damage_photos.includes(path);
+                      return (
+                        <div key={path} className="relative">
+                          <button
+                            type="button"
+                            className="p-0 border-0 bg-transparent cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary rounded-md"
+                            onClick={() => setPreviewIndex(idx)}
+                          >
+                            <img
+                              src={src}
+                              alt={t('Damage Photo')}
+                              className={
+                                'max-h-32 max-w-[8rem] rounded-md border object-cover transition-opacity ' +
+                                (isKept ? '' : 'opacity-40')
+                              }
+                            />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setData(
+                                'keep_damage_photos',
+                                isKept
+                                  ? data.keep_damage_photos.filter((p: string) => p !== path)
+                                  : [...data.keep_damage_photos, path]
+                              );
+                            }}
+                            className={
+                              'absolute top-1 right-1 rounded-full px-2 py-0.5 text-[10px] font-semibold shadow ' +
+                              (isKept
+                                ? 'bg-white/90 text-gray-800 hover:bg-white'
+                                : 'bg-red-600 text-white hover:bg-red-700')
+                            }
+                          >
+                            {isKept ? t('Keep') : t('Remove')}
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    {t('Click a photo to preview. Use the Keep/Remove badge to decide which photos stay when saving.')}
+                  </p>
+                </div>
+              )}
+
+              {((ticket.damage_photos && ticket.damage_photos.length > 0) || ticket.damage_photo_path) && (
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium text-muted-foreground">{t('Damage Photos')}</Label>
+                  <div className="mt-2 flex flex-wrap gap-3">
+                    {(ticket.damage_photos && ticket.damage_photos.length > 0
+                      ? ticket.damage_photos
+                      : [ticket.damage_photo_path!]
+                    ).map((path, idx) => {
+                      const src = `/storage/${path}`;
+                      return (
+                        <button
+                          type="button"
+                          key={idx}
+                          className="p-0 border-0 bg-transparent cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary rounded-md"
+                          onClick={() => setPreviewIndex(idx)}
+                        >
+                          <img
+                            src={src}
+                            alt={t('Damage Photo')}
+                            className="max-h-32 max-w-[8rem] rounded-md border object-cover"
+                          />
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    {t('Existing photos are shown above. Upload new photos from the ticket detail page if needed.')}
+                  </p>
+                </div>
+              )}
+
+              <div className="grid gap-2">
+                <Label>{t('Add New Photos')}</Label>
+                <div className="flex items-center gap-4">
+                  <UploadButton
+                    accept="image/*"
+                    multiple
+                    icon="upload"
+                    label={t('Upload')}
+                    placeholder={t('No file chosen')}
+                    onFilesSelected={(files) => {
+                      const maxNew = Math.max(0, 3 - data.keep_damage_photos.length);
+                      const limited = files.slice(0, maxNew);
+                      setData('damage_photos', limited as File[]);
+                      const urls = limited.map((file) => URL.createObjectURL(file));
+                      setNewPreviewUrls(urls);
+                    }}
+                  />
+                </div>
+                {newPreviewUrls.length > 0 && (
+                  <div className="mt-2 flex flex-wrap gap-3">
+                    {newPreviewUrls.map((url, idx) => (
+                      <img
+                        key={idx}
+                        src={url}
+                        alt={t('New Damage Photo')}
+                        className="h-24 w-24 rounded-md border object-cover"
+                      />
+                    ))}
+                  </div>
                 )}
               </div>
 
@@ -292,6 +430,76 @@ export default function TicketEdit({ ticket, users }: Props) {
           </CardContent>
         </Card>
       </div>
+
+      {previewIndex !== null && ((ticket.damage_photos && ticket.damage_photos.length > 0) || ticket.damage_photo_path) && (
+        (() => {
+          const images = ticket.damage_photos && ticket.damage_photos.length > 0
+            ? ticket.damage_photos
+            : [ticket.damage_photo_path!];
+
+          const total = images.length;
+          const currentIndex = ((previewIndex % total) + total) % total;
+          const currentSrc = `/storage/${images[currentIndex]}`;
+
+          const goPrev = () => setPreviewIndex((prev) => {
+            if (prev === null) return 0;
+            return (prev - 1 + total) % total;
+          });
+
+          const goNext = () => setPreviewIndex((prev) => {
+            if (prev === null) return 0;
+            return (prev + 1) % total;
+          });
+
+          const close = () => setPreviewIndex(null);
+
+          return (
+            <div
+              className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4"
+              onClick={close}
+            >
+              <div
+                className="relative max-h-[90vh] max-w-4xl w-full flex items-center justify-center"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {total > 1 && (
+                  <button
+                    type="button"
+                    onClick={goPrev}
+                    className="absolute left-2 md:left-4 rounded-full bg-white/90 text-black shadow-lg px-3 py-1 text-xs font-semibold hover:bg-white"
+                  >
+                    {t('Prev')}
+                  </button>
+                )}
+
+                <img
+                  src={currentSrc}
+                  alt={t('Damage Photo')}
+                  className="max-h-[90vh] w-auto rounded-lg shadow-xl object-contain bg-background"
+                />
+
+                {total > 1 && (
+                  <button
+                    type="button"
+                    onClick={goNext}
+                    className="absolute right-2 md:right-4 rounded-full bg-white/90 text-black shadow-lg px-3 py-1 text-xs font-semibold hover:bg-white"
+                  >
+                    {t('Next')}
+                  </button>
+                )}
+
+                <button
+                  type="button"
+                  onClick={close}
+                  className="absolute -top-3 -right-3 rounded-full bg-white text-black shadow-lg px-3 py-1 text-xs font-semibold hover:bg-gray-100"
+                >
+                  {t('Close')}
+                </button>
+              </div>
+            </div>
+          );
+        })()
+      )}
     </AppLayout>
   );
 }

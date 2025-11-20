@@ -74,11 +74,27 @@ class TicketController extends Controller
             'description' => 'required|string',
             'priority' => 'required|in:low,medium,high,urgent',
             'category' => 'required|in:hardware,software,network,email,access,other',
+            'damage_photos' => 'nullable|array|max:3',
+            'damage_photos.*' => 'image|max:2048',
         ]);
+
+        $photoPaths = [];
+        if ($request->hasFile('damage_photos')) {
+            foreach ($request->file('damage_photos') as $file) {
+                $photoPaths[] = $file->store('ticket-photos', 'public');
+            }
+        }
+
+        if (!empty($photoPaths)) {
+            $validated['damage_photos'] = $photoPaths;
+            // Keep first photo in damage_photo_path for backward compatibility
+            $validated['damage_photo_path'] = $photoPaths[0];
+        }
 
         $ticket = Ticket::create([
             ...$validated,
             'user_id' => Auth::id(),
+            'status' => 'open',
         ]);
 
         return redirect()->route('tickets.show', $ticket)->with('success', 'Ticket berhasil dibuat.');
@@ -94,7 +110,7 @@ class TicketController extends Controller
             abort(403, 'Anda tidak memiliki izin untuk melihat ticket ini.');
         }
 
-        $ticket->load(['user', 'assignedUser', 'comments.user']);
+        $ticket->load(['user', 'assignedUser', 'comments.user', 'histories']);
 
         return Inertia::render('tickets/Show', [
             'ticket' => $ticket,
@@ -139,12 +155,48 @@ class TicketController extends Controller
             'status' => 'required|in:open,in_progress,resolved,closed,cancelled',
             'assigned_to' => 'nullable|exists:users,id',
             'resolution' => 'nullable|string',
+            'keep_damage_photos' => 'nullable|array',
+            'keep_damage_photos.*' => 'string',
+            'damage_photos' => 'nullable|array|max:3',
+            'damage_photos.*' => 'image|max:2048',
         ]);
 
         // Set resolved_at if status is resolved
         if ($validated['status'] === 'resolved' && $ticket->status !== 'resolved') {
             $validated['resolved_at'] = now();
         }
+
+        // Handle damage photos (merge kept existing + new uploads, max 3)
+        $existingPhotos = $ticket->damage_photos ?? ($ticket->damage_photo_path ? [$ticket->damage_photo_path] : []);
+
+        $keepPhotos = $request->input('keep_damage_photos', $existingPhotos);
+        if (!is_array($keepPhotos)) {
+            $keepPhotos = [];
+        }
+
+        // Only keep photos that actually belong to this ticket
+        $kept = array_values(array_intersect($existingPhotos, $keepPhotos));
+
+        $photoPaths = $kept;
+
+        if ($request->hasFile('damage_photos')) {
+            foreach ($request->file('damage_photos') as $file) {
+                if (count($photoPaths) >= 3) {
+                    break;
+                }
+                $photoPaths[] = $file->store('ticket-photos', 'public');
+            }
+        }
+
+        if (!empty($photoPaths)) {
+            $validated['damage_photos'] = $photoPaths;
+            $validated['damage_photo_path'] = $photoPaths[0];
+        } else {
+            $validated['damage_photos'] = null;
+            $validated['damage_photo_path'] = null;
+        }
+
+        unset($validated['keep_damage_photos']);
 
         $ticket->update($validated);
 

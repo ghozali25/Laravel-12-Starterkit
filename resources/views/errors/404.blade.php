@@ -145,7 +145,7 @@
             <circle class="fill-dark" cx="480.296" cy="477.014" r="2.651"/>
           </g>
         </g>
-        <g id="spaceman" clip-path="url(cordClip)">
+        <g id="spaceman" clip-path="url(#cordClip)">
           <path id="cord" fill="none" class="dark" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" d="M273.813,410.969c0,0-54.527,39.501-115.34,38.218c-2.28-0.048-4.926-0.241-7.841-0.548c-68.038-7.178-134.288-43.963-167.33-103.87c-0.908-1.646-1.793-3.3-2.654-4.964c-18.395-35.511-37.259-83.385-32.075-118.817"/>
           <path id="backpack" class="dark fill-light" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" d="M338.164,454.689l-64.726-17.353c-11.086-2.972-17.664-14.369-14.692-25.455l15.694-58.537c3.889-14.504,18.799-23.11,33.303-19.221l52.349,14.035c14.504,3.889,23.11,18.799,19.221,33.303l-15.694,58.537C360.647,451.083,349.251,457.661,338.164,454.689z"/>
           <g id="antenna">

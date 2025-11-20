@@ -66,6 +66,8 @@ type WidgetComponentsMap = {
 interface DashboardData {
   totalUsers: number;
   totalEmployees: number; // Employees (non-admin)
+  totalBackups: number;
+  totalActivityLogs: number;
   totalDivisions: number; // New
   totalAssetCategories: number; // New
   totalAssets: number; // New
@@ -331,6 +333,8 @@ export default function Dashboard(props: DashboardProps) {
   const dashboardData: DashboardData = {
     totalUsers: totalUsers ?? 0,
     totalEmployees: totalEmployees ?? 0,
+    totalBackups: (props as any).totalBackups ?? 0,
+    totalActivityLogs: (props as any).totalActivityLogs ?? 0,
     totalDivisions: totalDivisions ?? 0,
     totalAssetCategories: totalAssetCategories ?? 0,
     totalAssets: totalAssets ?? 0,
@@ -351,16 +355,20 @@ export default function Dashboard(props: DashboardProps) {
     console.log('useEffect: initialWidgets changed', initialWidgets);
     if (Array.isArray(initialWidgets) && initialWidgets.length > 0) {
       // Re-initialize props for existing widgets to ensure they use fresh data and translations
-      const reinitializedWidgets = initialWidgets.map(widget => {
-        const widgetDef = widgetComponents[widget.type];
-        if (widgetDef) {
+      const reinitializedWidgets = initialWidgets
+        .map((widget) => {
+          const widgetDef = widgetComponents[widget.type];
+          if (!widgetDef) {
+            console.warn(`Unknown widget type in initialWidgets, dropping: ${widget.type}`);
+            return null;
+          }
           return {
             ...widget,
             props: widgetDef.getInitialProps(t, dashboardData),
           };
-        }
-        return widget;
-      });
+        })
+        .filter((widget): widget is DashboardWidget => widget !== null);
+
       setWidgets(reinitializedWidgets);
     } else {
       // Default widgets if none are saved

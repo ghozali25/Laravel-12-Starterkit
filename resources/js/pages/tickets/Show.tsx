@@ -46,6 +46,9 @@ interface Ticket {
   resolved_at?: string;
   resolution?: string;
   comments: TicketComment[];
+  damage_photo_path?: string | null;
+  damage_photos?: string[] | null;
+  histories?: { id: number; status: string; changed_at: string }[];
 }
 
 interface Props {
@@ -55,6 +58,7 @@ interface Props {
 export default function TicketShow({ ticket }: Props) {
   const { t, locale } = useTranslation();
   const [showInternalComments, setShowInternalComments] = useState(false);
+  const [previewIndex, setPreviewIndex] = useState<number | null>(null);
   
   const { data, setData, post, processing, errors } = useForm({
     comment: '',
@@ -195,6 +199,34 @@ export default function TicketShow({ ticket }: Props) {
                   <div>
                     <Label className="text-sm font-medium text-muted-foreground">{t('Resolution')}</Label>
                     <p className="mt-1 whitespace-pre-wrap">{ticket.resolution}</p>
+                  </div>
+                )}
+
+                {((ticket.damage_photos && ticket.damage_photos.length > 0) || ticket.damage_photo_path) && (
+                  <div>
+                    <Label className="text-sm font-medium text-muted-foreground">{t('Damage Photos')}</Label>
+                    <div className="mt-2 flex flex-wrap gap-3">
+                      {(ticket.damage_photos && ticket.damage_photos.length > 0
+                        ? ticket.damage_photos
+                        : [ticket.damage_photo_path!]
+                      ).map((path, idx) => {
+                        const src = `/storage/${path}`;
+                        return (
+                          <button
+                            type="button"
+                            key={idx}
+                            className="p-0 border-0 bg-transparent cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary rounded-md"
+                            onClick={() => setPreviewIndex(idx)}
+                          >
+                            <img
+                              src={src}
+                              alt={t('Damage Photo')}
+                              className="max-h-32 max-w-[8rem] rounded-md border object-cover"
+                            />
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
                 )}
               </CardContent>
@@ -369,10 +401,101 @@ export default function TicketShow({ ticket }: Props) {
                     </div>
                   </div>
                 )}
+
+                {ticket.histories && ticket.histories.length > 0 && (
+                  <div className="space-y-3 pt-2">
+                    {ticket.histories
+                      .slice()
+                      .sort((a, b) => dayjs(a.changed_at).valueOf() - dayjs(b.changed_at).valueOf())
+                      .map((h) => (
+                        <div key={h.id} className="flex items-start gap-3">
+                          <div className="w-2 h-2 bg-gray-400 rounded-full mt-2"></div>
+                          <div>
+                            <p className="text-sm font-medium">
+                              {t('Status changed to')} {getStatusLabel(h.status)}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              {dayjs(h.changed_at).format('MMM DD, YYYY HH:mm')}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>
         </div>
+
+        {previewIndex !== null && ((ticket.damage_photos && ticket.damage_photos.length > 0) || ticket.damage_photo_path) && (
+          (() => {
+            const images = ticket.damage_photos && ticket.damage_photos.length > 0
+              ? ticket.damage_photos
+              : [ticket.damage_photo_path!];
+
+            const total = images.length;
+            const currentIndex = ((previewIndex % total) + total) % total;
+            const currentSrc = `/storage/${images[currentIndex]}`;
+
+            const goPrev = () => setPreviewIndex((prev) => {
+              if (prev === null) return 0;
+              return (prev - 1 + total) % total;
+            });
+
+            const goNext = () => setPreviewIndex((prev) => {
+              if (prev === null) return 0;
+              return (prev + 1) % total;
+            });
+
+            const close = () => setPreviewIndex(null);
+
+            return (
+              <div
+                className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4"
+                onClick={close}
+              >
+                <div
+                  className="relative max-h-[90vh] max-w-4xl w-full flex items-center justify-center"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {total > 1 && (
+                    <button
+                      type="button"
+                      onClick={goPrev}
+                      className="absolute left-2 md:left-4 rounded-full bg-white/90 text-black shadow-lg px-3 py-1 text-xs font-semibold hover:bg-white"
+                    >
+                      {t('Prev')}
+                    </button>
+                  )}
+
+                  <img
+                    src={currentSrc}
+                    alt={t('Damage Photo')}
+                    className="max-h-[90vh] w-auto rounded-lg shadow-xl object-contain bg-background"
+                  />
+
+                  {total > 1 && (
+                    <button
+                      type="button"
+                      onClick={goNext}
+                      className="absolute right-2 md:right-4 rounded-full bg-white/90 text-black shadow-lg px-3 py-1 text-xs font-semibold hover:bg-white"
+                    >
+                      {t('Next')}
+                    </button>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={close}
+                    className="absolute -top-3 -right-3 rounded-full bg-white text-black shadow-lg px-3 py-1 text-xs font-semibold hover:bg-gray-100"
+                  >
+                    {t('Close')}
+                  </button>
+                </div>
+              </div>
+            );
+          })()
+        )}
       </div>
     </AppLayout>
   );

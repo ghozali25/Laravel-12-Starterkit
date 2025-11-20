@@ -11,6 +11,7 @@ export interface UploadButtonProps {
   label?: string;
   icon?: 'upload' | 'image' | 'file';
   onFileSelected?: (file: File | null) => void;
+  onFilesSelected?: (files: File[]) => void;
   placeholder?: string;
 }
 
@@ -22,6 +23,7 @@ export function UploadButton({
   label = 'Choose file',
   icon = 'upload',
   onFileSelected,
+  onFilesSelected,
   placeholder = 'No file chosen',
 }: UploadButtonProps) {
   const inputRef = React.useRef<HTMLInputElement | null>(null);
@@ -32,9 +34,19 @@ export function UploadButton({
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files && e.target.files.length > 0 ? e.target.files[0] : null;
+    const files = e.target.files ? Array.from(e.target.files) : [];
+    const file = files.length > 0 ? files[0] : null;
+
+    onFilesSelected?.(files);
     onFileSelected?.(file);
-    setFileName(file ? file.name : null);
+
+    if (!files.length) {
+      setFileName(null);
+    } else if (files.length === 1) {
+      setFileName(files[0].name);
+    } else {
+      setFileName(`${files.length} files selected`);
+    }
   };
 
   const Icon = icon === 'image' ? ImageIcon : icon === 'file' ? FileUp : Upload;

@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import { UploadButton } from '@/components/ui/upload-button';
 import {
   Select,
   SelectContent,
@@ -24,7 +25,10 @@ export default function TicketCreate() {
     description: '',
     priority: 'medium' as 'low' | 'medium' | 'high' | 'urgent',
     category: 'other' as 'hardware' | 'software' | 'network' | 'email' | 'access' | 'other',
+    damage_photos: [] as File[],
   });
+
+  const [previewUrls, setPreviewUrls] = useState<string[]>([]);
 
   const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -39,7 +43,9 @@ export default function TicketCreate() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    post('/tickets');
+    post('/tickets', {
+      forceFormData: true,
+    });
   };
 
   const getPriorityLabel = (priority: string) => {
@@ -164,6 +170,42 @@ export default function TicketCreate() {
                     <p className="text-sm text-red-500">{errors.category}</p>
                   )}
                 </div>
+              </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor="damage_photos">{t('Damage Photos (optional, up to 3)')}</Label>
+                <div className="flex items-center gap-4">
+                  <UploadButton
+                    accept="image/*"
+                    multiple
+                    icon="upload"
+                    label={t('Upload')}
+                    placeholder={t('No file chosen')}
+                    onFilesSelected={(files) => {
+                      const limited = files.slice(0, 3);
+                      setData('damage_photos', limited as File[]);
+                      const urls = limited.map((file) => URL.createObjectURL(file));
+                      setPreviewUrls(urls);
+                    }}
+                    className={errors.damage_photos ? 'border-red-500' : ''}
+                  />
+                </div>
+                {errors.damage_photos && (
+                  <p className="text-sm text-red-500">{errors.damage_photos}</p>
+                )}
+
+                {previewUrls.length > 0 && (
+                  <div className="mt-2 flex flex-wrap gap-3">
+                    {previewUrls.map((url, idx) => (
+                      <img
+                        key={idx}
+                        src={url}
+                        alt={t('Damage Photo Preview')}
+                        className="h-24 w-24 rounded-md border object-cover"
+                      />
+                    ))}
+                  </div>
+                )}
               </div>
 
               <div className="flex justify-end gap-4">

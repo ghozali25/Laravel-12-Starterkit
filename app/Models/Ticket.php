@@ -24,10 +24,13 @@ class Ticket extends Model
         'assigned_to',
         'resolved_at',
         'resolution',
+        'damage_photo_path',
+        'damage_photos',
     ];
 
     protected $casts = [
         'resolved_at' => 'datetime',
+        'damage_photos' => 'array',
     ];
 
     /**
