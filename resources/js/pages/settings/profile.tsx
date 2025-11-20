@@ -158,6 +158,7 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                                         const objectUrl = URL.createObjectURL(file);
                                         setPreviewUrl(objectUrl);
                                         setData('avatar', file);
+                                        setData('remove_avatar', false);
                                         setOriginalFile(file);
 
                                         try {
