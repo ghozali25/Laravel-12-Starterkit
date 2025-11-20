@@ -134,12 +134,31 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                             <Label>{t('Employee Photo (Max 2MB)')}</Label>
 
                             <div className="flex items-center gap-4">
-                                {!data.remove_avatar && (previewUrl || auth.user.avatar_url) && (
-                                    <img
-                                        src={(previewUrl || auth.user.avatar_url) ?? undefined}
-                                        className="h-12 w-12 rounded-full object-cover"
-                                    />
-                                )}
+                                <div className="relative inline-block h-12 w-12">
+                                    {!data.remove_avatar && (previewUrl || auth.user.avatar_url) && (
+                                        <>
+                                            <img
+                                                src={(previewUrl || auth.user.avatar_url) ?? undefined}
+                                                className="h-12 w-12 rounded-full object-cover"
+                                            />
+                                            <Button
+                                                type="button"
+                                                variant="destructive"
+                                                size="icon"
+                                                className="absolute -top-2 -right-2 h-6 w-6 rounded-full p-0"
+                                                onClick={() => {
+                                                    setData('remove_avatar', true);
+                                                    setData('avatar', null);
+                                                    setPreviewUrl(null);
+                                                    setOriginalFile(null);
+                                                    setShowCropper(false);
+                                                }}
+                                            >
+                                                <XCircle className="h-3 w-3" />
+                                            </Button>
+                                        </>
+                                    )}
+                                </div>
 
                                 <UploadButton
                                     accept="image/jpeg,image/png,image/webp"
@@ -206,34 +225,6 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                                     </div>
                                 </div>
                             )}
-
-                            {(previewUrl || auth.user.avatar_url) && (
-                                <Button
-                                    type="button"
-                                    variant="destructive"
-                                    size="icon"
-                                    onClick={() => {
-                                        setData('remove_avatar', true);
-                                        setData('avatar', null);
-                                        setPreviewUrl(null);
-                                        setOriginalFile(null);
-                                        setShowCropper(false);
-                                    }}
-                                >
-                                    <XCircle className="h-4 w-4" />
-                                </Button>
-                            )}
-                        </div>
-
-                        {/* Name */}
-                        <div className="grid gap-2">
-                            <Label htmlFor="name">{t('Name')}</Label>
-                            <Input
-                                id="name"
-                                value={data.name}
-                                onChange={(e) => setData('name', e.target.value)}
-                            />
-                            <InputError message={errors.name} />
                         </div>
 
                         {/* Email */}
